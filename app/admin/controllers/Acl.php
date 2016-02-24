@@ -12,7 +12,7 @@ class Acl extends Admin
     /**
      * 权限控制module
      *
-     * @var \modules\admin\AclModule
+     * @var AclModule
      */
     protected $ACL;
 
@@ -29,6 +29,8 @@ class Acl extends Admin
 
     /**
      * 子菜单管理
+     *
+     * @cp_params m
      */
     function editMenu()
     {
@@ -78,6 +80,8 @@ class Acl extends Admin
 
     /**
      * 删除
+     *
+     * @cp_params id
      */
     function del()
     {
@@ -133,6 +137,7 @@ class Acl extends Admin
     /**
      * 编辑角色
      *
+     * @cp_params rid
      * @return array|string
      */
     function editRole()
@@ -157,12 +162,16 @@ class Acl extends Admin
 
     /**
      * 删除角色
+     *
+     * @cp_params rid
      */
     function delRole()
     {
-        $rid = (int) $this->params['rid'];
+        $is_ajax = $this->is_ajax_request();
+        $rid = $is_ajax ? (int) $_GET['rid'] : (int) $this->params['rid'];
+
         $ret = $this->ACL->delRole($rid);
-        if ($this->is_ajax_request()) {
+        if ($is_ajax) {
             echo (int) $ret;
         } else {
             $this->to('acl:roleList');
@@ -207,6 +216,8 @@ class Acl extends Admin
 
     /**
      * 删除管理员
+     *
+     * @cp_params uid
      */
     function delUser()
     {
