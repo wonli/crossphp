@@ -50,6 +50,7 @@ return array(
          * PATH_INFO 方式
          *  2 原生的参数形式: /index.php/controller/action?foo=bar
          *  4 友好的参数形式: /index.php/controller/action/foo/bar...
+         *  5 PATH_INFO下的模式1
          */
         'type' => 2,
         /**
