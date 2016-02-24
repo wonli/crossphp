@@ -82,10 +82,15 @@ class AclModule extends Module
      */
     function initMenuList()
     {
-        /**
-         * 要过滤的方法
-         */
-        $_filter = array(
+        //过滤的类名称
+        $ingot_controller = array(
+            'Cross\MVC\Controller',
+            'Cross\Core\FrameBase',
+            'app\admin\controllers\Admin'
+        );
+
+        //过滤的方法
+        $ingot_action = array(
             '__construct',
             '__destruct',
             '__toString',
@@ -151,22 +156,21 @@ class AclModule extends Module
                 }
 
                 foreach ($method as $mm) {
-                    if ($mm->class == $fullName) {
-                        /**
-                         * 类名称是否在过滤列表
-                         */
-                        if (!in_array($mm->name, $_filter)) {
-                            if (isset($c_menu_list [$mm->name])) {
-                                $m ["method"][$mm->name] = $c_menu_list [$mm->name];
-                            } else {
-                                $add_data = array();
-                                $this->addClassMethodMenu($mm->class, $mm->name, $add_data);
-                                $m ["method"][$mm->name] = $add_data;
-                            }
+                    if (in_array($mm->class, $ingot_controller)) {
+                        continue;
+                    }
+
+                    //过滤
+                    if (!in_array($mm->name, $ingot_action)) {
+                        if (isset($c_menu_list [$mm->name])) {
+                            $m ["method"][$mm->name] = $c_menu_list [$mm->name];
+                        } else {
+                            $add_data = array();
+                            $this->addClassMethodMenu($mm->class, $mm->name, $add_data);
+                            $m ["method"][$mm->name] = $add_data;
                         }
                     }
                 }
-
             } else {
                 $m["error"] = "-1";
                 $m["method"] = array();
@@ -475,11 +479,10 @@ class AclModule extends Module
     {
         $params = array();
         if (null !== $pid) {
-            $params = array('pid' => $pid);
+            $params['pid'] = $pid;
         }
 
-        $menu_list = $this->link->getAll($this->t_acl_menu, '*', $params, '`order` ASC');
-        return $menu_list;
+        return $this->link->getAll($this->t_acl_menu, '*', $params, '`order` ASC');
     }
 
     /**
@@ -544,7 +547,7 @@ class AclModule extends Module
      */
     private function scanControllers($hashMap = false)
     {
-        $controller_file = Loader::getFilePath("app::controllers");
+        $controller_file = Loader::getFilePath('app::controllers');
         $nav_data = array();
         foreach (glob(rtrim($controller_file, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*.php') as $f) {
             $fi = pathinfo($f);
