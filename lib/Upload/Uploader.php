@@ -106,7 +106,7 @@ class Uploader
             $name .= '.' . $this->file['extension'];
         }
 
-        $path = trim($dir, '/') . '/' . $name;
+        $path = rtrim($dir, '/') . '/' . $name;
         return $this->moveUploadedFile($this->file['tmp_name'], $path);
     }
 
