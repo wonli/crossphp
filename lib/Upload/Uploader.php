@@ -94,7 +94,7 @@ class Uploader
      * @param string $name 文件名
      * @return bool
      */
-    function save($dir, $name = null)
+    function save($dir, &$name = null)
     {
         if (!$this->file) {
             return false;
