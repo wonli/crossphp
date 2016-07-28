@@ -11,7 +11,7 @@ use Cross\MVC\Controller;
 use modules\admin\AclModule;
 use modules\admin\AdminModule;
 
-class Admin extends Controller
+abstract class Admin extends Controller
 {
     /**
      * @var string
@@ -36,7 +36,7 @@ class Admin extends Controller
     function __construct()
     {
         parent::__construct();
-        $this->u = $_SESSION['u'];
+        $this->u = &$_SESSION['u'];
 
         $this->ACL = new AclModule();
         $this->ADMIN = new AdminModule();
@@ -45,7 +45,9 @@ class Admin extends Controller
          * 查询登录用户信息
          */
         $user_info = $this->ADMIN->getAdminInfo(array('name' => $this->u));
-        $role_id = $user_info['rid'];
+        if (empty($user_info)) {
+            $this->to();
+        }
 
         /**
          * 导航菜单
@@ -66,6 +68,7 @@ class Admin extends Controller
         /**
          * 判断是否是超级管理员
          */
+        $role_id = $user_info['rid'];
         if ($role_id == 0) {
             /**
              * 设置view导航数据
@@ -82,7 +85,7 @@ class Admin extends Controller
             $this->view->setAllMenu($all_menu, $icon_config);
         } else {
             /**
-             * 查询所属管理角色
+             * 所属角色
              */
             $role_info = $this->ACL->getRoleInfo(array('id' => $role_id));
 
@@ -90,50 +93,47 @@ class Admin extends Controller
              * 角色允许的方法
              */
             $accept_behavior = explode(',', $role_info ['behavior']);
+            $accept_behavior = array_combine($accept_behavior, array_pad(array(), count($accept_behavior), true));
 
             /**
              * 只保留允许访问的菜单
              */
-            foreach ($nav_menu_data as $k => $nav) {
-                if (!in_array($nav['id'], $accept_behavior)) {
+            $allow_menu = array();
+            $all_accept_action = array();
+            foreach ($nav_menu_data as $k => &$nav) {
+                $nav_id = $nav['id'];
+                if (!isset($accept_behavior[$nav_id])) {
                     unset($nav_menu_data[$k]);
-                }
-            }
-
-            /**
-             * 设置view导航数据
-             */
-            $this->view->setNavMenu($nav_menu_data);
-            $all_menu = $this->ACL->getNavChildMenu($nav_menu_data);
-            $this->view->setAllMenu($all_menu, $icon_config);
-
-            $child_menu = array();
-            if (isset($nav_menu_data [$controller])) {
-                $child_menu = $all_menu[$controller]['child_menu'];
-            } else {
-                //如果没有访问权限 使用有权限的第一个菜单
-                $accept_menus = array_keys($nav_menu_data);
-                if (! empty($accept_menus)) {
-                    $this->to($accept_menus[0]);
-                }
-
-                $this->to();
-            }
-
-            $accept_action = array();
-            foreach ($child_menu as $c_key => $c_value) {
-                //过滤无权限的菜单
-                if (!in_array($c_value ['id'], $accept_behavior)) {
-                    unset($child_menu [$c_key]);
                 } else {
-                    $accept_action [] = $c_value ['link'];
+                    $child_menu = $this->ACL->getMenuByCondition(array('pid' => $nav_id));
+                    if (!empty($child_menu)) {
+                        foreach ($child_menu as $ck => $m) {
+                            if (!isset($accept_behavior[$m['id']])) {
+                                unset($child_menu[$ck]);
+                            } else {
+                                if ($m['display'] == 1) {
+                                    $allow_menu[$nav['link']] = $m['link'];
+                                }
+
+                                $all_accept_action[$nav['link']][$m['link']] = true;
+                            }
+                        }
+                    }
+
+                    $nav['child_menu'] = $child_menu;
                 }
             }
 
-            $this->view->setMenu($child_menu);
+            //跳转到第一个有权限的action
+            if (!isset($nav_menu_data[$controller])) {
+                if (!empty($allow_menu)) {
+                    list($controller, $action) = each($allow_menu);
+                    $this->to("{$controller}:{$action}");
+                }
+            }
 
-            //都没有权限执行action时,跳转到第一个有权限的action
-            if (!in_array($this->action, $accept_action)) {
+            $accept_action = &$all_accept_action[$controller];
+            if (!isset($accept_action[$this->action])) {
                 if ($this->is_ajax_request()) {
                     $this->dieJson($this->getStatus(100030));
                 } else {
@@ -141,8 +141,16 @@ class Admin extends Controller
                     exit(0);
                 }
             }
+
+            /**
+             * 设置view导航数据
+             */
+            $this->view->setNavMenu($nav_menu_data);
+            $this->view->setMenu($child_menu);
+            $this->view->setAllMenu($nav_menu_data, $icon_config);
         }
     }
+
 
     /**
      * 返回错误码和错误消息数组

@@ -43,14 +43,12 @@ class AclModule extends Module
      */
     function addNav($name, $link, $pid = 0)
     {
-        $menu_id = $this->link->add(
-            $this->t_acl_menu,
-            array(
-                'pid' => $pid,
-                'name' => $name,
-                'link' => $link,
-            )
-        );
+        $menu_id = $this->link->add($this->t_acl_menu, array(
+            'pid' => $pid,
+            'name' => $name,
+            'link' => $link,
+            'status' => 1
+        ));
 
         if ($menu_id) {
             return $this->result(1, "保存成功");
@@ -67,12 +65,7 @@ class AclModule extends Module
      */
     function delNav($nav_id)
     {
-        return $this->link->del(
-            $this->t_acl_menu,
-            array(
-                'id' => $nav_id
-            )
-        );
+        return $this->delNavByCondition(array('id = ? or pid = ?', array($nav_id, $nav_id)));
     }
 
     /**
@@ -82,14 +75,15 @@ class AclModule extends Module
      */
     function initMenuList()
     {
-        //过滤的类名称
+        //排除的类名称(基类,登录类等)
         $ingot_controller = array(
             'Cross\MVC\Controller',
             'Cross\Core\FrameBase',
-            'app\admin\controllers\Admin'
+            'app\admin\controllers\Admin',
+            'app\admin\controllers\Main'
         );
 
-        //过滤的方法
+        //要过滤的类方法
         $ingot_action = array(
             '__construct',
             '__destruct',
@@ -107,77 +101,102 @@ class AclModule extends Module
             '__get'
         );
 
-        /**
-         * 所有导航菜单
-         */
+        //一级导航菜单
         $menu_list = $this->getMenuList(0);
-
         foreach ($menu_list as & $m) {
-            $controller_name = ucfirst($m["link"]);
-
-            /**
-             * 控制器文件物理路径
-             */
-            $controller_file = Loader::getFilePath("app::controllers/{$controller_name}.php");
-
-            /**
-             * 获取子菜单数据及整理菜单格式
-             */
-            $c_menu_data = $this->getMenuList($m["id"]);
+            //获取子菜单数据及整理菜单格式
             $c_menu_list = array();
-
+            $c_menu_data = $this->getMenuList($m['id']);
             foreach ($c_menu_data as $cm) {
-                $c_menu_list[$cm['link']] ['id'] = $cm ['id'];
-                $c_menu_list[$cm['link']] ['pid'] = $cm ['pid'];
-                $c_menu_list[$cm['link']] ['name'] = $cm ['name'];
-                $c_menu_list[$cm['link']] ['order'] = $cm['order'];
-                $c_menu_list[$cm['link']] ['display'] = $cm ['display'];
+                $c_menu_list[$cm['link']] = $cm;
             }
 
-            /**
-             * 判断物理文件是否存在
-             */
-            if (file_exists($controller_file)) {
-                /**
-                 * 使用反射API 取得类中的名称
-                 */
-                $fullName = "app\\" . parent::getConfig()->get('app', 'name') . '\\controllers\\' . $controller_name;
-                $rc = new ReflectionClass($fullName);
-                $method = $rc->getMethods(ReflectionMethod::IS_PUBLIC);
+            if ($m['type'] == 1) {
+                //控制器文件物理路径
+                $m['method'] = array();
+                $controller_name = ucfirst($m['link']);
+                $controller_file = Loader::getFilePath("app::controllers/{$controller_name}.php");
+                if (file_exists($controller_file)) {
+                    //反射取得类中的方法列表
+                    $fullName = "app\\" . parent::getConfig()->get('app', 'name') . '\\controllers\\' . $controller_name;
+                    $rc = new ReflectionClass($fullName);
+                    $method = $rc->getMethods(ReflectionMethod::IS_PUBLIC);
 
-                /**
-                 * 清除类中不存在但存在数据库中的方法
-                 */
-                foreach ($c_menu_list as $cm_key => $cm_value) {
-                    if (!$rc->hasMethod($cm_key)) {
-                        unset($c_menu_list[$cm_key]);
-                        $this->delNav($cm_value['id']);
-                    }
-                }
-
-                foreach ($method as $mm) {
-                    if (in_array($mm->class, $ingot_controller)) {
-                        continue;
-                    }
-
-                    //过滤
-                    if (!in_array($mm->name, $ingot_action)) {
-                        if (isset($c_menu_list [$mm->name])) {
-                            $m ["method"][$mm->name] = $c_menu_list [$mm->name];
+                    //清理无效的类方法并整理自定义菜单
+                    foreach ($c_menu_list as $cm_key => $cm_value) {
+                        if ($cm_value['type'] == 1) {
+                            if (!$rc->hasMethod($cm_key)) {
+                                unset($c_menu_list[$cm_key]);
+                                $this->delNav($cm_value['id']);
+                            }
                         } else {
-                            $add_data = array();
-                            $this->addClassMethodMenu($mm->class, $mm->name, $add_data);
-                            $m ["method"][$mm->name] = $add_data;
+                            $m['method'][$cm_value['link']] = $cm_value;
                         }
                     }
+
+                    foreach ($method as $mm) {
+
+                        if($mm->class != $fullName) {
+                            continue;
+                        }
+
+                        if (in_array($mm->class, $ingot_controller)) {
+                            continue;
+                        }
+
+                        //过滤
+                        if (!in_array($mm->name, $ingot_action)) {
+                            if (isset($c_menu_list[$mm->name])) {
+                                $m['method'][$mm->name] = $c_menu_list[$mm->name];
+                            } else {
+                                $add_data = array();
+                                $this->addClassMethodMenu(lcfirst($controller_name), $mm->name, $add_data);
+                                $m['method'][$mm->name] = $add_data;
+                            }
+                        }
+                    }
+                } else {
+                    //删除不存在的控制器菜单和子菜单
+                    $this->delNav($m['id']);
                 }
             } else {
-                $m["error"] = "-1";
-                $m["method"] = array();
+                $m['method'] = $c_menu_list;
             }
         }
 
         return $menu_list;
+    }
+
+    /**
+     * 获取菜单及子菜单数据
+     *
+     * @param int $id
+     * @return array
+     * @throws \Cross\Exception\CoreException
+     */
+    function getMenuAllDate($id)
+    {
+        $data = $this->link->select('*')
+            ->from("{$this->t_acl_menu} where id={$id} union all select * from {$this->t_acl_menu} where pid={$id}")
+            ->stmt()->fetchAll(\PDO::FETCH_ASSOC);
+
+        if (!empty($data)) {
+            $main = $child = array();
+            foreach ($data as $d) {
+                if ($d['id'] == $id) {
+                    $main = $d;
+                }
+
+                if ($d['pid'] == $id) {
+                    $child[$d['link']] = $d;
+                }
+            }
+
+            $main['method'] = $child;
+            return $main;
+        }
+
+        return false;
     }
 
     /**
@@ -186,7 +205,7 @@ class AclModule extends Module
      * @param $params
      * @return bool
      */
-    function saveNav($params)
+    function saveNav(array $params)
     {
         foreach ($params as $p) {
             if (empty($p['name']) || empty($p['link'])) {
@@ -194,10 +213,13 @@ class AclModule extends Module
             }
 
             $data = array(
-                'name' => $p ['name'],
-                'link' => $p ['link'],
-                '`order`' => !empty($p['order']) ? (int)$p ['order'] : 0,
-                'status' => !empty($p ['status']) ? (int)$p ['status'] : 0,
+                'name' => $p['name'],
+                'link' => $p['link'],
+                'pid' => !empty($p['pid']) ? (int)$p['pid'] : 0,
+                'type' => !empty($p['type']) ? (int)$p['type'] : 1,
+                '`order`' => !empty($p['order']) ? (int)$p['order'] : 0,
+                'display' => !empty($p['display']) ? (int)$p['display'] : 0,
+                'status' => 1
             );
 
             if (isset($p['id'])) {
@@ -240,7 +262,7 @@ class AclModule extends Module
     function getNavChildMenu($nav_menu)
     {
         foreach ($nav_menu as & $m) {
-            $m['child_menu'] = $this->getChildMenuByCondition(array('pid' => $m['id']));
+            $m['child_menu'] = $this->getMenuByCondition(array('pid' => $m['id']));
         }
 
         return $nav_menu;
@@ -263,45 +285,52 @@ class AclModule extends Module
     function saveMenu(array $menu)
     {
         //已经保存在数据库中的菜单
+        $menu_list = array();
         $menu_data = $this->getMenuList();
-        $menu_list2 = array();
         foreach ($menu_data as $m) {
-            if ($m ['pid'] == 0) {
-                $menu_list2 [$m['id']] = array();
+            if ($m['pid'] == 0) {
+                $menu_list[$m['id']] = array();
             }
         }
 
         foreach ($menu_data as $ml) {
-            $menu_list2 [$ml['pid']] [$ml ['link']] = $ml;
+            $menu_list[$ml['pid']][$ml['link']] = $ml;
         }
 
-        $menu_list = $menu_list2;
-        unset($menu_list2);
-        foreach ($menu as $pid => $change_data) {
-            if (isset($menu_list [$pid])) {
-                $be_change = $menu_list [$pid];
+        foreach ($menu as $pid => $current_menu_data) {
+            if (isset($menu_list[$pid])) {
+                $be_change = $menu_list[$pid];
+                foreach ($current_menu_data as $change_key => $change_value) {
+                    $name = trim($change_value['name']);
+                    $type = isset($change_value['type']) ? (int)$change_value['type'] : 1;
+                    $order = empty($change_value['order']) ? 0 : (int)$change_value['order'];
+                    $display = isset($change_value['display']) && $change_value['display'] == 'on' ? 1 : 0;
+                    $link = isset($change_value['link']) ? $change_value['link'] : $change_key;
 
-                foreach ($change_data as $change_key => $change_value) {
-                    if (isset($be_change [$change_key])) {
-                        //更新
-                        $_change ['name'] = $change_value['name'];
-                        $_change ['display'] = isset($change_value ['display']) && $change_value ['display'] == 'on' ? 1 : 0;
-                        $_change ['`order`'] = empty($change_value ['order']) ? 0 : intval($change_value ['order']);
-
-                        $this->link->update(
-                            $this->t_acl_menu,
-                            $_change,
-                            array(
-                                'id' => $be_change [$change_key] ['id']
-                            )
-                        );
+                    if (isset($be_change[$change_key])) {
+                        $id = $be_change[$change_key]['id'];
+                        if (empty($change_value['link'])) {
+                            $this->delNav($id);
+                        } else {
+                            $update = array(
+                                'name' => $name,
+                                'link' => $link,
+                                '`order`' => $order,
+                                'display' => $display,
+                            );
+                            $this->link->update($this->t_acl_menu, $update, array('id' => $id));
+                        }
                     } else {
-                        //新增方法
-                        $change_value['pid'] = $pid;
-                        $change_value ['link'] = $change_key;
-                        $change_value ['display'] = isset($change_value ['display']) && $change_value ['display'] == 'on' ? 1 : 0;
+                        $add_data = array(
+                            'pid' => $pid,
+                            'type' => $type,
+                            'name' => $name,
+                            'link' => $link,
+                            'order' => $order,
+                            'display' => $display
+                        );
 
-                        $this->addAclMenuFunction($change_value);
+                        $this->addAclMenuFunction($add_data);
                     }
                 }
             }
@@ -315,24 +344,19 @@ class AclModule extends Module
      * @param $method
      * @param array $menu_data
      */
-    function addClassMethodMenu($class, $method, & $menu_data = array())
+    function addClassMethodMenu($class, $method, &$menu_data = array())
     {
-        $class_menu_pid = $this->link->get(
-            $this->t_acl_menu,
-            'id',
-            array(
-                'pid' => 0,
-                'link' => lcfirst($class),
-            )
-        );
+        $class_menu_pid = $this->link->get($this->t_acl_menu, 'id', array(
+            'pid' => 0,
+            'link' => lcfirst($class),
+        ));
 
         if (!empty($class_menu_pid['id'])) {
-            $add_data ['pid'] = $class_menu_pid['id'];
-            $add_data ['link'] = $method;
+            $add_data['pid'] = $class_menu_pid['id'];
+            $add_data['link'] = $method;
             $id = $this->addAclMenuFunction($add_data);
-
             if (false !== $id) {
-                $add_data ['id'] = $id;
+                $add_data['id'] = $id;
                 $menu_data = $add_data;
             }
         }
@@ -344,20 +368,20 @@ class AclModule extends Module
      * @param $data
      * @return bool
      */
-    function addAclMenuFunction($data)
+    function addAclMenuFunction(&$data)
     {
-        if (!$data ['pid'] || !$data ['link']) {
+        if (!$data['pid'] || !$data['link']) {
             return false;
         }
 
-        $add_data ['pid'] = $data['pid'];
-        $add_data ['link'] = $data ['link'];
-        $add_data ['name'] = empty($data ['name']) ? '' : $data['name'];
-        $add_data ['`order`'] = empty($data ['order']) ? 0 : intval($data ['order']);
-        $add_data ['display'] = isset($data ['display']) ? $data ['display'] : 0;
-        $add_data ['type'] = 1;
-        $add_data ['status'] = 1;
-
+        $add_data['pid'] = $data['pid'];
+        $add_data['link'] = $data['link'];
+        $add_data['name'] = empty($data['name']) ? '' : $data['name'];
+        $add_data['`order`'] = empty($data['order']) ? 0 : (int)$data['order'];
+        $add_data['display'] = isset($data['display']) ? $data['display'] : 0;
+        $add_data['type'] = isset($data['type']) ? $data['type'] : 1;
+        $add_data['status'] = 1;
+        $data = $add_data;
         return $this->link->add($this->t_acl_menu, $add_data);
     }
 
@@ -411,7 +435,7 @@ class AclModule extends Module
 
         $save_data ['name'] = $menu_name;
         $save_data ['behavior'] = implode($data, ',');
-        $role_info = $this->link->get($this->t_role, "*", array('name' => $menu_name));
+        $role_info = $this->link->get($this->t_role, '*', array('name' => $menu_name));
         if ($role_info) {
             return $this->result(100020);
         }
@@ -438,13 +462,14 @@ class AclModule extends Module
             return $this->result(100018);
         }
 
+        $save_data ['name'] = $menu_name;
         if (empty($data)) {
-            return $this->result(100019);
+            $save_data['behavior'] = '';
+        } else {
+            $save_data['behavior'] = trim(implode($data, ','));
         }
 
-        $save_data ['name'] = $menu_name;
-        $save_data ['behavior'] = implode($data, ',');
-        $role_info = $this->link->get($this->t_role, "*", array('id' => $rid));
+        $role_info = $this->link->get($this->t_role, '*', array('id' => $rid));
         if (!$role_info) {
             return $this->result(100023);
         }
@@ -477,12 +502,12 @@ class AclModule extends Module
      */
     function getMenuList($pid = null)
     {
-        $params = array();
+        $condition = array();
         if (null !== $pid) {
-            $params['pid'] = $pid;
+            $condition['pid'] = $pid;
         }
 
-        return $this->link->getAll($this->t_acl_menu, '*', $params, '`order` ASC');
+        return $this->getMenuByCondition($condition, '`order` ASC, type ASC');
     }
 
     /**
@@ -494,7 +519,7 @@ class AclModule extends Module
     function getNavList(& $un_save_menu = array())
     {
         $controllers_lists = $this->scanControllers();
-        $saved_menus = $this->link->getAll($this->t_acl_menu, '*', array('pid' => '0'), '`order` ASC');
+        $saved_menus = $this->getMenuByCondition(array('pid' => 0), '`order` ASC, type ASC');
 
         $saved_menu_link_hash = array();
         array_map(function ($m) use (&$saved_menu_link_hash) {
@@ -518,7 +543,7 @@ class AclModule extends Module
      */
     function getChildMenu($pid)
     {
-        return $this->getChildMenuByCondition(array('pid' => $pid));
+        return $this->getMenuByCondition(array('pid' => $pid));
     }
 
     /**
@@ -528,15 +553,26 @@ class AclModule extends Module
      * @param array|string $order
      * @return array
      */
-    function getChildMenuByCondition($condition, $order = '`order` ASC')
+    function getMenuByCondition($condition, $order = '`order` ASC')
     {
         $result = $this->link->getAll($this->t_acl_menu, '*', $condition, $order);
-
         if (empty($result)) {
             $result = array();
         }
 
         return $result;
+    }
+
+    /**
+     * 按条件删除导航菜单
+     *
+     * @param $condition
+     * @return bool
+     * @throws \Cross\Exception\CoreException
+     */
+    private function delNavByCondition($condition)
+    {
+        return $this->link->del($this->t_acl_menu, $condition);
     }
 
     /**
@@ -552,10 +588,21 @@ class AclModule extends Module
         foreach (glob(rtrim($controller_file, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*.php') as $f) {
             $fi = pathinfo($f);
             $class_name = $fi['filename'];
+            $menuName = lcfirst($class_name);
+
+            $fullName = "app\\" . parent::getConfig()->get('app', 'name') . '\\controllers\\' . $class_name;
+            $rc = new ReflectionClass($fullName);
+
+            $display = 1;
+            if ($rc->isAbstract() || $menuName == 'main') {
+                $display = 0;
+            }
+
             $ori_nav_data = array(
-                'name' => lcfirst($class_name),
-                'link' => lcfirst($class_name),
+                'name' => $menuName,
+                'link' => $menuName,
                 'status' => 1,
+                'display' => $display
             );
 
             if ($hashMap) {

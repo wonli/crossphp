@@ -28,11 +28,11 @@ class AclView extends AdminView
      */
     function editMenu($data)
     {
-        if (!empty($data['menu_list'])) {
-            $this->renderTpl('acl/menu_manager', array($data['menu_list']));
-        } else {
-            $data['status'] = 100026;
-        }
+        $menu = &$data['menu_list'];
+        $methodList = &$menu['method'];
+        unset($menu['method']);
+
+        $this->renderTpl('acl/menu_manager', array('menu' => $menu, 'methodList' => $methodList));
     }
 
     /**
@@ -42,6 +42,7 @@ class AclView extends AdminView
      */
     function navManager($data = array())
     {
+        $data['displayConfig'] = array(1 => '');
         $this->renderTpl('acl/nav_manager', $data);
     }
 
@@ -54,7 +55,7 @@ class AclView extends AdminView
     {
         $this->renderTpl("acl/add_role", array(
             'menu_list' => $data['menu_list'],
-            'menu_select'   =>  array(),
+            'menu_select' => array(),
         ));
     }
 
@@ -76,7 +77,7 @@ class AclView extends AdminView
      */
     function roleList($data)
     {
-        if (! empty($data['role_list'])) {
+        if (!empty($data['role_list'])) {
             $this->renderTpl('acl/role_list', $data);
         } else {
             $this->text('暂无角色');
@@ -90,7 +91,7 @@ class AclView extends AdminView
      */
     function user($data)
     {
-        if(empty($data['roles'])) {
+        if (empty($data['roles'])) {
             $this->text('请先添加角色');
         } else {
             $this->renderTpl('acl/user', $data);

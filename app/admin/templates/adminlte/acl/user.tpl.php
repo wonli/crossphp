@@ -15,7 +15,9 @@
                 <tbody>
                 <?php foreach ($data['u'] as $u) : ?>
                     <tr>
-                        <td><?php echo $u['id'] ?></td>
+                        <td>
+                            <p class="form-control-static"><?php echo $u['id'] ?></p>
+                        </td>
                         <td>
                             <input type="text" class="form-control"
                                    name="a[<?php echo $u['id'] ?>][name]" value="<?php echo $u['name'] ?>" />
@@ -42,13 +44,15 @@
                             </select>
                         </td>
                         <td style="vertical-align: middle">
-                            <a href="javascript:void(0)"
-                               onclick="pop.confirm('', function(){location.href='<?php echo $this->link('acl:delUser', array('uid' => $u['id'])) ?>'})">删除</a>
+                            <a href="javascript:void(0)" class="confirm-href-flag" title="确定删除该用户吗"
+                               action = "<?php echo $this->link('acl:delUser', array('uid' => $u['id'])) ?>">删除</a>
                         </td>
                     </tr>
                 <?php endforeach ?>
                 <tr>
-                    <td>+</td>
+                    <td>
+                        <p class="form-control-static">+</p>
+                    </td>
                     <td><input type="text" name="a[+][name]" value="" class="form-control"/></td>
                     <td><input type="text" name="a[+][password]" value="" class="form-control"/></td>
                     <td><input type="text" name="a[+][t]" value="" class="form-control"/></td>

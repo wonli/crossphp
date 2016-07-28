@@ -123,12 +123,24 @@ class AdminView extends View
      */
     function setAllMenu($menu, $menu_icon = array())
     {
-        foreach ($menu as $name => & $m) {
-            if (isset($menu_icon[$name])) {
-                $m ['icon'] = $menu_icon[$name];
+        foreach ($menu as $name => &$m) {
+            $menu_icon_config = &$menu_icon[$name];
+            if (is_array($menu_icon_config)) {
+                $icon = $menu_icon_config[0];
+                $child_menu_icon_config = $menu_icon_config[1];
+            } else {
+                $icon = $menu_icon_config;
+                $child_menu_icon_config = array();
             }
 
-            foreach ($m['child_menu'] as $id => $mc) {
+            $m['icon'] = $icon;
+            foreach ($m['child_menu'] as $id => &$mc) {
+                if(is_array($child_menu_icon_config)) {
+                    $mc_icon = &$child_menu_icon_config[$mc['link']];
+                } else {
+                    $mc_icon = &$child_menu_icon_config;
+                }
+                $mc['icon'] = $mc_icon;
                 if ($mc['display'] != 1) {
                     unset($m['child_menu'][$id]);
                 }

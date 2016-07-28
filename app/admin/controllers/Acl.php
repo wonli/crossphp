@@ -30,25 +30,28 @@ class Acl extends Admin
     /**
      * 子菜单管理
      *
-     * @cp_params m
+     * @cp_params id
      */
     function editMenu()
     {
-        $m_name = $this->params['m'];
+        $id = (int)$this->params['id'];
         if ($this->is_post()) {
-            $this->ACL->saveMenu($_POST['menu']);
+            if (!empty($_POST['menu'])) {
+                $this->ACL->saveMenu($_POST['menu']);
+            }
+
+            if (!empty($_POST['customMenu'])) {
+                $this->ACL->saveMenu($_POST['customMenu']);
+            }
+
             $this->return_referer();
         } else {
-            $child_menu = array();
-            $menu_list = $this->ACL->initMenuList();
-
-            foreach($menu_list as $data) {
-                if ($data['link'] == $m_name) {
-                    $child_menu = $data;
-                    break;
-                }
+            $menu_list = $this->ACL->getMenuAllDate($id);
+            if(false === $menu_list) {
+                $this->to('acl');
             }
-            $this->data['menu_list'] = $child_menu;
+
+            $this->data['menu_list'] = $menu_list;
         }
 
         $this->display($this->data);
@@ -72,6 +75,8 @@ class Acl extends Admin
         }
 
         $un_save_menu = array();
+        $this->ACL->initMenuList();
+
         $this->data['menu'] = $this->ACL->getNavList($un_save_menu);
         $this->data['un_save_menu'] = $un_save_menu;
 
@@ -81,12 +86,16 @@ class Acl extends Admin
     /**
      * 删除
      *
-     * @cp_params id
+     * @cp_params id, e
      */
     function del()
     {
         if (!empty($this->params['id'])) {
-            $this->ACL->delNav(intval($this->params['id']));
+            $this->ACL->delNav((int)$this->params['id']);
+        }
+
+        if (!empty($this->params['e'])) {
+            $this->to('acl:editMenu', array('id' => (int)$this->params['e']));
         }
 
         $this->to('acl:navManager');
@@ -142,20 +151,24 @@ class Acl extends Admin
      */
     function editRole()
     {
-        if (empty($this->params ['rid'])) {
+        if (empty($this->params['rid'])) {
             $this->to('acl');
         }
 
-        $rid = (int) $this->params['rid'];
+        $rid = (int)$this->params['rid'];
         $role_info = $this->ACL->getRoleInfo(array('id' => $rid));
+        if (empty($role_info)) {
+            $this->to('acl');
+        }
 
-        if($this->is_post()) {
+        if ($this->is_post()) {
             $this->ACL->editRoleMenu($rid, $_POST['name'], $_POST['menu_id']);
             $this->to('acl:editRole', array('rid' => $this->params['rid']));
         }
 
-        $this->data ['role_info'] = $role_info;
-        $this->data ['menu_list'] = $this->ACL->initMenuList();
+        $menu_list = $this->ACL->initMenuList();
+        $this->data['role_info'] = $role_info;
+        $this->data['menu_list'] = $menu_list;
 
         $this->display($this->data);
     }
@@ -168,11 +181,11 @@ class Acl extends Admin
     function delRole()
     {
         $is_ajax = $this->is_ajax_request();
-        $rid = $is_ajax ? (int) $_GET['rid'] : (int) $this->params['rid'];
+        $rid = $is_ajax ? (int)$_GET['rid'] : (int)$this->params['rid'];
 
         $ret = $this->ACL->delRole($rid);
         if ($is_ajax) {
-            echo (int) $ret;
+            echo (int)$ret;
         } else {
             $this->to('acl:roleList');
         }
@@ -221,7 +234,7 @@ class Acl extends Admin
      */
     function delUser()
     {
-        $uid = (int) $this->params['uid'];
+        $uid = (int)$this->params['uid'];
         $this->ADMIN->del(array('id' => $uid));
         $this->to('acl:user');
     }
