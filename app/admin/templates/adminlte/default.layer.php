@@ -3,32 +3,22 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?php echo isset($title) ? $title : 'CPAdmin' ?></title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <!-- Bootstrap 3.3.5 -->
-    <link rel="stylesheet" href="<?php echo $this->res('styles/adminlte/2.3.0/plugins/bootstrap/3.3.5/css/bootstrap.min.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->res('styles/adminlte/2.3.0/plugins/font-awesome/4.5.0/css/font-awesome.min.css') ?>">
+    <title><?php echo isset($title) ? $title : 'CPAdmin' ?></title>
+    <link rel="stylesheet" href="<?php echo $this->res('libs/bootstrap/3.3.7/css/bootstrap.min.css') ?>">
 
-    <link rel="stylesheet" href="<?php echo $this->res("styles/adminlte/2.3.0/dist/css/AdminLTE.min.css") ?>">
-    <link rel="stylesheet" href="<?php echo $this->res("styles/adminlte/2.3.0/dist/css/skins/_all-skins.min.css") ?>">
+    <link rel="stylesheet" href="<?php echo $this->res("adminlte/2.3.5/dist/css/AdminLTE.min.css") ?>">
+    <link rel="stylesheet" href="<?php echo $this->res("adminlte/2.3.5/dist/css/skins/_all-skins.min.css") ?>">
+    <link rel="stylesheet" href="<?php echo $this->res('adminlte/2.3.5/plugins/font-awesome/4.6.3/css/font-awesome.min.css') ?>">
 
     <script src="<?php echo $this->res('libs/jquery/1.11.3/jquery.min.js') ?>"></script>
-    <script type="text/javascript" src="<?php echo $this->res('libs/cp/base.js') ?>"></script>
-    <script type="text/javascript" src="<?php echo $this->res('libs/artDialog/jquery.artDialog.js?skin=idialog') ?>"></script>
+    <script src="<?php echo $this->res('js/cpa.js') ?>"></script>
+    <script src="<?php echo $this->res('libs/artDialog/jquery.artDialog.js?skin=idialog') ?>"></script>
     <script type="text/javascript" src="<?php echo $this->res('libs/artDialog/plugins/iframeTools.js') ?>"></script>
-    <script type="text/javascript">
-        var cp = {
-            url:<?php echo json_encode( $this->config->get('url', array('ext', 'dot', 'request', 'full_request')) ); ?>,
-            link: function (controller, action, params) {
-                var c = typeof controller === 'undefined' ? this.url['full_request'] : this.url['request'] + '/', a = action || 'index', p = params || [];
-                return c + (a == 'index' ? [controller] : [controller, a]).concat(p).join(this.url['dot']) + this.url['ext'];
-            }
-        }
-    </script>
 
     <!--[if lt IE 9]>
-    <script src="<?php echo $this->res('styles/adminlte/2.3.0/plugins/html5shiv/3.7.3/html5shiv.min.js') ?>"></script>
-    <script src="<?php echo $this->res('styles/adminlte/2.3.0/plugins/respond/1.4.2/respond.min.js') ?>"></script>
+    <script src="<?php echo $this->res('adminlte/2.3.5/plugins/html5shiv/3.7.3/html5shiv.min.js') ?>"></script>
+    <script src="<?php echo $this->res('adminlte/2.3.5/plugins/respond/1.4.2/respond.min.js') ?>"></script>
     <![endif]-->
 </head>
 <!-- fixed -->
@@ -40,11 +30,11 @@
     <header class="main-header">
         <a href="" class="logo">
             <span class="logo-mini">
-                <img src="<?php echo $this->res("styles/adminlte/2.3.0/dist/img/logo.png") ?>" alt="cross php framework"
+                <img src="<?php echo $this->res("adminlte/2.3.5/dist/img/logo.png") ?>" alt="cross php framework"
                      style="width:50px;"/>
             </span>
             <span class="logo-lg">
-                <img src="<?php echo $this->res("styles/adminlte/2.3.0/dist/img/logo.png") ?>" alt="cross php framework"
+                <img src="<?php echo $this->res("adminlte/2.3.5/dist/img/logo.png") ?>" alt="cross php framework"
                      style="width:50px;"/>
                 <b>CP</b>Admin
             </span>
@@ -60,7 +50,7 @@
             <div class="navbar-custom-menu">
                 <ul class="nav navbar-nav">
                     <li>
-                        <a href="<?php echo $this->link("main:logout") ?>" target="_top">
+                        <a href="<?php echo $this->url("main:logout") ?>" target="_top">
                             <?php echo $_SESSION['u'] ?> <i class="fa fa-sign-out"></i>
                         </a>
                     </li>
@@ -88,18 +78,18 @@
                     }
                 }
 
-                function li_menu_content($link, $icon, $name)
+                function li_menu_content($link, $target, $icon, $name)
                 {
-                    return sprintf('<a href="%s"><i class="%s"></i><span>%s</span><i class="fa fa-angle-left pull-right"></i></a>', $link, $icon, $name);
+                    return sprintf('<a href="%s" target="%s"><i class="%s"></i><span>%s</span><i class="fa fa-angle-left pull-right"></i></a>', $link, $target, $icon, $name);
                 }
 
-                function li_child_menu($class, $link, $icon, $name)
+                function li_child_menu($class, $link, $target, $icon, $name)
                 {
-                    return sprintf('<li class="%s"><a href="%s"><i class="fa fa-circle-o"></i>%s</a></li>', $class, $link, $name);
+                    return sprintf('<li class="%s"><a href="%s" target="%s"><i class="%s"></i>%s</a></li>', $class, $link, $target, $icon, $name);
                 }
 
                 foreach ($this->getAllMenu() as $m) {
-                    if ($m['status'] != 1) continue;
+                    if ($m['display'] != 1) continue;
                     $icon_name = !empty($m['icon']) ? $m['icon'] : 'fa fa-circle-o';
                     $child_node_num = count($m['child_menu']);
 
@@ -112,11 +102,20 @@
                     if ($child_node_num > 0) {
                         $li_menu = '';
                         foreach ($m['child_menu'] as $mu) {
+                            $child_icon_name = !empty($mu['icon']) ? $mu['icon'] : 'fa fa-circle-o';
                             $child_menu_name_map[$m['link']][$mu['link']] = $mu['name'];
-                            if ($mu['link'] == $this->action) {
-                                $li_menu .= li_child_menu('active', $this->link("{$m['link']}:{$mu['link']}"), $icon_name, $mu['name']);
+                            if ($mu['type'] == 1) {
+                                $menu_link = $this->url("{$m['link']}:{$mu['link']}");
+                                $li_menu_target = '_self';
                             } else {
-                                $li_menu .= li_child_menu('', $this->link("{$m['link']}:{$mu['link']}"), $icon_name, $mu['name']);
+                                $menu_link = $mu['link'];
+                                $li_menu_target = '_blank';
+                            }
+
+                            if ($mu['link'] == $this->action) {
+                                $li_menu .= li_child_menu('active', $menu_link, $li_menu_target, $child_icon_name, $mu['name']);
+                            } else {
+                                $li_menu .= li_child_menu('', $menu_link, $li_menu_target, $child_icon_name, $mu['name']);
                             }
                         }
 
@@ -124,7 +123,16 @@
                     } else {
                         $child_ul_menu = '';
                     }
-                    echo li_menu($li_class, li_menu_content($this->link($m['link']), $icon_name, $m['name']), $child_ul_menu);
+
+                    if ($m['type'] == 1) {
+                        $m_link = $this->url($m['link']);
+                        $target = '_self';
+                    } else {
+                        $target = '_blank';
+                        $m_link = $m['link'];
+                    }
+
+                    echo li_menu($li_class, li_menu_content($m_link, $target, $icon_name, $m['name']), $child_ul_menu);
                 }
 
                 if (isset($child_menu_name_map[$controller]) && isset($child_menu_name_map[$controller][$this->action])) {
@@ -173,10 +181,9 @@
         </section>
     </div>
 </div>
-
-<script src="<?php echo $this->res('styles/adminlte/2.3.0/plugins/bootstrap/3.3.5/js/bootstrap.min.js') ?>"></script>
-<script src="<?php echo $this->res('styles/adminlte/2.3.0/plugins/slimScroll/jquery.slimscroll.min.js') ?>"></script>
-<script src="<?php echo $this->res('styles/adminlte/2.3.0/plugins/fastclick/fastclick.min.js') ?>"></script>
-<script src="<?php echo $this->res('styles/adminlte/2.3.0/dist/js/app.min.js') ?>"></script>
+<script src="<?php echo $this->res('libs/bootstrap/3.3.7/js/bootstrap.min.js') ?>"></script>
+<script src="<?php echo $this->res('adminlte/2.3.5/plugins/slimScroll/jquery.slimscroll.min.js') ?>"></script>
+<script src="<?php echo $this->res('adminlte/2.3.5/plugins/fastclick/fastclick.min.js') ?>"></script>
+<script src="<?php echo $this->res('adminlte/2.3.5/dist/js/app.min.js') ?>"></script>
 </body>
 </html>
