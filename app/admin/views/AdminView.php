@@ -135,7 +135,7 @@ class AdminView extends View
 
             $m['icon'] = $icon;
             foreach ($m['child_menu'] as $id => &$mc) {
-                if(is_array($child_menu_icon_config)) {
+                if (is_array($child_menu_icon_config)) {
                     $mc_icon = &$child_menu_icon_config[$mc['link']];
                 } else {
                     $mc_icon = &$child_menu_icon_config;
@@ -153,14 +153,42 @@ class AdminView extends View
     /**
      * 分页方法
      *
-     * @param $page
+     * @param array $data
      * @param string $tpl
      */
-    function page($page, $tpl = 'page')
+    function page(array $data, $tpl = 'default')
     {
-        list($controller, $params) = $page['link'];
+        if (!isset($data['link'])) {
+            $current_controller = lcfirst($this->controller);
+            $current_action = $this->action;
+            if ($current_action != 'index') {
+                $controller = "{$current_controller}:{$current_action}";
+            } else {
+                $controller = "{$current_controller}";
+            }
 
-        $_dot = isset($page['dot']) ? $page["dot"] : $this->config->get('url', 'dot');
+            $params = array();
+        } elseif (is_array($data['link']) && $data['link'][1]) {
+            list($controller, $params) = $data['link'];
+        } elseif (is_array($data['link'])) {
+            $params = array();
+            $controller = $data['link'][0];
+        } else {
+            $params = array();
+            $controller = $data['link'];
+        }
+
+        if (!isset($data['anchor'])) {
+            $data['anchor'] = '';
+        }
+
+        $data['controller'] = $controller;
+        $data['params'] = $params;
+
+        if (!isset($data['half'])) {
+            $data['half'] = 5;
+        }
+
         include $this->tpl("page/{$tpl}");
     }
 }
