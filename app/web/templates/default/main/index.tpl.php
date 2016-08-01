@@ -1,4 +1,4 @@
-<div class="jumbotron">
+<div class="jumbotron" style="background:#fff;border-bottom:1px solid #f5f5f5">
     <div class="container">
         <h1>Hello World</h1>
         <p>OOP，MMVC，Layer，Annotate，双向智能别名，PSR，Composer</p>
