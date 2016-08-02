@@ -159,15 +159,9 @@ class AdminView extends View
     function page(array $data, $tpl = 'default')
     {
         if (!isset($data['link'])) {
-            $current_controller = lcfirst($this->controller);
-            $current_action = $this->action;
-            if ($current_action != 'index') {
-                $controller = "{$current_controller}:{$current_action}";
-            } else {
-                $controller = "{$current_controller}";
-            }
-
             $params = array();
+            $current_controller = lcfirst($this->controller);
+            $controller = "{$current_controller}:{$this->action}";
         } elseif (is_array($data['link']) && $data['link'][1]) {
             list($controller, $params) = $data['link'];
         } elseif (is_array($data['link'])) {
