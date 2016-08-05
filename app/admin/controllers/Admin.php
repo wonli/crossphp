@@ -58,7 +58,7 @@ abstract class Admin extends Controller
         /**
          * 菜单icon
          */
-        $icon = Loader::read(Loader::getFilePath('::config/menu_icon.config.php'));
+        $icon = $this->parseGetFile('config::menu_icon.config.php');
         $tpl_dir_name = $this->config->get('sys', 'default_tpl_dir');
         $icon_config = array();
         if (isset($icon[$tpl_dir_name])) {
@@ -151,7 +151,6 @@ abstract class Admin extends Controller
         }
     }
 
-
     /**
      * 返回错误码和错误消息数组
      *
@@ -171,7 +170,7 @@ abstract class Admin extends Controller
      */
     protected function getStatusMessage($code)
     {
-        $code_config = Loader::read("::config/notice.config.php");
+        $code_config = $this->parseGetFile('config::notice.config.php');
         if (isset($code_config[$code])) {
             $message = $code_config[$code];
         } else {

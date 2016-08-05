@@ -78,9 +78,13 @@
                     }
                 }
 
-                function li_menu_content($link, $target, $icon, $name)
+                function li_menu_content($link, $target, $icon, $name, $child_node_num)
                 {
-                    return sprintf('<a href="%s" target="%s"><i class="%s"></i><span>%s</span><i class="fa fa-angle-left pull-right"></i></a>', $link, $target, $icon, $name);
+                    if($child_node_num > 0) {
+                        return sprintf('<a href="%s" target="%s"><i class="%s"></i><span>%s</span><i class="fa fa-angle-left pull-right"></i></a>', $link, $target, $icon, $name);
+                    } else {
+                        return sprintf('<a href="%s" target="%s"><i class="%s"></i><span>%s</span></a>', $link, $target, $icon, $name);
+                    }
                 }
 
                 function li_child_menu($class, $link, $target, $icon, $name)
@@ -93,10 +97,10 @@
                     $icon_name = !empty($m['icon']) ? $m['icon'] : 'fa fa-circle-o';
                     $child_node_num = count($m['child_menu']);
 
-                    $li_class = "treeview";
+                    $li_class = '';
                     if ($controller == $m['link']) {
                         $controller_menu_name = $m['name'];
-                        $li_class = "treeview active";
+                        $li_class = 'active';
                     }
 
                     if ($child_node_num > 0) {
@@ -119,6 +123,7 @@
                             }
                         }
 
+                        $li_class = "treeview {$li_class}";
                         $child_ul_menu = sprintf('<ul class="treeview-menu">%s</ul>', $li_menu);
                     } else {
                         $child_ul_menu = '';
@@ -132,7 +137,7 @@
                         $m_link = $m['link'];
                     }
 
-                    echo li_menu($li_class, li_menu_content($m_link, $target, $icon_name, $m['name']), $child_ul_menu);
+                    echo li_menu($li_class, li_menu_content($m_link, $target, $icon_name, $m['name'], $child_node_num), $child_ul_menu);
                 }
 
                 if (isset($child_menu_name_map[$controller]) && isset($child_menu_name_map[$controller][$this->action])) {

@@ -115,7 +115,7 @@ class AclModule extends Module
                 //控制器文件物理路径
                 $m['method'] = array();
                 $controller_name = ucfirst($m['link']);
-                $controller_file = Loader::getFilePath("app::controllers/{$controller_name}.php");
+                $controller_file = $this->getFilePath("app::controllers/{$controller_name}.php");
                 if (file_exists($controller_file)) {
                     //反射取得类中的方法列表
                     $fullName = "app\\" . parent::getConfig()->get('app', 'name') . '\\controllers\\' . $controller_name;
@@ -583,8 +583,8 @@ class AclModule extends Module
      */
     private function scanControllers($hashMap = false)
     {
-        $controller_file = Loader::getFilePath('app::controllers');
         $nav_data = array();
+        $controller_file = $this->getFilePath('app::controllers');
         foreach (glob(rtrim($controller_file, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*.php') as $f) {
             $fi = pathinfo($f);
             $class_name = $fi['filename'];
