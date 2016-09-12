@@ -14,6 +14,8 @@ use Cross\MVC\Controller;
  */
 abstract class Cli extends Controller
 {
+    protected $command = '';
+
     function __construct()
     {
         parent::__construct();
@@ -21,8 +23,11 @@ abstract class Cli extends Controller
         //处理$argv传递过来的参数
         //params1=value1 params2=value2 ... paramsN=valueN
         $params = array();
-        foreach($this->params as $p) {
+        foreach ($this->params as $k => $p) {
             if (strpos($p, '=') === false) {
+                if($k == 0) {
+                    $this->command = trim($p);
+                }
                 continue;
             }
 
