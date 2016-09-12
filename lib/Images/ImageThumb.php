@@ -136,13 +136,11 @@ class ImageThumb
         $thumb_file_name = $this->thumb_image_name . $file_ext;
         unset($info);
 
-        $scale = max($this->width / $src_width, $this->height / $src_height);
-        if ($scale >= 1) {
-            $width = $src_width;
-            $height = $src_height;
-        } else {
-            $width = round($src_width * $scale);
-            $height = round($src_height * $scale);
+        $x = 0;
+        $height = $this->height;
+        $width = floor($src_width * ($this->height / $src_height));
+        if ($width > $this->width) {
+            $x = floor(($this->width - $width) / 2);
         }
 
         //载入原图
@@ -150,26 +148,26 @@ class ImageThumb
 
         //创建缩略图
         if ($type != 'gif' && function_exists('imagecreatetruecolor')) {
-            $thumb_images = imagecreatetruecolor($width, $height);
+            $thumb_images = imagecreatetruecolor($this->width, $this->height);
         } else {
-            $thumb_images = imagecreate($width, $height);
+            $thumb_images = imagecreate($this->width, $this->height);
+        }
+
+        if ('gif' == $type) {
+            $background_color = imagecolorallocate($thumb_images, 0, 0, 0);
+            imagecolortransparent($thumb_images, $background_color);
+        } elseif ('png' == $type) {
+            imagealphablending($thumb_images, false);
+            imagesavealpha($thumb_images, true);
+        } else {
+            imageinterlace($thumb_images, (int)$interlace);
         }
 
         // 复制图片
         if (function_exists('imagecopyresampled')) {
-            imagecopyresampled($thumb_images, $src_images, 0, 0, 0, 0, $width, $height, $src_width, $src_height);
+            imagecopyresampled($thumb_images, $src_images, $x, 0, 0, 0, $width, $height, $src_width, $src_height);
         } else {
-            imagecopyresized($thumb_images, $src_images, 0, 0, 0, 0, $width, $height, $src_width, $src_height);
-        }
-
-        if ('gif' == $type || 'png' == $type) {
-            $background_color = imagecolorallocate($thumb_images, 0, 255, 0); //指派一个绿色
-            imagecolortransparent($thumb_images, $background_color); //设置为透明色，若注释掉该行则输出绿色的图
-        }
-
-        // 对jpeg图形设置隔行扫描
-        if ('jpg' == $type || 'jpeg' == $type) {
-            imageinterlace($thumb_images, (int)$interlace);
+            imagecopyresized($thumb_images, $src_images, $x, 0, 0, 0, $width, $height, $src_width, $src_height);
         }
 
         //返回缩略图的路径，字符串
