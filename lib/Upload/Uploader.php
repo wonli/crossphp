@@ -176,7 +176,7 @@ class Uploader
      */
     private function moveUploadedFile($src, $target)
     {
-        $abs_path = $this->save_dir ? trim($this->save_dir . '/') . $target : $target;
+        $abs_path = $this->save_dir ? rtrim($this->save_dir . '/') . '/' . $target : $target;
         $dir_name = dirname($abs_path);
 
         if (!file_exists($dir_name)) {
