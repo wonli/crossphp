@@ -68,7 +68,7 @@ class UploadImages
     protected $status_code = array(
         -8 => '文件上传失败',
         -4 => '大小超出限制',
-        -3 => '不允许上传的类型',
+        -3 => '不支持的图片类型',
         0 => '上传成功',
         1 => '上传的文件超过了 php.ini 中 upload_max_filesize 选项限制的值',
         2 => '上传文件的大小超过了 HTML 表单中 MAX_FILE_SIZE 选项指定的值',
@@ -149,11 +149,12 @@ class UploadImages
     /**
      * 生成缩略图
      *
-     * @param array $thumb_size_config
-     * @param bool $save_ori_images
+     * @param array $thumb_size_config 尺寸长x宽或长, 当指定生成方图时以长宽的最大值为准
+     * @param bool $save_ori_images 是否保留原图
+     * @param bool $square 是否生成方图
      * @return array
      */
-    public function thumb($thumb_size_config = array(), $save_ori_images = true)
+    public function thumb($thumb_size_config = array(), $save_ori_images = true, $square = false)
     {
         $ret = $this->moveUploadFile();
         if ($ret['status'] === 0) {
@@ -165,7 +166,7 @@ class UploadImages
                     $thumb_size_config = array($thumb_size_config);
                 }
 
-                $result_file_url['thumb'] = $this->makeThumb($ori_images_path, $thumb_size_config);
+                $result_file_url['thumb'] = $this->makeThumb($ori_images_path, $thumb_size_config, $square);
                 if (!$save_ori_images) {
                     unlink($ori_images_path);
                     unset($result_file_url['ori']);
@@ -198,7 +199,6 @@ class UploadImages
                 }
 
                 $result_file_url['thumb'] = $this->makeCutThumb($ori_images_path, $thumb_size, $coordinate);
-
                 if (!$save_ori_images) {
                     unlink($ori_images_path);
                     unset($result_file_url['ori']);
@@ -215,25 +215,32 @@ class UploadImages
      *  计算缩裁剪略图大小
      * @param int $max_w 最大宽度
      * @param int $max_h 最大高度
+     * @param bool $is_square 是否生成方图
      * @return $this
      */
-    protected function thumbSize($max_w, $max_h)
+    protected function thumbSize($max_w, $max_h, $is_square = false)
     {
-        $w = $this->upload_file_base_info['width'];
-        $h = $this->upload_file_base_info['height'];
-        //计算缩放比例
-        $w_ratio = $max_w / $w;
-        $h_ratio = $max_h / $h;
-        //计算裁剪图片宽、高度
-        if (($w <= $max_w) && ($h <= $max_h)) {
-            $this->thumb['w'] = $w;
-            $this->thumb['h'] = $h;
-        } else if (($w_ratio * $h) < $max_h) {
-            $this->thumb['h'] = ceil($w_ratio * $h);
-            $this->thumb['w'] = $max_w;
+        if($is_square) {
+            $size = max($max_w, $max_h);
+            $this->thumb['w'] = $size;
+            $this->thumb['h'] = $size;
         } else {
-            $this->thumb['w'] = ceil($h_ratio * $w);
-            $this->thumb['h'] = $max_h;
+            $w = $this->upload_file_base_info['width'];
+            $h = $this->upload_file_base_info['height'];
+            //计算缩放比例
+            $w_ratio = $max_w / $w;
+            $h_ratio = $max_h / $h;
+            //计算裁剪图片宽、高度
+            if (($w <= $max_w) && ($h <= $max_h)) {
+                $this->thumb['w'] = $w;
+                $this->thumb['h'] = $h;
+            } else if (($w_ratio * $h) < $max_h) {
+                $this->thumb['h'] = ceil($w_ratio * $h);
+                $this->thumb['w'] = $max_w;
+            } else {
+                $this->thumb['w'] = ceil($h_ratio * $w);
+                $this->thumb['h'] = $max_h;
+            }
         }
 
         return $this;
@@ -299,7 +306,7 @@ class UploadImages
                 if ($base_info['error'] !== 0) {
                     throw new Exception($base_info['error']);
                 } else {
-                    $extend_info = $this->getImageInfo($base_info ['tmp_name']);
+                    $extend_info = $this->getImageInfo($base_info['tmp_name']);
                     if (!empty($extend_info)) {
                         $base_info = array_merge($base_info, $extend_info);
                     }
@@ -406,24 +413,26 @@ class UploadImages
      *
      * @param $images_path
      * @param $thumb_size_config
+     * @param bool $square
      * @return array
+     * @throws \Cross\Exception\CoreException
      */
-    protected function makeThumb($images_path, $thumb_size_config)
+    protected function makeThumb($images_path, $thumb_size_config, $square = false)
     {
         $result = array();
         if (!$images_path || !$thumb_size_config) {
             return $result;
         }
 
-        $Thumb = new ImageThumb($images_path);
+        $Thumb = new ImageThumb($images_path, $square);
         foreach ($thumb_size_config as $val) {
             if (false !== strpos($val, 'x')) {
                 list($width, $height) = explode('x', $val);
             } else {
                 $width = $height = $val;
             }
-            $this->thumbSize($width, $height);
-            $thumb_file_name = sprintf("%s-%sx%s", $this->save_name, $this->thumb['w'], $this->thumb['h']);
+            $this->thumbSize($width, $height, $square);
+            $thumb_file_name = sprintf("%s-%s", $this->save_name, $val);
             $result[] = $Thumb->setFile($this->getSavePath(), $thumb_file_name)->setSize($this->thumb['w'], $this->thumb['h'])->thumb();
         }
 
@@ -437,7 +446,7 @@ class UploadImages
     {
         $base_info = $this->getBaseInfo();
         $allow_type = $this->getAllowType();
-        if (!in_array($base_info['file_type'], $allow_type)) {
+        if (empty($base_info['file_type']) || !in_array($base_info['file_type'], $allow_type)) {
             return -3;
         }
 
@@ -482,7 +491,7 @@ class UploadImages
      */
     protected function getImageInfo($images)
     {
-        $image_info = getimagesize($images);
+        $image_info = @getimagesize($images);
         if (false !== $image_info) {
             $image_ext = strtolower(image_type_to_extension($image_info[2]));
             $image_type = substr($image_ext, 1);

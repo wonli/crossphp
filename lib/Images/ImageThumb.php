@@ -129,8 +129,8 @@ class ImageThumb
             return false;
         }
 
-        $src_width = $info['width'];
-        $src_height = $info['height'];
+        $src_width = &$info['width'];
+        $src_height = &$info['height'];
         $type = strtolower($info['file_type']);
         $file_ext = strtolower($info['ext']);
         $thumb_file_name = $this->thumb_image_name . $file_ext;
@@ -163,7 +163,7 @@ class ImageThumb
             imageinterlace($thumb_images, (int)$interlace);
         }
 
-        // 复制图片
+        //复制图片
         if (function_exists('imagecopyresampled')) {
             imagecopyresampled($thumb_images, $src_images, $x, 0, 0, 0, $width, $height, $src_width, $src_height);
         } else {

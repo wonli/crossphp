@@ -180,13 +180,13 @@ class Uploader
         $dir_name = dirname($abs_path);
 
         if (!file_exists($dir_name)) {
-            if (!mkdir($dir_name, 0600, true)) {
+            if (!mkdir($dir_name, 0755, true)) {
                 throw new CoreException('保存文件的目录不存在');
             }
         }
 
         if (move_uploaded_file($src, $abs_path)) {
-            @chmod($abs_path, 0600);
+            @chmod($abs_path, 0755);
             return $target;
         } else {
             return false;
