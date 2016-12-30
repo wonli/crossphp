@@ -1,12 +1,13 @@
 <?php
 /**
- * @Auth crossphp 优化
- * Class Captcha 验证码
+ * 生成图片验证码
+ *
+ * Class Captcha
  */
 namespace lib\Images;
 
-use Cross\Core\Helper;
 use Cross\Exception\CoreException;
+use Cross\Core\Helper;
 
 class Captcha
 {
@@ -15,103 +16,214 @@ class Captcha
      *
      * @var int
      */
-    public $width;
+    private $width;
 
     /**
      * 高
      *
      * @var int
      */
-    public $height;
+    private $height;
 
     /**
      * 图片资源
      *
      * @var resource
      */
-    public $img;
-
-    /**
-     * 图片类型
-     *
-     * @var string
-     */
-    public $imgType;
+    private $img;
 
     /**
      * 文字
      *
      * @var string
      */
-    public $checkCode;
+    private $text;
 
     /**
-     * 验证码类型
+     * 验证码字体
      *
-     * @var int
+     * @var array
      */
-    public $fontFamily;
+    private $fontFamily = array();
+
+    /**
+     * 设置背景色
+     *
+     * @var array
+     */
+    private $backgroundColor = array();
+
+    /**
+     * 画多少个干扰点
+     *
+     * @var bool
+     */
+    private $withPix = 10;
+
+    /**
+     * 最大画多少根干扰线
+     *
+     * @var bool
+     */
+    private $withArc = 5;
 
     /**
      * 字体大小
      *
      * @var int
      */
-    public $fontSize;
+    private $fontSize;
 
     /**
      * 文字个数
      *
      * @var int
      */
-    public $num;
+    private $num;
 
     /**
-     * 构造方法，初使化各个成员属性包括根据文字类型，产生文字
+     * 设置验证码图片高宽
      *
      * @param int $width
      * @param int $height
-     * @param int $fontSize
-     * @param string $imgType
      */
-    public function __construct($width = 120, $height = 40, $fontSize = 20, $imgType = 'jpeg')
+    public function __construct($width = 120, $height = 40)
     {
         $this->width = $width;
         $this->height = $height;
-        $this->imgType = $imgType;
-        $this->fontSize = $fontSize;
     }
 
     /**
-     * 外部设置code
+     * 设置文字
      *
-     * @param string $code
-     * @param string $fontFamily
+     * @param string $text
+     * @return $this
      */
-    public function setCheckCode($code, $fontFamily = '')
+    public function setText($text)
     {
-        $this->checkCode = $code;
-        $this->fontFamily = $fontFamily;
+        $this->text = $text;
+        return $this;
     }
 
     /**
-     * 获取要产生的文字
+     * 设置字体
      *
-     * @return Array
+     * @param string|array $fontFamily
+     * @param int $fontSize
+     * @return $this
+     */
+    public function setTypeface($fontFamily, $fontSize = 20)
+    {
+        $this->fontFamily[] = $fontFamily;
+        $this->fontSize = $fontSize;
+        return $this;
+    }
+
+    /**
+     * 设置字体文件夹
+     *
+     * @param string $dir
+     * @param int $fontSize
+     * @return $this
+     */
+    public function setTypefaceDir($dir, $fontSize = 20)
+    {
+        $this->fontSize = $fontSize;
+        if (is_dir($dir)) {
+            $this->fontFamily = glob("{$dir}*.ttf");
+        }
+
+        return $this;
+    }
+
+    /**
+     * 设置背景色
+     *
+     * @param int $r
+     * @param int $g
+     * @param int $b
+     * @return $this
+     */
+    public function setBackGround($r, $g, $b)
+    {
+        $this->backgroundColor = array('r' => $r, 'g' => $g, 'b' => $b);
+        return $this;
+    }
+
+    /**
+     * 是否画干扰点
+     *
+     * @param int $num
+     * @return $this
+     */
+    public function withPix($num)
+    {
+        $this->withPix = (int)$num;
+        return $this;
+    }
+
+    /**
+     * 是否画干扰线
+     *
+     * @param $num
+     * @return $this
+     */
+    public function withArc($num)
+    {
+        $this->withArc = $num;
+        return $this;
+    }
+
+    /**
+     * @see output()
+     */
+    public function getImage()
+    {
+        $this->initCreateImages();
+        $this->output();
+    }
+
+    /**
+     * @see base64encode()
+     *
+     * @return string
+     */
+    function getImageBase64encode()
+    {
+        $this->initCreateImages();
+        return $this->base64encode();
+    }
+
+    /**
+     * 初始化图片数据
+     */
+    protected function initCreateImages()
+    {
+        $this->createImg();
+        $this->filledColor();
+        $this->pix();
+        $this->arc();
+        $this->write();
+    }
+
+    /**
+     * 获取文字
+     *
+     * @return array
      * @throws CoreException
      */
-    private function getCheckCode()
+    protected function getText()
     {
-        if ($this->checkCode) {
-            $ret = array();
-            $this->num = Helper::strLen($this->checkCode);
+        if ($this->text) {
+            $texts = array();
+            $this->num = Helper::strLen($this->text);
             for ($i = 0; $i < $this->num; $i++) {
-                $ret[] = mb_substr($this->checkCode, $i, 1, 'UTF-8');
+                $texts[] = mb_substr($this->text, $i, 1, 'UTF-8');
             }
 
-            return $ret;
+            return $texts;
         } else {
-            throw new CoreException('error captcha code!');
+            throw new CoreException('please set captcha text!');
         }
     }
 
@@ -124,13 +236,17 @@ class Captcha
     }
 
     /**
-     * 产生背景颜色,颜色值越大，越浅，越小越深
+     * 产生背景颜色, 颜色值越大越浅, 越小越深
      *
      * @return int
      */
     protected function bgColor()
     {
-        return imagecolorallocate($this->img, mt_rand(230, 255), mt_rand(230, 255), mt_rand(230, 255));
+        if ($this->backgroundColor) {
+            return imagecolorallocate($this->img, $this->backgroundColor['r'], $this->backgroundColor['g'], $this->backgroundColor['b']);
+        }
+
+        return imagecolorallocate($this->img, mt_rand(235, 255), mt_rand(245, 255), 255);
     }
 
     /**
@@ -140,7 +256,7 @@ class Captcha
      */
     protected function fontColor()
     {
-        return imagecolorallocate($this->img, mt_rand(0, 90), mt_rand(0, 90), mt_rand(0, 90));
+        return imagecolorallocate($this->img, mt_rand(0, 90), mt_rand(0, 100), mt_rand(0, 120));
     }
 
     /**
@@ -156,8 +272,10 @@ class Captcha
      */
     protected function pix()
     {
-        for ($i = 0; $i < 10; $i++) {
-            imagesetpixel($this->img, mt_rand(0, $this->width), mt_rand(0, $this->height), $this->fontColor());
+        if ($this->withPix > 0) {
+            for ($i = 0; $i < $this->withPix; $i++) {
+                imagesetpixel($this->img, mt_rand(0, $this->width), mt_rand(0, $this->height), $this->fontColor());
+            }
         }
     }
 
@@ -166,17 +284,20 @@ class Captcha
      */
     protected function arc()
     {
-        for ($i = 0; $i < 5; $i++) {
-            imagearc(
-                $this->img,
-                mt_rand(10, $this->width - 10),
-                mt_rand(10, $this->height - 10),
-                200,
-                50,
-                mt_rand(0, 90),
-                mt_rand(100, 390),
-                $this->fontColor()
-            );
+        if ($this->withArc > 0) {
+            for ($i = 0; $i < mt_rand(1, $this->withArc); $i++) {
+                imagesetthickness($this->img, mt_rand(1, 3));
+                imagearc(
+                    $this->img,
+                    mt_rand(0, $this->width),
+                    mt_rand(0, $this->height),
+                    mt_rand($this->width, ceil($this->width * 1.5)),
+                    mt_rand($this->height, ceil($this->height / 0.5)),
+                    mt_rand(0, 90),
+                    mt_rand(180, 360),
+                    $this->fontColor()
+                );
+            }
         }
     }
 
@@ -185,17 +306,26 @@ class Captcha
      */
     protected function write()
     {
-        $checkCode = $this->getCheckCode();
-        $y_base = floor($this->height * 0.75);
-        $x_base = ceil($this->width / $this->num);
+        $texts = $this->getText();
+        $fontFamilyCount = count($this->fontFamily);
+        $preWidth = ceil(($this->width - 10) / $this->num);
 
         for ($i = 0; $i < $this->num; $i++) {
-            $x = $x_base * $i + 10;
             $fontSize = mt_rand($this->fontSize - 5, $this->fontSize + 5);
+            if ($fontFamilyCount) {
+                if ($fontFamilyCount > 1) {
+                    shuffle($this->fontFamily);
+                }
 
-            if ($this->fontFamily) {
-                $y = mt_rand($y_base - 5, $y_base + 5);
-                $angle = mt_rand(-5, 5) * mt_rand(1, 5);
+                $font = current($this->fontFamily);
+                $box = imagettfbbox($fontSize, 0, $font, $texts[$i]);
+                $textWidth = $box[2] - $box[0];
+                $textHeight = $box[1] - $box[7];
+
+                $x = $preWidth * $i + ($preWidth / 2 - $textWidth / 2);
+                $y = ($this->height - $textHeight) / 2 + $textHeight;
+
+                $angle = mt_rand(-15, 15);
                 imagettftext(
                     $this->img,
                     $fontSize,
@@ -203,12 +333,13 @@ class Captcha
                     $x,
                     $y,
                     $this->fontColor(),
-                    $this->fontFamily,
-                    $checkCode[$i]
+                    $font,
+                    $texts[$i]
                 );
             } else {
-                $y = mt_rand(5, $y_base);
-                imagechar($this->img, 5, $x, $y, $checkCode[$i], $this->fontColor());
+                $x = max(5, floor($this->width / $this->num) * $i);
+                $y = mt_rand(5, floor($this->height * 0.65));
+                imagechar($this->img, 5, $x, $y, $texts[$i], $this->fontColor());
             }
         }
     }
@@ -218,35 +349,28 @@ class Captcha
      */
     protected function output()
     {
-        $func = 'image' . $this->imgType;
-
-        if (function_exists($func)) {
-            header("Content-type:image/{$this->imgType}");
-            $func($this->img);
-            exit;
-        } else {
-            echo '不支持该图片类型';
-            exit;
-        }
+        header("Content-type:image/jpeg");
+        imagejpeg($this->img);
+        exit(0);
     }
 
     /**
-     * 组装得到图片
+     * 生成图片的base64编码数据
+     *
+     * @return string
      */
-    public function getImage()
+    protected function base64encode()
     {
-        $this->createImg();
-        $this->filledColor();
-        $this->pix();
-        $this->arc();
-        $this->write();
-        $this->output();
+        ob_start();
+        imagejpeg($this->img);
+        $content = ob_get_clean();
+        return chunk_split(sprintf("data:image/jpeg;base64,%s", base64_encode($content)));
     }
 
     /**
      * 销毁内存中的临时图片
      */
-    public function __destruct()
+    function __destruct()
     {
         if (!empty($this->img)) {
             imagedestroy($this->img);
