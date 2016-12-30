@@ -1,0 +1,50 @@
+body {
+    background-color: #f7f8fa;
+}
+
+h3 {
+    margin: 0;
+}
+
+.panel-api-case > .panel-body {
+    padding: 0 15px;
+}
+
+.panel.panel-api-case.current {
+    background-color: #fbfbfb;
+}
+
+.well {
+    margin: 10px 0;
+    padding: 10px 0;
+    background-color: transparent;
+}
+
+.menu-list {
+    border-top: #efefef solid 1px;
+}
+
+#goTop, #fold {
+    display: none;
+    padding: 5px 0;
+    color: #fff;
+    text-align: center;
+    position: fixed;
+    _position: absolute;
+    right: 3%;
+    bottom: 80px;
+    _bottom: "auto";
+    cursor: pointer;
+    opacity: .6;
+    filter: Alpha(opacity=60);
+}
+
+#goTop > i, #fold > i {
+    color: #333;
+    font-size: 42px;
+}
+
+#fold {
+    display: block;
+    bottom: 130px;
+}
