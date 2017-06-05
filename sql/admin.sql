@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS `cp_acl_menu` (
 DELETE FROM `cp_acl_menu`;
 INSERT INTO `cp_acl_menu` (`id`, `pid`, `type`, `name`, `link`, `status`, `display`, `order`) VALUES
 	(1, 0, 1, '权限', 'acl', 1, 1, 90),
-	(2, 0, 1, 'admin', 'admin', 0, 1, 0),
-	(3, 0, 1, 'main', 'main', 0, 1, 0),
+	(2, 0, 1, 'admin', 'admin', 1, 0, 0),
+	(3, 0, 1, 'main', 'main', 1, 0, 0),
 	(4, 0, 1, '面板', 'panel', 1, 1, 10),
 	(5, 0, 1, '安全', 'security', 1, 1, 80),
 	(6, 4, 1, '默认主页', 'index', 1, 1, 0),
@@ -33,7 +33,9 @@ INSERT INTO `cp_acl_menu` (`id`, `pid`, `type`, `name`, `link`, `status`, `displ
 	(19, 5, 1, '重置密保卡', 'refresh', 1, 1, 40),
 	(20, 5, 1, '密保卡解绑', 'kill', 1, 1, 50),
 	(21, 5, 1, '', 'create', 1, 0, 0),
-	(22, 5, 1, '更改登录密码', 'changePassword', 1, 1, 60);
+	(22, 5, 1, '更改登录密码', 'changePassword', 1, 1, 60),
+	(23, 1, 1, '', 'delRole', 1, 0, 0),
+	(24, 1, 1, '', 'delUser', 1, 0, 0);
 
 CREATE TABLE IF NOT EXISTS `cp_acl_role` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
