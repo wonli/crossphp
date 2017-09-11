@@ -151,6 +151,64 @@ class AdminView extends View
     }
 
     /**
+     * 生成导航菜单
+     *
+     * @param string $controller_menu_name
+     * @param string $action_menu_name
+     */
+    function renderNavMenu(&$controller_menu_name = '', &$action_menu_name = '')
+    {
+        $controller = lcfirst($this->controller);
+        if (!empty($this->all_menu)) {
+            foreach ($this->all_menu as $m) {
+                if ($m['display'] != 1) {
+                    continue;
+                }
+
+                $icon_name = 'fa fa-circle-o';
+                if (!empty($m['icon'])) {
+                    $icon_name = $m['icon'];
+                }
+
+                $class = '';
+                if (0 === strcasecmp($controller, $m['link'])) {
+                    $controller_menu_name = $m['name'];
+                    $class = 'active';
+                }
+
+                $child_node_num = count($m['child_menu']);
+                if ($child_node_num > 0) {
+                    $class = "treeview {$class}";
+                }
+
+                if ($m['type'] == 1) {
+                    $link = $this->url($m['link']);
+                    $target = '_self';
+                } else {
+                    $link = $m['link'];
+                    $target = '_blank';
+                }
+
+                $child_menu = array(
+                    'controller' => &$m['link'],
+                    'action_menu_name' => &$action_menu_name,
+                    'child' => &$m['child_menu']
+                );
+
+                $this->renderTpl('nav/li', array(
+                    'link' => $link,
+                    'name' => $m['name'],
+                    'class' => $class,
+                    'target' => $target,
+                    'icon_name' => $icon_name,
+                    'child_menu' => &$child_menu,
+                    'child_node_num' => $child_node_num
+                ));
+            }
+        }
+    }
+
+    /**
      * 分页方法
      *
      * @param array $data

@@ -9,7 +9,8 @@
 
     <link rel="stylesheet" href="<?php echo $this->res("adminlte/2.3.5/dist/css/AdminLTE.min.css") ?>">
     <link rel="stylesheet" href="<?php echo $this->res("adminlte/2.3.5/dist/css/skins/_all-skins.min.css") ?>">
-    <link rel="stylesheet" href="<?php echo $this->res('adminlte/2.3.5/plugins/font-awesome/4.6.3/css/font-awesome.min.css') ?>">
+    <link rel="stylesheet"
+          href="<?php echo $this->res('adminlte/2.3.5/plugins/font-awesome/4.6.3/css/font-awesome.min.css') ?>">
 
     <script src="<?php echo $this->res('libs/jquery/1.11.3/jquery.min.js') ?>"></script>
     <script src="<?php echo $this->res('js/cpa.js') ?>"></script>
@@ -64,85 +65,9 @@
             <ul class="sidebar-menu">
                 <li class="header"></li>
                 <?php
-                $action_menu_name = '';
-                $controller_menu_name = '';
-                $child_menu_name_map = array();
-                $controller = lcfirst($this->controller);
-
-                function li_menu($class, $content, $child_menu = '')
-                {
-                    if ($child_menu) {
-                        return sprintf('<li class="%s">%s%s</li>', $class, $content, $child_menu);
-                    } else {
-                        return sprintf('<li class="%s">%s</li>', $class, $content);
-                    }
-                }
-
-                function li_menu_content($link, $target, $icon, $name, $child_node_num)
-                {
-                    if($child_node_num > 0) {
-                        return sprintf('<a href="%s" target="%s"><i class="%s"></i><span>%s</span><i class="fa fa-angle-left pull-right"></i></a>', $link, $target, $icon, $name);
-                    } else {
-                        return sprintf('<a href="%s" target="%s"><i class="%s"></i><span>%s</span></a>', $link, $target, $icon, $name);
-                    }
-                }
-
-                function li_child_menu($class, $link, $target, $icon, $name)
-                {
-                    return sprintf('<li class="%s"><a href="%s" target="%s"><i class="%s"></i>%s</a></li>', $class, $link, $target, $icon, $name);
-                }
-
-                foreach ($this->getAllMenu() as $m) {
-                    if ($m['display'] != 1) continue;
-                    $icon_name = !empty($m['icon']) ? $m['icon'] : 'fa fa-circle-o';
-                    $child_node_num = count($m['child_menu']);
-
-                    $li_class = '';
-                    if ($controller == $m['link']) {
-                        $controller_menu_name = $m['name'];
-                        $li_class = 'active';
-                    }
-
-                    if ($child_node_num > 0) {
-                        $li_menu = '';
-                        foreach ($m['child_menu'] as $mu) {
-                            $child_icon_name = !empty($mu['icon']) ? $mu['icon'] : 'fa fa-circle-o';
-                            $child_menu_name_map[$m['link']][$mu['link']] = $mu['name'];
-                            if ($mu['type'] == 1) {
-                                $menu_link = $this->url("{$m['link']}:{$mu['link']}");
-                                $li_menu_target = '_self';
-                            } else {
-                                $menu_link = $mu['link'];
-                                $li_menu_target = '_blank';
-                            }
-
-                            if ($mu['link'] == $this->action) {
-                                $li_menu .= li_child_menu('active', $menu_link, $li_menu_target, $child_icon_name, $mu['name']);
-                            } else {
-                                $li_menu .= li_child_menu('', $menu_link, $li_menu_target, $child_icon_name, $mu['name']);
-                            }
-                        }
-
-                        $li_class = "treeview {$li_class}";
-                        $child_ul_menu = sprintf('<ul class="treeview-menu">%s</ul>', $li_menu);
-                    } else {
-                        $child_ul_menu = '';
-                    }
-
-                    if ($m['type'] == 1) {
-                        $m_link = $this->url($m['link']);
-                        $target = '_self';
-                    } else {
-                        $target = '_blank';
-                        $m_link = $m['link'];
-                    }
-
-                    echo li_menu($li_class, li_menu_content($m_link, $target, $icon_name, $m['name'], $child_node_num), $child_ul_menu);
-                }
-
-                if (isset($child_menu_name_map[$controller]) && isset($child_menu_name_map[$controller][$this->action])) {
-                    $action_menu_name = $child_menu_name_map[$controller][$this->action];
-                }
+                $action_menu_name = $this->action;
+                $controller_menu_name = $this->controller;
+                $this->renderNavMenu($controller_menu_name, $action_menu_name);
                 ?>
             </ul>
             <ul class="sidebar-menu">
@@ -160,14 +85,8 @@
     <div class="content-wrapper">
         <section class="content-header">
             <h1>
-                <?php
-                if ($controller_menu_name) {
-                    echo $controller_menu_name;
-                }
-                if ($action_menu_name) {
-                    printf('<small>%s</small>', $action_menu_name);
-                }
-                ?>
+                <?php echo $controller_menu_name ?>
+                <small><?php echo $action_menu_name ?></small>
             </h1>
             <ol class="breadcrumb">
                 <?php echo $this->getTitleBread() ?>
