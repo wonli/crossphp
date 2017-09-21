@@ -1,12 +1,21 @@
 <?php
 /**
  * @Author: wonli <wonli@live.com>
- * 实现了一个简单的权限控制系统
+ * Acl.php
  */
+
 namespace app\admin\controllers;
 
 use modules\admin\AclModule;
+use modules\admin\SecurityModule;
 
+/**
+ * 权限管理(菜单,角色及用户)
+ * @Auth wonli <wonli@live.com>
+ *
+ * Class Acl
+ * @package app\admin\controllers
+ */
 class Acl extends Admin
 {
     /**
@@ -47,7 +56,7 @@ class Acl extends Admin
             $this->return_referer();
         } else {
             $menu_list = $this->ACL->getMenuAllDate($id);
-            if(false === $menu_list) {
+            if (false === $menu_list) {
                 $this->to('acl');
             }
 
@@ -119,7 +128,7 @@ class Acl extends Admin
                     $data ['status'] = $ret['status'];
                 }
             } else {
-                $this->data ['status'] = 100022;
+                $this->data ['status'] = 100670;
             }
         }
 
@@ -196,35 +205,73 @@ class Acl extends Admin
      */
     function user()
     {
-        $u = $this->ADMIN->getUserList();
-        foreach ($u as $k => $ui) {
-            if ($ui['rid'] == 0) {
-                unset($u[$k]);
-            }
-        }
-
-        $this->data ['u'] = $u;
+        $this->data ['u'] = $this->ADMIN->getAdminUserList();
         $this->data ['roles'] = $this->ACL->getRoleList();
+
         if ($this->is_post()) {
-            $a = $_POST['a'];
+            $error = 0;
+            $a = &$_POST['a'];
             foreach ($a as $k => $v) {
+                if (isset($v['t']) && ($v['t'] == 'on' || $v['t'] == 1)) {
+                    $v['t'] = 1;
+                } else {
+                    $v['t'] = 0;
+                }
+
+                if (isset($v['usc']) && ($v['usc'] == 'on' || $v['usc'] == 1)) {
+                    $v['usc'] = 1;
+                } else {
+                    $v['usc'] = 0;
+                }
+
                 if ($k == '+') {
                     if (!empty($v ['name']) && !empty($v ['password'])) {
-                        $this->ADMIN->addAdmin($v);
+                        $ret = $this->ADMIN->addAdmin($v);
+                    } else {
+                        $ret['status'] = 1;
                     }
                 } else {
                     if (!empty($v['name'])) {
-                        $this->ADMIN->update($v, array('id' => $k));
+                        $ret = $this->ADMIN->update($k, $v);
                     } else {
-                        $this->ADMIN->del(array('id' => $k));
+                        $ret = $this->ADMIN->del(array('id' => $k));
                     }
+                }
+
+                if ($ret['status'] != 1) {
+                    $error++;
+                    $this->data['status'] = $ret['status'];
+                    break;
                 }
             }
 
-            $this->to('acl:user');
+            if ($error == 0) {
+                $this->to('acl:user');
+            }
         }
 
         $this->display($this->data);
+    }
+
+    /**
+     * 操作密保卡
+     */
+    function userSecurityCard()
+    {
+        $op = &$this->params['op'];
+        $user = &$this->params['user'];
+
+        $SEC = new SecurityModule();
+        if ($op == 'bind') {
+            $bind = $SEC->checkBind($user);
+            if (!$bind) {
+                $SEC->bindCard($user);
+            }
+        } else {
+            $SEC->unBind($user, false);
+        }
+
+        $this->to('acl:user');
     }
 
     /**
@@ -239,6 +286,3 @@ class Acl extends Admin
         $this->to('acl:user');
     }
 }
-
-
-

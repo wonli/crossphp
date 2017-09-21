@@ -3,8 +3,15 @@
 /**
  * @Author: wonli <wonli@live.com>
  */
+
 namespace app\admin\views;
 
+/**
+ * @Auth wonli <wonli@live.com>
+ *
+ * Class AclView
+ * @package app\admin\views
+ */
 class AclView extends AdminView
 {
     /**
@@ -12,12 +19,12 @@ class AclView extends AdminView
      *
      * @param $data
      */
-    function index($data)
+    function index(array $data = array())
     {
         if (!empty($data['menu_list'])) {
             $this->renderTpl('acl/index', $data['menu_list']);
         } else {
-            $data['status'] = 100026;
+            $data['status'] = 100680;
         }
     }
 
@@ -26,7 +33,7 @@ class AclView extends AdminView
      *
      * @param $data
      */
-    function editMenu($data)
+    function editMenu(array $data = array())
     {
         $menu = &$data['menu_list'];
         $methodList = &$menu['method'];
@@ -40,7 +47,7 @@ class AclView extends AdminView
      *
      * @param array $data
      */
-    function navManager($data = array())
+    function navManager(array $data = array())
     {
         $data['displayConfig'] = array(1 => '');
         $this->renderTpl('acl/nav_manager', $data);
@@ -51,7 +58,7 @@ class AclView extends AdminView
      *
      * @param $data
      */
-    function addRole($data)
+    function addRole(array $data = array())
     {
         $this->renderTpl("acl/add_role", array(
             'menu_list' => $data['menu_list'],
@@ -64,7 +71,7 @@ class AclView extends AdminView
      *
      * @param $data
      */
-    function editRole($data)
+    function editRole(array $data = array())
     {
         $data['menu_select'] = explode(',', $data['role_info']['behavior']);
         $this->renderTpl('acl/role_edit', $data);
@@ -75,7 +82,7 @@ class AclView extends AdminView
      *
      * @param $data
      */
-    function roleList($data)
+    function roleList(array $data = array())
     {
         if (!empty($data['role_list'])) {
             $this->renderTpl('acl/role_list', $data);
@@ -89,12 +96,77 @@ class AclView extends AdminView
      *
      * @param $data
      */
-    function user($data)
+    function user(array $data = array())
     {
         if (empty($data['roles'])) {
             $this->text('请先添加角色');
         } else {
             $this->renderTpl('acl/user', $data);
         }
+    }
+
+    /**
+     * 输出管理员角色选择菜单
+     *
+     * @param int $uid
+     * @param string $selected_value
+     */
+    protected function roleSelect($uid, $selected_value = '')
+    {
+        $role_data = &$this->data['roles'];
+        if (!empty($role_data)) {
+            $role_option = array();
+            array_walk($role_data, function ($r) use (&$role_option) {
+                $role_option[$r['id']] = $r['name'];
+            });
+
+            echo $this->select($role_option, $selected_value, array(
+                'class' => 'form-control',
+                'name' => "a[{$uid}][rid]",
+            ));
+        }
+    }
+
+    /**
+     * 输出帐号状态选择菜单
+     *
+     * @param int $uid
+     * @param string $current_value
+     */
+    protected function statusCheckbox($uid, $current_value = '')
+    {
+        $boxData['data-on'] = '正常';
+        $boxData['data-off'] = '禁用';
+        $boxData['data-toggle'] = 'toggle';
+        $boxData['data-onstyle'] = 'success';
+        $boxData['data-offstyle'] = 'danger';
+        $boxData['name'] = "a[{$uid}][t]";
+        if ($current_value == 1) {
+            $boxData['checked'] = true;
+        }
+
+        echo $this->input('checkbox', $boxData);
+    }
+
+    /**
+     * 生成解绑选择按钮
+     *
+     * @param int $uid
+     * @param string $current_value
+     */
+    protected function securityCheckbox($uid, $current_value = '')
+    {
+        $boxData['data-on'] = '允许解绑';
+        $boxData['data-off'] = '禁止解绑';
+        $boxData['data-toggle'] = 'toggle';
+        $boxData['data-onstyle'] = 'success';
+        $boxData['data-offstyle'] = 'danger';
+        $boxData['data-width'] = '90px';
+        $boxData['name'] = "a[{$uid}][usc]";
+        if ($current_value == 1) {
+            $boxData['checked'] = true;
+        }
+
+        echo $this->input('checkbox', $boxData);
     }
 }

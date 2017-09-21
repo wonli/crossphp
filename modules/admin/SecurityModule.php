@@ -2,9 +2,8 @@
 /**
  * @Author: wonli <wonli@live.com>
  */
-namespace modules\admin;
 
-use Cross\MVC\Module;
+namespace modules\admin;
 
 /**
  * 密保卡
@@ -13,15 +12,8 @@ use Cross\MVC\Module;
  * Class SecurityModule
  * @package modules\admin
  */
-class SecurityModule extends Module
+class SecurityModule extends AdminModule
 {
-    /**
-     * 存储密保卡的表名
-     *
-     * @var string
-     */
-    protected $t_sec = 'cp_security_card';
-
     /**
      * 随机生成密保卡坐标
      *
@@ -57,47 +49,46 @@ class SecurityModule extends Module
         $is_bind = $this->checkBind($bind_user);
 
         if ($is_bind) {
-            return $this->result(100010);
+            return $this->result(100500);
         } else {
             $data = array(
                 'card_data' => $card_data,
                 'bind_user' => $bind_user,
             );
 
-            $card_id = $this->link->add($this->t_sec, $data);
+            $card_id = $this->link->add($this->t_security_card, $data);
             if ($card_id) {
-                return $this->result(100011);
+                return $this->result(1);
             }
 
-            return $this->result(100012);
+            return $this->result(100501);
         }
     }
 
     /**
      * 更新密保卡
      *
-     * @param $bind_user
+     * @param string $bind_user
      * @return int
      */
     function updateCard($bind_user)
     {
         $card_data = self::makeSecurityCode();
-        $is_bind = self::checkBind($bind_user);
+        $is_bind = $this->checkBind($bind_user);
 
         if ($is_bind) {
             $data = array(
                 'card_data' => $card_data,
             );
 
-            $up_status = $this->link->update($this->t_sec, $data, array('bind_user' => $bind_user));
-
+            $up_status = $this->link->update($this->t_security_card, $data, array('bind_user' => $bind_user));
             if ($up_status) {
                 return $this->result(1);
             } else {
-                return $this->result(100015);
+                return $this->result(100502);
             }
         } else {
-            return $this->result(100013);
+            return $this->result(100503);
         }
     }
 
@@ -105,20 +96,29 @@ class SecurityModule extends Module
      * 取消绑定
      *
      * @param string $bind_user
-     * @return bool;
+     * @param bool $check_usc
+     * @return bool
      */
-    function killBind($bind_user)
+    function unBind($bind_user, $check_usc = true)
     {
-        $is_bind = self::checkBind($bind_user);
+        $is_bind = $this->checkBind($bind_user);
         if ($is_bind) {
-            $del_status = $this->link->del($this->t_sec, array('bind_user' => $bind_user));
+            if($check_usc) {
+                $AU = new AdminUserModule();
+                $ai = $AU->getAdminInfo(array('name' => $bind_user));
+                if ($ai['usc'] != 1) {
+                    return $this->result(100521);
+                }
+            }
+
+            $del_status = $this->link->del($this->t_security_card, array('bind_user' => $bind_user));
             if ($del_status) {
-                return $this->result(100016);
+                return $this->result(1);
             } else {
-                return $this->result(100017);
+                return $this->result(100520);
             }
         } else {
-            return $this->result(100013);
+            return $this->result(100503);
         }
     }
 
@@ -130,8 +130,7 @@ class SecurityModule extends Module
      */
     public function checkBind($bind_user)
     {
-        $id = $this->link->get($this->t_sec, 'id', array('bind_user' => $bind_user));
-
+        $id = $this->link->get($this->t_security_card, 'id', array('bind_user' => $bind_user));
         if (!empty($id)) {
             return true;
         } else {
@@ -153,10 +152,10 @@ class SecurityModule extends Module
             if ($data[0] != -1) {
                 return $this->result(1, $data[1]);
             } else {
-                return $this->result(100015);
+                return $this->result(100510);
             }
         } else {
-            return $this->result(100013);
+            return $this->result(100503);
         }
     }
 
@@ -170,7 +169,7 @@ class SecurityModule extends Module
     {
         $is_bind = $this->checkBind($bind_user);
         if (!$is_bind) {
-            return $this->result(100013);
+            return $this->result(100503);
         }
 
         $data = $this->securityData($bind_user);
@@ -182,7 +181,7 @@ class SecurityModule extends Module
             // 设置背景为白色
             imagefilledrectangle($im, 31, 31, 520, 520, 0xFFFFFF);
 
-            $_front = 5;
+            $front = 5;
             $_space = 50;
             $_margin = 20;
 
@@ -194,22 +193,26 @@ class SecurityModule extends Module
                 imageline($im, $_x + 30, 0, $_x + 30, 480, $color);
                 imageline($im, 0, 0, 0, 480, $color);
 
-
                 imageline($im, 0, $_y + 30, 480, $_x + 30, $color);
                 imageline($im, 0, 0, 480, 0, $color);
 
                 foreach ($data as $y => $c) {
                     ++$_i;
 
-                    imagestring($im, $_front, $_margin - 10, $_y + $_space, $y, 0xFFBB00);
-                    imagestring($im, $_front, $_x + $_space, $_margin - 10, $_i, 0xFFBB00);
+                    imagestring($im, $front, $_margin - 10, $_y + $_space, $y, 0xFFBB00);
+                    imagestring($im, $front, $_x + $_space, $_margin - 10, $_i, 0xFFBB00);
 
+                    $code_location = 0;
                     $_x = $_y += $_space;
+                    foreach ($c as $code_index => $code) {
+                        if ($_i == $code_index) {
+                            $char_color = 0x009933;
+                        } else {
+                            $char_color = 0x666666;
+                        }
 
-                    $_code_location = 0;
-                    foreach ($c as $code) {
-                        $_code_location += $_space;
-                        imagestring($im, $_front, $_code_location, $_y, $code, 0x336699);
+                        $code_location += $_space;
+                        imagestring($im, $front, $code_location, $_y, $code, $char_color);
                     }
 
                     imageline($im, $_x + 30, 0, $_x + 30, 480, $color);
@@ -217,7 +220,7 @@ class SecurityModule extends Module
 
                 }
 
-                imagestring($im, $_front, 350, $_y + 46, "power by crossphp", 0xCCCCCC);
+                imagestring($im, $front, 350, $_y + 46, "power by crossphp", 0xCCCCCC);
 
                 imageline($im, 519, 519, 500, 520, $color2);
                 imageline($im, 519, 519, 520, 500, $color2);
@@ -259,13 +262,31 @@ class SecurityModule extends Module
     }
 
     /**
+     * 取得密保卡数据
+     *
+     * @param string
+     * @return array|bool
+     */
+    function getSecurityData($bind_user)
+    {
+        $is_bind = $this->checkBind($bind_user);
+
+        if ($is_bind) {
+            $data = $this->link->get($this->t_security_card, '*', array('bind_user' => $bind_user));
+            return array($data['ext_time'], json_decode($data['card_data'], true));
+        }
+
+        return false;
+    }
+
+    /**
      * 创建代码
      *
      * @return mixed
      */
     function createTable()
     {
-        $table = $this->getPrefix($this->t_sec);
+        $table = $this->getPrefix($this->t_security_card);
         $create_sql = "CREATE TABLE `{$table}` (
             `id` INT(11) NOT NULL AUTO_INCREMENT,
             `card_data` TEXT NOT NULL COLLATE 'utf8_unicode_ci',
@@ -291,7 +312,7 @@ class SecurityModule extends Module
     private function makeSecurityCode($is_serialize = true)
     {
         $security = array();
-        $str = '3456789abcdefghjkmnpqrstuvwxy';
+        $str = '3456789ABCDEFGHJKMNPQRSTUVWXY';
 
         for ($k = 65; $k < 74; $k++) {
             for ($i = 1; $i <= 9; $i++) {
@@ -300,26 +321,8 @@ class SecurityModule extends Module
             }
         }
         if ($is_serialize === true) {
-            return serialize($security);
+            return json_encode($security);
         }
         return $security;
-    }
-
-    /**
-     * 取得密保卡数据
-     *
-     * @param string
-     * @return array
-     */
-    private function getSecurityData($bind_user)
-    {
-        $is_bind = $this->checkBind($bind_user);
-
-        if ($is_bind) {
-            $data = $this->link->get($this->t_sec, '*', array('bind_user' => $bind_user));
-            return array($data['ext_time'], unserialize($data['card_data']));
-        }
-
-        return false;
     }
 }

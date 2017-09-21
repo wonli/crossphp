@@ -1,16 +1,22 @@
 <?php
 /**
- * @Auth: wonli <wonli@live.com>
- * AdminBase.php
- *
- * 管理登录和退出
+ * @Auth wonli <wonli@live.com>
+ * Main.php
  */
 namespace app\admin\controllers;
 
-use Cross\MVC\Controller;
-use modules\admin\AdminModule;
+use modules\admin\AdminUserModule;
 use modules\admin\SecurityModule;
+use Cross\MVC\Controller;
 
+/**
+ * 登录和退出
+ *
+ * @Auth wonli <wonli@live.com>
+ *
+ * Class Main
+ * @package app\admin\controllers
+ */
 class Main extends Controller
 {
     /**
@@ -19,7 +25,7 @@ class Main extends Controller
     protected $SEC;
 
     /**
-     * @var AdminModule
+     * @var AdminUserModule
      */
     protected $ADMIN;
 
@@ -33,8 +39,8 @@ class Main extends Controller
         //安全管理的module
         $this->SEC = new SecurityModule();
 
-        //AdminModule
-        $this->ADMIN = new AdminModule();
+        //AdminUserModule
+        $this->ADMIN = new AdminUserModule();
     }
 
     /**
@@ -53,11 +59,11 @@ class Main extends Controller
                     $data['status'] = $check_ret['status'];
                 }
             } else {
-                $data ['status'] = 10001;
+                $data ['status'] = 100230;
             }
         }
 
-        //生成安全码
+        //随机安全码坐标
         $data['v'] = $this->SEC->shuffleLocation();
         $this->display($data);
     }

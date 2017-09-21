@@ -2,12 +2,11 @@
 /**
  * @Author: wonli <wonli@live.com>
  */
+
 namespace modules\admin;
 
-use ReflectionClass;
 use ReflectionMethod;
-use Cross\MVC\Module;
-use Cross\Core\Loader;
+use ReflectionClass;
 
 /**
  * 权限处理
@@ -16,23 +15,8 @@ use Cross\Core\Loader;
  * Class AclModule
  * @package modules\admin
  */
-class AclModule extends Module
+class AclModule extends AdminModule
 {
-    /**
-     * @var string 角色表名
-     */
-    protected $t_role = 'cp_acl_role';
-
-    /**
-     * @var string 表名
-     */
-    protected $t_acl_menu = 'cp_acl_menu';
-
-    /**
-     * @var string 行为表
-     */
-    protected $t_behavior = 'cp_acl_behavior';
-
     /**
      * 增加导航菜单
      *
@@ -46,8 +30,7 @@ class AclModule extends Module
         $menu_id = $this->link->add($this->t_acl_menu, array(
             'pid' => $pid,
             'name' => $name,
-            'link' => $link,
-            'status' => 1
+            'link' => $link
         ));
 
         if ($menu_id) {
@@ -136,7 +119,7 @@ class AclModule extends Module
 
                     foreach ($method as $mm) {
 
-                        if($mm->class != $fullName) {
+                        if ($mm->class != $fullName) {
                             continue;
                         }
 
@@ -180,8 +163,8 @@ class AclModule extends Module
             ->from("{$this->t_acl_menu} where id={$id} union all select * from {$this->t_acl_menu} where pid={$id}")
             ->stmt()->fetchAll(\PDO::FETCH_ASSOC);
 
+        $main = $child = array();
         if (!empty($data)) {
-            $main = $child = array();
             foreach ($data as $d) {
                 if ($d['id'] == $id) {
                     $main = $d;
@@ -193,10 +176,9 @@ class AclModule extends Module
             }
 
             $main['method'] = $child;
-            return $main;
         }
 
-        return false;
+        return $main;
     }
 
     /**
@@ -218,8 +200,7 @@ class AclModule extends Module
                 'pid' => !empty($p['pid']) ? (int)$p['pid'] : 0,
                 'type' => !empty($p['type']) ? (int)$p['type'] : 1,
                 '`order`' => !empty($p['order']) ? (int)$p['order'] : 0,
-                'display' => !empty($p['display']) ? (int)$p['display'] : 0,
-                'status' => 1
+                'display' => !empty($p['display']) ? (int)$p['display'] : 0
             );
 
             if (isset($p['id'])) {
@@ -380,7 +361,6 @@ class AclModule extends Module
         $add_data['`order`'] = empty($data['order']) ? 0 : (int)$data['order'];
         $add_data['display'] = isset($data['display']) ? $data['display'] : 0;
         $add_data['type'] = isset($data['type']) ? $data['type'] : 1;
-        $add_data['status'] = 1;
         $data = $add_data;
         return $this->link->add($this->t_acl_menu, $add_data);
     }
@@ -426,18 +406,18 @@ class AclModule extends Module
     function saveRoleMenu($menu_name, $data)
     {
         if (!$menu_name) {
-            return $this->result(100018);
+            return $this->result(100610);
         }
 
         if (empty($data)) {
-            return $this->result(100019);
+            return $this->result(100620);
         }
 
         $save_data ['name'] = $menu_name;
         $save_data ['behavior'] = implode($data, ',');
         $role_info = $this->link->get($this->t_role, '*', array('name' => $menu_name));
         if ($role_info) {
-            return $this->result(100020);
+            return $this->result(100630);
         }
 
         $rid = $this->link->add($this->t_role, $save_data);
@@ -445,7 +425,7 @@ class AclModule extends Module
             return $this->result(1, $rid);
         }
 
-        return $this->result(100021);
+        return $this->result(100640);
     }
 
     /**
@@ -459,7 +439,7 @@ class AclModule extends Module
     function editRoleMenu($rid, $menu_name, $data)
     {
         if (!$menu_name) {
-            return $this->result(100018);
+            return $this->result(100610);
         }
 
         $save_data ['name'] = $menu_name;
@@ -471,7 +451,7 @@ class AclModule extends Module
 
         $role_info = $this->link->get($this->t_role, '*', array('id' => $rid));
         if (!$role_info) {
-            return $this->result(100023);
+            return $this->result(100650);
         }
 
         $rid = $role_info['id'];
@@ -480,7 +460,7 @@ class AclModule extends Module
             return $this->result(1, $rid);
         }
 
-        return $this->result(100024);
+        return $this->result(100660);
     }
 
     /**
@@ -601,7 +581,6 @@ class AclModule extends Module
             $ori_nav_data = array(
                 'name' => $menuName,
                 'link' => $menuName,
-                'status' => 1,
                 'display' => $display
             );
 

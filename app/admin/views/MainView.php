@@ -1,10 +1,15 @@
 <?php
 /**
  * @Auth: wonli <wonli@live.com>
- * loginView.php
  */
 namespace app\admin\views;
 
+/**
+ * @Auth wonli <wonli@live.com>
+ *
+ * Class MainView
+ * @package app\admin\views
+ */
 class MainView extends AdminView
 {
     function __construct() {
@@ -21,7 +26,7 @@ class MainView extends AdminView
      *
      * @param array $data
      */
-    function login($data = array())
+    function login(array $data = array())
     {
         $this->renderTpl("main/index", $data);
     }

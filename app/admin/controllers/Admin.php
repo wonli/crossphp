@@ -1,16 +1,21 @@
 <?php
 /**
  * @Author: wonli <wonli@live.com>
- *
- * 除了Main控制器之外的基类
  */
+
 namespace app\admin\controllers;
 
-use Cross\Core\Loader;
-use Cross\MVC\Controller;
+use modules\admin\AdminUserModule;
 use modules\admin\AclModule;
-use modules\admin\AdminModule;
+use Cross\MVC\Controller;
 
+/**
+ * 管理模块控制器基类(导航菜单及权限验证)
+ * @Auth wonli <wonli@live.com>
+ *
+ * Class Admin
+ * @package app\admin\controllers
+ */
 abstract class Admin extends Controller
 {
     /**
@@ -24,7 +29,7 @@ abstract class Admin extends Controller
     protected $ACL;
 
     /**
-     * @var AdminModule
+     * @var AdminUserModule
      */
     protected $ADMIN;
 
@@ -39,25 +44,19 @@ abstract class Admin extends Controller
         $this->u = &$_SESSION['u'];
 
         $this->ACL = new AclModule();
-        $this->ADMIN = new AdminModule();
+        $this->ADMIN = new AdminUserModule();
 
-        /**
-         * 查询登录用户信息
-         */
+        //查询登录用户信息
         $user_info = $this->ADMIN->getAdminInfo(array('name' => $this->u));
         if (empty($user_info)) {
             $this->to();
         }
 
-        /**
-         * 导航菜单
-         */
+        //导航菜单数据
         $nav_menu_data = $this->ACL->getMenu();
         $controller = lcfirst($this->controller);
 
-        /**
-         * 菜单icon
-         */
+        //加载菜单icon配置文件
         $icon = $this->parseGetFile('config::menu_icon.config.php');
         $tpl_dir_name = $this->config->get('sys', 'default_tpl_dir');
         $icon_config = array();
@@ -65,14 +64,9 @@ abstract class Admin extends Controller
             $icon_config = $icon[$tpl_dir_name];
         }
 
-        /**
-         * 判断是否是超级管理员
-         */
+        //权限判断, 超级管理员rid=0
         $role_id = $user_info['rid'];
         if ($role_id == 0) {
-            /**
-             * 设置view导航数据
-             */
             $this->view->setNavMenu($nav_menu_data);
             $all_menu = $this->ACL->getNavChildMenu($nav_menu_data);
 
@@ -84,20 +78,14 @@ abstract class Admin extends Controller
             $this->view->setMenu($child_menu);
             $this->view->setAllMenu($all_menu, $icon_config);
         } else {
-            /**
-             * 所属角色
-             */
+            //所属角色信息
             $role_info = $this->ACL->getRoleInfo(array('id' => $role_id));
 
-            /**
-             * 角色允许的方法
-             */
+            //角色权限
             $accept_behavior = explode(',', $role_info ['behavior']);
             $accept_behavior = array_combine($accept_behavior, array_pad(array(), count($accept_behavior), true));
 
-            /**
-             * 只保留允许访问的菜单
-             */
+            //只保留允许访问的菜单
             $allow_menu = array();
             $all_accept_action = array();
             foreach ($nav_menu_data as $k => &$nav) {
@@ -135,16 +123,14 @@ abstract class Admin extends Controller
             $accept_action = &$all_accept_action[$controller];
             if (!isset($accept_action[$this->action])) {
                 if ($this->is_ajax_request()) {
-                    $this->dieJson($this->getStatus(100030));
+                    $this->dieJson($this->getStatus(100101));
                 } else {
-                    $this->view->notice(100030);
+                    $this->view->notice(100101);
                     exit(0);
                 }
             }
 
-            /**
-             * 设置view导航数据
-             */
+            //设置导航数据
             $this->view->setNavMenu($nav_menu_data);
             $this->view->setMenu($child_menu);
             $this->view->setAllMenu($nav_menu_data, $icon_config);

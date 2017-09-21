@@ -1,8 +1,6 @@
 <form id="form_nav" class="form-horizontal" action="" method="post">
     <div class="box">
-
         <div class="box-body table-responsive">
-
             <table class="table table-bordered table-hover">
                 <thead>
                 <tr>
@@ -17,7 +15,7 @@
                 </thead>
 
                 <tbody>
-                <?php foreach ($data["menu"] as $m) : ?>
+                <?php foreach ($data['menu'] as $m) : ?>
                     <tr>
                         <td>
                             <p class="form-control-static">
@@ -54,14 +52,13 @@
                                    name="nav[<?php echo $m['id'] ?>][order]" value="<?php echo $m['order'] ?>"/>
                         </td>
                         <td style="vertical-align:middle">
-                            <a href="javascript:void(0)" class="confirm-href-flag" title="确定要删除吗?"
-                               action="<?php echo $this->link("acl:del", array('id' => $m['id'])) ?>">删除</a>
-                            <a href="<?php echo $this->link("acl:editMenu", array('id' => $m['id'])) ?>">编辑子菜单</a>
+                            <?php echo $this->confirmUrl('acl:del', array('id' => $m['id']), '删除') ?>
+                            <a href="<?php echo $this->link('acl:editMenu', array('id' => $m['id'])) ?>">编辑子菜单</a>
                         </td>
                     </tr>
                 <?php endforeach ?>
 
-                <?php foreach ($data["un_save_menu"] as $k => $m) : ?>
+                <?php foreach ($data['un_save_menu'] as $k => $m) : ?>
                     <tr>
                         <td><p class="form-control-static">+</p></td>
                         <td>
@@ -114,8 +111,7 @@
         </div>
 
         <div class="box-footer">
-            <input type="submit" class="btn btn-default" name="save" value="保存"/>
+            <input type="submit" class="btn btn-primary" name="save" value="保存"/>
         </div>
-
     </div>
 </form>

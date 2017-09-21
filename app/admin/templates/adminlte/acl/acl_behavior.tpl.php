@@ -1,62 +1,75 @@
 <table class="table table-bordered">
     <thead>
     <tr>
-        <th>类名</th>
-        <th>方法列表</th>
+        <th style="width:100px;min-width:100px;">类名</th>
+        <th style="width:800px;min-width:800px;">方法列表</th>
     </tr>
     </thead>
     <tbody>
     <?php foreach ($data['menu_list'] as $l) : ?>
         <tr>
-            <td align="left" style="width:130px;padding:10px;">
-                <label>
-                    <?php if (isset($data['menu_select']) && in_array($l['id'], $data['menu_select'])) : ?>
-                        <input type="checkbox" checked onclick="selectAll(this)"
-                               class="<?php echo "token_{$l['link']}_class" ?>" value="<?php echo $l['id'] ?>"
-                               name="menu_id[]" id=""/>
-                    <?php else : ?>
-                        <input type="checkbox" onclick="selectAll(this)"
-                               class="<?php echo "token_{$l['link']}_class" ?>"
-                               value="<?php echo $l['id'] ?>" name="menu_id[]" id=""/>
-                    <?php endif ?>
+            <td>
+                <div class="checkbox">
+                    <label>
+                        <?php
+                        $checkboxParams = array(
+                            'class' => 'selectChild',
+                            'action' => "action_{$l['link']}_class",
+                            'value' => $l['id'],
+                            'name' => 'menu_id[]',
+                        );
 
-                    <?php echo $l ['name'] ?>
-                </label>
+                        if (isset($data['menu_select']) && in_array($l['id'], $data['menu_select'])) {
+                            $checkboxParams['checked'] = true;
+                        }
+
+                        echo $this->input('checkbox', $checkboxParams) . $l['name'];
+                        ?>
+                    </label>
+                </div>
             </td>
             <td>
-                <?php
-                if (isset($l['method'])) {
-                    foreach ($l['method'] as $link => $m) {
-                        if (!empty($m)) {
-                            ?>
-                            <span style="float:left;padding:5px;">
-                                <label>
-                                    <?php if (isset($data['menu_select']) && in_array($m['id'], $data['menu_select'])) : ?>
-                                        <input checked class="<?php echo "token_{$l['link']}_class_children" ?>"
-                                               type="checkbox" value="<?php echo $m['id'] ?>" name="menu_id[]"/>
-                                    <?php else : ?>
-                                        <input class="<?php echo "token_{$l['link']}_class_children" ?>"
-                                               type="checkbox" value="<?php echo $m['id'] ?>" name="menu_id[]"/>
-                                    <?php endif ?>
+                <div class="checkbox">
+                    <?php
+                    if (isset($l['method'])) {
+                        foreach ($l['method'] as $link => $m) {
+                            if (!empty($m)) {
+                                $checkboxParams = array(
+                                    'class' => "action_{$l['link']}_class_children",
+                                    'value' => $m['id'],
+                                    'style' => 'margin-left:-15px',
+                                    'name' => 'menu_id[]'
+                                );
 
-                                    <?php echo empty($m['name']) ? "*{$link}" : $m['name'] ?>
-                                </label>
-                            </span>
-                            <?php
+                                if (isset($data['menu_select']) && in_array($m['id'], $data['menu_select'])) {
+                                    $checkboxParams['checked'] = true;
+                                }
+
+                                if (empty($m['name'])) {
+                                    $labelName = "*{$link}";
+                                } else {
+                                    $labelName = $m['name'];
+                                }
+
+                                echo $this->wrap('label', array('@content' => $labelName, 'style' => 'margin-right:5px'), true)
+                                    ->input('checkbox', $checkboxParams);
+                            }
                         }
                     }
-                }
-                ?>
+                    ?>
+                </div>
             </td>
         </tr>
     <?php endforeach ?>
     </tbody>
 </table>
 <script type="text/javascript">
-    function selectAll(o) {
-        var token_name = $(o).attr('class');
-        $('.' + token_name + '_children').each(function () {
-            $(this)[0].checked = !!($(o)[0].checked);
-        })
-    }
+    $(function () {
+        $('.selectChild').on('click', function () {
+            var that = $(this), action_name = $(this).attr('action');
+            $('.' + action_name + '_children').each(function () {
+                $(this)[0].checked = !!(that[0].checked);
+            })
+        });
+    })
 </script>

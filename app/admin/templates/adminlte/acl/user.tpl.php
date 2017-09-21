@@ -1,15 +1,22 @@
-<div class="box">
-    <div class="box-body table-responsive">
-        <form action="" class="form" method="post">
-            <table class="table table-bordered border-hover">
+<form action="" class="form" method="post">
+    <div class="box">
+        <div class="box-header">
+        </div>
+        <div class="box-body table-responsive">
+            <table class="table table-bordered border-hover acl-table">
                 <thead>
                 <tr>
                     <th>id</th>
-                    <th>用户名</th>
-                    <th>密码</th>
-                    <th>状态</th>
-                    <th>角色</th>
-                    <th>操作</th>
+                    <th class="user">用户名</th>
+                    <th class="password" title="输入明文密码, 在保存时自动加密">
+                        登录密码 <i class="fa fa-question-circle-o"></i>
+                    </th>
+                    <th class="status">状态</th>
+                    <th class="status" title="是否允许解绑密保卡">
+                        密保卡 <i class="fa fa-question-circle-o"></i>
+                    </th>
+                    <th class="role">角色</th>
+                    <th class="act">操作</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -20,32 +27,40 @@
                         </td>
                         <td>
                             <input type="text" class="form-control"
-                                   name="a[<?php echo $u['id'] ?>][name]" value="<?php echo $u['name'] ?>" />
+                                   name="a[<?php echo $u['id'] ?>][name]" value="<?php echo $u['name'] ?>"/>
                         </td>
                         <td>
                             <input type="text" class="form-control"
-                                   name="a[<?php echo $u['id'] ?>][password]" value="<?php echo $u['password'] ?>" />
+                                   name="a[<?php echo $u['id'] ?>][password]" value="<?php echo $u['password'] ?>"/>
                         </td>
                         <td>
-                            <input type="text" class="form-control"
-                                   name="a[<?php echo $u['id'] ?>][t]" value="<?php echo $u['t'] ?>" />
+                            <?php $this->statusCheckbox($u['id'], $u['t']) ?>
                         </td>
                         <td>
-                            <select name="a[<?php echo $u['id'] ?>][rid]"  class="form-control">
-                                <?php foreach ($data['roles'] as $r) : ?>
-                                    <?php if ($r['id'] == $u['rid']): ?>
-                                        <option value="<?php echo $r['id'] ?>" selected>
-                                            <?php echo $r['name'] ?>
-                                        </option>
-                                    <?php else : ?>
-                                        <option value="<?php echo $r['id'] ?>"><?php echo $r['name'] ?></option>
-                                    <?php endif ?>
-                                <?php endforeach ?>
-                            </select>
+                            <?php $this->securityCheckbox($u['id'], $u['usc']) ?>
                         </td>
-                        <td style="vertical-align: middle">
-                            <a href="javascript:void(0)" class="confirm-href-flag" title="确定删除该用户吗"
-                               action = "<?php echo $this->link('acl:delUser', array('uid' => $u['id'])) ?>">删除</a>
+                        <td>
+                            <?php $this->roleSelect($u['id'], $u['rid']) ?>
+                        </td>
+                        <td style="vertical-align: middle" class="td-op">
+                            <?php
+                            echo $this->confirmUrl('acl:delUser', array('uid' => $u['id']), '删除', '确定删除该用户吗?');
+
+                            if ($u['bind_id']) {
+                                $class = 'text-red';
+                                $title = '点击解除绑定';
+                                $txt = '密保卡已绑定';
+                                $op = 'unbind';
+                            } else {
+                                $class = 'text-green';
+                                $title = '点击绑定密保卡';
+                                $txt = '密保卡未绑定';
+                                $op = 'bind';
+                            }
+
+                            $url = $this->url('acl:userSecurityCard', array('user' => $u['name'], 'op' => $op));
+                            echo $this->a($txt, $url, array('class' => $class, 'title' => $title));
+                            ?>
                         </td>
                     </tr>
                 <?php endforeach ?>
@@ -54,22 +69,24 @@
                         <p class="form-control-static">+</p>
                     </td>
                     <td><input type="text" name="a[+][name]" value="" class="form-control"/></td>
-                    <td><input type="text" name="a[+][password]" value="" class="form-control"/></td>
-                    <td><input type="text" name="a[+][t]" value="" class="form-control"/></td>
+                    <td><input type="text" name="a[+][password]" placeholder="保存时自动加密" value="" class="form-control"/>
+                    </td>
                     <td>
-                        <select name="a[+][rid]" class="form-control">
-                            <?php foreach ($data['roles'] as $r) : ?>
-                                <option value="<?php echo $r['id'] ?>"><?php echo $r['name'] ?></option>
-                            <?php endforeach ?>
-                        </select>
+                        <?php $this->statusCheckbox('+', 1) ?>
+                    </td>
+                    <td>
+                        <?php $this->securityCheckbox('+', 1) ?>
+                    </td>
+                    <td>
+                        <?php $this->roleSelect('+') ?>
                     </td>
                     <td></td>
                 </tr>
                 </tbody>
             </table>
-            <div style="padding-top:10px;text-align:left;">
-                <input class="pure-button" type="submit" value="保存"/>
-            </div>
-        </form>
+        </div>
+        <div class="box-footer">
+            <input class="btn btn-primary" type="submit" value="保存"/>
+        </div>
     </div>
-</div>
+</form>

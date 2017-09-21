@@ -3,44 +3,29 @@
 /**
  * @Author: wonli <wonli@live.com>
  */
+
 namespace app\admin\views;
 
+/**
+ * @Auth wonli <wonli@live.com>
+ *
+ * Class SecurityView
+ * @package app\admin\views
+ */
 class SecurityView extends AdminView
 {
     /**
-     * 输出密保卡
+     * 管理密保卡
      *
      * @param array $data
      */
-    function printSecurityCard($data=array())
+    function securityCard(array $data = array())
     {
-        if ($data['status'] == 1) {
-            $this->renderTpl('security/security_card', $data['card']);
+        if (!empty($data['card'])) {
+            $this->renderTpl('security/bind_notice');
         }
-    }
 
-    /**
-     * 输出status
-     *
-     * @param array $data
-     */
-    function printStatus($data = array())
-    {
-
-    }
-
-    /**
-     * 下载密保卡
-     *
-     * @param $notes
-     */
-    function makeSecurityImage($notes)
-    {
-        if (isset($notes['ok']) && $notes['ok'] < 0) {
-            echo $notes["msg"];
-        } else {
-            echo '正在下载...';
-        }
+        $this->renderTpl('security/card', $data);
     }
 
     /**
@@ -48,7 +33,7 @@ class SecurityView extends AdminView
      *
      * @param $data
      */
-    function changePassword($data)
+    function changePassword(array $data = array())
     {
         $this->renderTpl('security/change_password', $data);
     }

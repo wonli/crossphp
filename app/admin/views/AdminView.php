@@ -3,11 +3,17 @@
 /**
  * @Author: wonli <wonli@live.com>
  */
+
 namespace app\admin\views;
 
-use Cross\Core\Loader;
 use Cross\MVC\View;
 
+/**
+ * @Auth wonli <wonli@live.com>
+ *
+ * Class AdminView
+ * @package app\admin\views
+ */
 class AdminView extends View
 {
     /**
@@ -110,7 +116,7 @@ class AdminView extends View
      *
      * @param $data
      */
-    function setMenu($data)
+    function setMenu(array $data = array())
     {
         $this->menu_data = $data;
     }
@@ -191,6 +197,7 @@ class AdminView extends View
 
                 $child_menu = array(
                     'controller' => &$m['link'],
+                    'current_controller' => $controller,
                     'action_menu_name' => &$action_menu_name,
                     'child' => &$m['child_menu']
                 );
@@ -206,6 +213,26 @@ class AdminView extends View
                 ));
             }
         }
+    }
+
+    /**
+     * 生成询问URL
+     * <pre>
+     * js检查对应的class标记, 用户确认后跳转到执行该操作的链接
+     * </pre>
+     *
+     * @param string $controller
+     * @param string $params
+     * @param string $link_text
+     * @param string $confirm_title
+     */
+    function confirmUrl($controller, $params, $link_text, $confirm_title = '确定执行该操作吗?')
+    {
+        echo $this->a($link_text, 'javascript:void(0)', array(
+            'title' => $confirm_title,
+            'class' => 'confirm-href-flag',
+            'action' => $this->url($controller, $params)
+        ));
     }
 
     /**
