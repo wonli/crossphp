@@ -7,8 +7,8 @@
     <title><?php echo isset($title) ? $title : 'CPAdmin' ?></title>
 
     <link rel="stylesheet" href="<?php echo $this->res('libs/bootstrap/3.3.7/css/bootstrap.min.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->res("adminlte/2.4.0/dist/css/AdminLTE.min.css") ?>">
-    <link rel="stylesheet" href="<?php echo $this->res("adminlte/2.4.0/dist/css/skins/_all-skins.min.css") ?>">
+    <link rel="stylesheet" href="<?php echo $this->res("adminlte/2.4.2/dist/css/AdminLTE.min.css") ?>">
+    <link rel="stylesheet" href="<?php echo $this->res("adminlte/2.4.2/dist/css/skins/_all-skins.min.css") ?>">
     <link rel="stylesheet" href="<?php echo $this->res('libs/font-awesome/4.7.0/css/font-awesome.min.css') ?>">
     <link rel="stylesheet" href="<?php echo $this->res("libs/toggle/2.2.2/css/bootstrap-toggle.min.css") ?>">
     <link rel="stylesheet" href="<?php echo $this->res('libs/nprogress/0.2.0/nprogress.css') ?>">
@@ -102,9 +102,9 @@
 <script src="<?php echo $this->res('libs/toggle/2.2.2/js/bootstrap-toggle.min.js') ?>"></script>
 <script src="<?php echo $this->res('libs/nprogress/0.2.0/nprogress.js') ?>"></script>
 <script src="<?php echo $this->res('libs/pop/pop.min.js') ?>"></script>
-<script src="<?php echo $this->res('adminlte/2.4.0/dist/js/adminlte.min.js') ?>"></script>
-<script src="<?php echo $this->res('adminlte/2.4.0/plugins/slimScroll/jquery.slimscroll.min.js') ?>"></script>
-<script src="<?php echo $this->res('adminlte/2.4.0/plugins/fastclick/fastclick.min.js') ?>"></script>
+<script src="<?php echo $this->res('adminlte/2.4.2/dist/js/adminlte.min.js') ?>"></script>
+<script src="<?php echo $this->res('adminlte/2.4.2/plugins/slimScroll/jquery.slimscroll.min.js') ?>"></script>
+<script src="<?php echo $this->res('adminlte/2.4.2/plugins/fastclick/fastclick.min.js') ?>"></script>
 <script src="<?php echo $this->res('js/cpa.js') ?>"></script>
 <script>
     NProgress.configure({

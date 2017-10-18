@@ -6,12 +6,12 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <title>CPAdmin 登录</title>
     <link rel="stylesheet" href="<?php echo $this->res('libs/bootstrap/3.3.7/css/bootstrap.min.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->res("adminlte/2.4.0/dist/css/AdminLTE.min.css") ?>">
+    <link rel="stylesheet" href="<?php echo $this->res("adminlte/2.4.2/dist/css/AdminLTE.min.css") ?>">
     <link rel="stylesheet" href="<?php echo $this->res("css/style.css") ?>">
 
     <!--[if lt IE 9]>
-    <script src="<?php echo $this->res('adminlte/2.4.0/plugins/html5shiv/3.7.3/html5shiv.min.js') ?>"></script>
-    <script src="<?php echo $this->res('adminlte/2.4.0/plugins/respond/1.4.2/respond.min.js') ?>"></script>
+    <script src="<?php echo $this->res('adminlte/2.4.2/plugins/html5shiv/3.7.3/html5shiv.min.js') ?>"></script>
+    <script src="<?php echo $this->res('adminlte/2.4.2/plugins/respond/1.4.2/respond.min.js') ?>"></script>
     <![endif]-->
 </head>
 <body class="hold-transition login-page">
