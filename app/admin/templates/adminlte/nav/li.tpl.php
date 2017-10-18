@@ -8,7 +8,7 @@ if (empty($data)) {
 
 $add_icon = '';
 if ($data['child_node_num'] > 0) {
-    $add_icon = '<i class="fa fa-angle-left pull-right"></i>';
+    $add_icon = '<span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>';
 }
 ?>
 

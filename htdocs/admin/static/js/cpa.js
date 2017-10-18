@@ -1,17 +1,18 @@
 $(function () {
+    //顶部居中的确认弹窗
     $('.confirm-href-flag').on('click', function () {
-        var t = $(this).attr('title'), a = $(this).attr('action');
-        layer.msg(t, {
-            time: 0,
-            btn: ['确定', '取消'],
-            yes: function (index) {
-                layer.close(index);
-                location.href = a;
+        pop.confirm($(this).attr('title'), {
+            btn: {yes: '确认', no: '取消'},
+            actions: {
+                yes: function () {
+                    location.href = $(this).attr('action') || location.href;
+                }
             }
-        });
+        })
     });
 
+    //顶部居中提示信息
     $('.pop-alert-flag').on('click', function () {
-        layer.msg($(this).attr('title'));
-    });
+        pop.alert($(this).attr('title'));
+    })
 });

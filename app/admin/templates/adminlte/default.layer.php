@@ -12,20 +12,17 @@
     <link rel="stylesheet" href="<?php echo $this->res('libs/font-awesome/4.7.0/css/font-awesome.min.css') ?>">
     <link rel="stylesheet" href="<?php echo $this->res("libs/toggle/2.2.2/css/bootstrap-toggle.min.css") ?>">
     <link rel="stylesheet" href="<?php echo $this->res('libs/nprogress/0.2.0/nprogress.css') ?>">
+    <link rel="stylesheet" href="<?php echo $this->res('libs/pop/pop.min.css') ?>">
     <link rel="stylesheet" href="<?php echo $this->res('css/style.css') ?>">
 
     <script src="<?php echo $this->res('libs/jquery/1.12.4/jquery.min.js') ?>"></script>
-    <script src="<?php echo $this->res('libs/nprogress/0.2.0/nprogress.js') ?>"></script>
-    <script src="<?php echo $this->res('libs/layer/3.1.0/layer.js') ?>"></script>
-    <script src="<?php echo $this->res('js/cpa.js') ?>"></script>
-
     <!--[if lt IE 9]>
     <script src="<?php echo $this->res('libs/html5shiv/3.7.3/html5shiv.min.js') ?>"></script>
     <script src="<?php echo $this->res('libs/respond/1.4.2/respond.min.js') ?>"></script>
     <![endif]-->
 </head>
 <!-- sidebar-collapse ! layout-boxed ! fixed ! skin-[blue|black|purple|green|red|yellow]-light -->
-<body class="hold-transition skin-black sidebar-mini">
+<body class="hold-transition skin-black sidebar-mini" style="display: none">
 <div class="wrapper">
     <header class="main-header">
         <a href="" class="logo">
@@ -78,7 +75,7 @@
         </section>
     </aside>
 
-    <div class="content-wrapper" id="content-wrapper" style="display: none">
+    <div class="content-wrapper" id="content-wrapper">
         <section class="content-header">
             <h1>
                 <?php echo $controller_menu_name ?>
@@ -103,9 +100,12 @@
 </div>
 <script src="<?php echo $this->res('libs/bootstrap/3.3.7/js/bootstrap.min.js') ?>"></script>
 <script src="<?php echo $this->res('libs/toggle/2.2.2/js/bootstrap-toggle.min.js') ?>"></script>
+<script src="<?php echo $this->res('libs/nprogress/0.2.0/nprogress.js') ?>"></script>
+<script src="<?php echo $this->res('libs/pop/pop.min.js') ?>"></script>
 <script src="<?php echo $this->res('adminlte/2.4.0/dist/js/adminlte.min.js') ?>"></script>
 <script src="<?php echo $this->res('adminlte/2.4.0/plugins/slimScroll/jquery.slimscroll.min.js') ?>"></script>
 <script src="<?php echo $this->res('adminlte/2.4.0/plugins/fastclick/fastclick.min.js') ?>"></script>
+<script src="<?php echo $this->res('js/cpa.js') ?>"></script>
 <script>
     NProgress.configure({
         template: '<div class="bar" role="bar"><div class="peg"></div></div>'
@@ -114,7 +114,7 @@
     NProgress.start();
     $(function () {
         NProgress.done();
-        $('#content-wrapper').show();
+        $('body').show();
     });
 </script>
 </body>
