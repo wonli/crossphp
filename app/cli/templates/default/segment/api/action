@@ -1,0 +1,115 @@
+<?php
+if (!empty($_POST)) {
+    $custom_config = array();
+    if (!empty($_POST['global'])) {
+        foreach ($_POST['global'] as $g) {
+            $g = array_map('trim', $g);
+            if (!empty($g['f'])) {
+                $custom_config[$g['f']] = $g['v'];
+            }
+        }
+
+        if (!empty($custom_config)) {
+            setcookie('__api_global_params__', json_encode($custom_config), time() + 86400000, '/');
+        }
+    }
+} elseif (!empty($_COOKIE['__api_global_params__'])) {
+    $custom_config = json_decode($_COOKIE['__api_global_params__'], true);
+} else {
+    $custom_config = array();
+}
+
+$global_config = array();
+if(file_exists('.global.json')) {
+    $global_config = json_decode(file_get_contents('.global.json'), true);
+    foreach($global_config as &$g) {
+        if(isset($custom_config[$g['f']])) {
+            $g['v'] = $custom_config[$g['f']];
+        }
+    }
+}
+
+function globalParams($global_config)
+{
+    if (!empty($global_config)) {
+        foreach ($global_config as $k => $global) {
+            ?>
+            <div class="form-group">
+                <div class="col-sm-3">
+                    <input type="hidden" name="global[<?php echo $k ?>][f]" value="<?php echo $global['f'] ?>">
+                    <label for="" class="form-control-static"><?php echo $global['f'] ?></label>
+                </div>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" name="global[<?php echo $k ?>][v]"
+                           value="<?php echo $global['v'] ?>" placeholder="值">
+                </div>
+                <div class="col-sm-5 text-left form-control-static">
+                    <?php echo $global['t'] ?>
+                </div>
+            </div>
+            <?php
+        }
+    }
+}
+
+function globalParamsInput($global_config)
+{
+    if (!empty($global_config)) {
+        foreach ($global_config as $k => $global) {
+            ?>
+            <tr>
+                <td>
+                    <div class="form-control-static">
+                        <?php echo $global['f'] ?>
+                    </div>
+                </td>
+                <td>
+	                <div class="form-group col-lg-12">
+	                    <input type="text" class="form-control" required="1" name="<?php echo $global['f'] ?>"
+	                           value="<?php echo $global['v'] ?>"
+	                           placeholder="<?php echo $global['f'] ?>">
+	                    <span class="hidden-xs">
+	                        <b style="form-control-static">*</b>
+                        </span>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-control-static">
+                        <span class="visible-xs"><b style="form-control-static">*</b></span>
+                        <span class="hidden-xs"><?php echo $global['t'] ?></span>
+                    </div>
+                </td>
+            </tr>
+            <?php
+        }
+    }
+}
+
+function basicAuth($users, $options = array())
+{
+    $user = &$_SERVER['PHP_AUTH_USER'];
+    $password = &$_SERVER['PHP_AUTH_PW'];
+
+    $users = json_decode($users, true);
+    if (isset($users[$user]) && (0 === strcmp($password, $users[$user]))) {
+        $_SERVER['CP_AUTH_USER'] = $user;
+        return true;
+    }
+
+    $realm = &$options['realm'];
+    if (null === $realm) {
+        $realm = 'CP Login Required';
+    }
+
+    $message = &$options['fail_msg'];
+    if (null === $message) {
+        $message = 'Unauthorized';
+    }
+
+    header("401");
+    header('WWW-Authenticate: Basic realm="' . $realm . '"');
+    echo $message;
+    exit(0);
+}
+
+?>

@@ -6,6 +6,10 @@ h3 {
     margin: 0;
 }
 
+.panel-api-case {
+
+}
+
 .panel-api-case > .panel-body {
     padding: 0 15px;
 }
@@ -22,6 +26,29 @@ h3 {
 
 .menu-list {
     border-top: #efefef solid 1px;
+}
+
+.mainWrap {
+    margin: 30px 0 50px 0;
+}
+
+.mainContainer {
+    background: #f7f8fa;
+    min-height: 600px;
+    padding: 5px;
+    border-radius: 5px;
+    height: 100%;
+}
+
+.leftContainer {
+    padding: 10px;
+}
+
+.rightContainer {
+    background: transparent;
+    padding: 0 10px;
+    margin-top: 10px;
+    border-radius: 5px;
 }
 
 #goTop, #fold {

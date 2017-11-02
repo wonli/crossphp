@@ -14,7 +14,6 @@ if (!empty($parent_annotate)) {
 
 $class = $info['class'];
 $api_title = !empty($info['desc'])?$info['desc']:$info['class'];
-
 ?>
 <div class="panel panel-api-case">
     <div class="panel-heading">

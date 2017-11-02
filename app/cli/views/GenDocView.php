@@ -23,14 +23,9 @@ class GenDocView extends View
             'load_layer' => false
         ));
 
-        $out_put_dir = rtrim($data['output_dir'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        $out_put_index_file =  $out_put_dir . 'index.php';
-
-        $doc_info = include("annotate://" . $data['annotate']['doc_info']);
-        $annotate_data = $data['annotate']['data'];
-
         $nav = $main = '';
-        $head = $this->obRenderTpl('segment/api/title', $doc_info);
+        $layer_data = array();
+        $annotate_data = &$data['annotate']['data'];
         if (!empty($annotate_data)) {
             foreach ($annotate_data as $d) {
                 $nav .= $this->obRenderTpl('segment/api/nav', $d);
@@ -38,13 +33,19 @@ class GenDocView extends View
             }
         }
 
-        $layer_data = array();
         $layer_data['nav'] = $nav;
         $layer_data['main'] = $main;
-        $layer_data['head'] = $head;
-        $layer_data['action'] = $this->obRenderTpl('segment/api/action');
+        $layer_data['head'] = $this->obRenderTpl('segment/api/title', $data['annotate']['doc_info']);
+        $layer_data['action'] = file_get_contents($this->getTplPath() . 'segment/api/action');
+        $layer_data['asset_server'] = &$data['asset_server'];
+
+        $layer_data['do_action'] = '';
+        if (!empty($data['annotate']['basic_auth'])) {
+            $layer_data['do_action'] = $this->obRenderFile($this->getTplPath() . 'segment/api/doAction', $data['annotate']['basic_auth']);
+        }
 
         $content = $this->obRenderTpl('segment/api_layer', $layer_data);
+        $out_put_index_file = $data['output_dir'] . 'index.php';
         file_put_contents($out_put_index_file, $content, LOCK_EX);
         echo 'gen successful!' . PHP_EOL;
     }

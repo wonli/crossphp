@@ -6,6 +6,7 @@
 
 namespace app\cli\controllers;
 
+use Cross\Exception\CoreException;
 use Cross\Core\Annotate;
 use ReflectionMethod;
 use ReflectionClass;
@@ -21,8 +22,21 @@ class GenDoc extends Cli
 {
     function index()
     {
-        $source = $this->params['source'];
-        $output_dir = $this->params['output'];
+        if (!empty($this->params['source'])) {
+            $source = $this->params['source'];
+        } else {
+            throw new CoreException('source dir not define');
+        }
+
+        if (!empty($this->params['output'])) {
+            $output_dir = rtrim($this->params['output'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+            if (!is_dir($output_dir)) {
+                mkdir($output_dir, 0755, true);
+            }
+        } else {
+            throw new CoreException('output dir not define');
+        }
+
         if (!empty($this->params['apiHost'])) {
             $api_host = &$this->params['apiHost'];
         } else {
@@ -40,22 +54,23 @@ class GenDoc extends Cli
             $api_host = trim($server_ip);
         }
 
-        $annotate = $this->scanSource($source);
-        $this->genApiPage($annotate, $output_dir, $api_host);
-    }
+        if (!empty($this->params['assetServer'])) {
+            $asset_server = &$this->params['assetServer'];
+        } else {
+            $asset_server = '';
+        }
 
-    /**
-     * 生成文档页面
-     *
-     * @param array $annotate
-     * @param string $output_dir
-     * @param string $api_host
-     */
-    private function genApiPage(array $annotate, $output_dir, $api_host)
-    {
-        $data['annotate'] = $annotate;
+        $annotate = $this->scanSource($source);
+
+        //处理公共配置
+        if (!empty($annotate['global_params'])) {
+            $this->globalParams($annotate['global_params'], $output_dir);
+        }
+
+        $data['asset_server'] = $asset_server;
         $data['output_dir'] = $output_dir;
         $data['api_host'] = $api_host;
+        $data['annotate'] = $annotate;
 
         $this->display($data);
     }
@@ -92,8 +107,13 @@ class GenDoc extends Cli
             '__get'
         );
 
+        $ANNOTATE = Annotate::getInstance($this->delegate);
+
         $doc_info = array();
+        $basic_auth = array();
+        $global_params = array();
         $annotate_config = array();
+        $global_params_status = true;
         $controllerList = glob("{$source}/*.*");
         foreach ($controllerList as & $file) {
             $file_info = explode('/', $file);
@@ -118,10 +138,19 @@ class GenDoc extends Cli
             }
 
             $rcAnnotate = $rc->getDocComment();
-            $classAnnotate = Annotate::getInstance($this->delegate)->parse($rcAnnotate);
+            $classAnnotate = $ANNOTATE->parse($rcAnnotate);
+
+            if (isset($classAnnotate['api_ignore'])) {
+                continue;
+            }
 
             if (isset($classAnnotate['doc_info'])) {
                 $doc_info = $classAnnotate['doc_info'];
+            }
+
+            if (isset($classAnnotate['global_params'])) {
+                $enable = array('enable' => true, 'true' => true, 'yes' => true, '1' => true);
+                $global_params_status = isset($enable[$classAnnotate['global_params']]) ? true : false;
             }
 
             $parentClassAnnotate = array();
@@ -133,13 +162,20 @@ class GenDoc extends Cli
 
                 $prc = new ReflectionClass($pcParentName);
                 $prcAnnotate = $prc->getDocComment();
-                $parentClassAnnotate = Annotate::getInstance($this->delegate)->parse($prcAnnotate);
+                $parentClassAnnotate = $ANNOTATE->parse($prcAnnotate);
 
                 if (isset($parentClassAnnotate['doc_info'])) {
-                    $doc_info = $parentClassAnnotate['doc_info'];
+                    $doc_info = $ANNOTATE->toCode($parentClassAnnotate['doc_info']);
+                }
+
+                if (isset($parentClassAnnotate['doc_basic_auth'])) {
+                    $basic_auth = $ANNOTATE->toCode($parentClassAnnotate['doc_basic_auth']);
+                }
+
+                if (isset($parentClassAnnotate['doc_global_params'])) {
+                    $global_params = $ANNOTATE->toCode($parentClassAnnotate['doc_global_params']);
                 }
             }
-
 
             $actionAnnotate = array();
             $methodList = $rc->getMethods();
@@ -159,14 +195,14 @@ class GenDoc extends Cli
                         if (!empty($annotate)) {
                             $annotate['action'] = $action->name;
                             $annotate['controller'] = $controllerName;
+                            if (!isset($annotate['global_params'])) {
+                                $annotate['global_params'] = $global_params_status;
+                            }
+
                             $actionAnnotate[$action->name] = $annotate;
                         }
                     }
                 }
-            }
-
-            if (isset($classAnnotate['api_ignore'])) {
-                continue;
             }
 
             $annotate_config[] = array(
@@ -181,7 +217,29 @@ class GenDoc extends Cli
             );
         }
 
-        return array('doc_info' => $doc_info, 'data' => $annotate_config);
+        return array('doc_info' => $doc_info, 'basic_auth' => $basic_auth, 'global_params' => $global_params, 'data' => $annotate_config);
     }
 
+    /**
+     * 处理全局参数
+     *
+     * @param array $global_params
+     * @param string $output_dir
+     */
+    private function globalParams(array $global_params, $output_dir)
+    {
+        $data = array();
+        if (!empty($global_params)) {
+            foreach ($global_params as $k => $v) {
+                if (!empty($k) && !empty($v)) {
+                    $data[] = array('t' => $v, 'f' => $k, 'v' => '');
+                }
+            }
+        }
+
+        if (!empty($data)) {
+            $global_config_file = $output_dir . '.global.json';
+            file_put_contents($global_config_file, json_encode($data));
+        }
+    }
 }

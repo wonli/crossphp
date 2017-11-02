@@ -1,8 +1,5 @@
-<?php
-echo '<?php' . PHP_EOL;
-echo $data['action'];
-echo '?>' . PHP_EOL
-?>
+<?php echo $data['action']; ?>
+<?php echo $data['do_action'] ?>
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
@@ -13,63 +10,30 @@ echo '?>' . PHP_EOL
     <title><?php echo isset($title) ? $title : '' ?></title>
     <meta name="Keywords" content="<?php echo isset($keywords) ? $keywords : ''; ?>"/>
     <meta name="Description" content="<?php echo isset($description) ? $description : ''; ?>"/>
-    <link href='libs/bootstrap/3.3.6/css/bootstrap.min.css' rel="stylesheet">
-    <link href='css/default-theme.css' rel="stylesheet">
-    <script src='libs/jquery/1.11.1/jquery.min.js'></script>
-    <script src='libs/bootstrap/3.3.6/js/bootstrap.min.js'></script>
-    <script src='libs/bootstrap-validator/0.11.8/validator.min.js'></script>
+    <link href="<?php echo $data['asset_server'] ?>libs/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?php echo $data['asset_server'] ?>css/default-theme.css" rel="stylesheet">
+    <script src="<?php echo $data['asset_server'] ?>libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="<?php echo $data['asset_server'] ?>libs/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="<?php echo $data['asset_server'] ?>libs/bootstrap-validator/0.11.8/validator.min.js"></script>
 </head>
 <body>
 
-<div class="navbar navbar-default navbar-static-top" role="navigation">
+<div class="navbar navbar-default navbar-inverse navbar-static-top" role="navigation">
     <?php echo $data['head'] ?>
 </div>
 
-<div class="commonWrap" style="display: none;text-align: center">
-    <div class="container">
+<div class="mainWrap">
+    <div class="container mainContainer">
         <div class="row">
-            <div class="col-md-12">
-                <div class="panel">
-                    <div class="panel-heading">
-                        <h2>公共参数设置</h2>
-                    </div>
-                    <div class="panel-body">
-                        <form class="form-inline" method="post">
-                            <div class="form-group">
-                                <label for="platform">platform</label>
-                                <input type="text" class="form-control" id="platform"
-                                       value="<?php echo '<?php echo $_COOKIE["platform"] ?>' ?>" name="platform"
-                                       placeholder="平台">
-                            </div>
-                            <div class="form-group">
-                                <label for="channel">channel</label>
-                                <input type="text" class="form-control" id="channel"
-                                       value="<?php echo '<?php echo $_COOKIE["channel"] ?>' ?>" name="channel"
-                                       placeholder="渠道">
-                            </div>
-                            <div class="form-group">
-                                <label for="version">version</label>
-                                <input type="text" class="form-control" id="version"
-                                       value="<?php echo '<?php echo $_COOKIE["version"] ?>' ?>" name="version"
-                                       placeholder="版本号">
-                            </div>
-                            <button type="submit" class="btn btn-primary">保存</button>
-                        </form>
-                    </div>
+            <div class="col-md-4">
+                <div class="leftContainer navbar-collapse collapse">
+                    <?php echo $data['nav'] ?>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="mainWrap">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-3">
-                <?php echo $data['nav'] ?>
-            </div>
-            <div class="col-md-9">
-                <?php echo $data['main'] ?>
+            <div class="col-md-8">
+                <div class="rightContainer">
+                    <?php echo $data['main'] ?>
+                </div>
             </div>
         </div>
     </div>
@@ -82,6 +46,32 @@ echo '?>' . PHP_EOL
         <div class="row" style="position:relative">
             <div id="goTop"><i class="glyphicon glyphicon-circle-arrow-up"></i></div>
             <div id="fold" status="0"><i class="glyphicon glyphicon-info-sign"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="commonModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form class="form-horizontal" method="post">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">公共参数配置</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="col-sm-3">表单字段名</div>
+                        <div class="col-sm-4">值</div>
+                        <div class="col-sm-5">名称</div>
+                    </div>
+                    <?php echo '<?php globalParams($global_config) ?>' ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary">保存配置</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -171,9 +161,8 @@ echo '?>' . PHP_EOL
             $("html, body").animate({scrollTop: 0}, 200);
         });
 
-        $('#commonWrapSwitch').click(function () {
-            $('.commonWrap').toggle();
-            $('.mainWrap').toggle();
+        $('#commonModalSwitch').click(function () {
+            $('#commonModal').modal('toggle');
         });
 
         $(window).bind("scroll", function () {

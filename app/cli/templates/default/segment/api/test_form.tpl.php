@@ -7,6 +7,7 @@ $api = &$data['api'];
 $api_host = &$this->data['api_host'];
 $formFields = &$data['request'];
 $apiInfo = $formFieldsArray = array();
+$global_params_status = &$data['global_params'];
 $list_container_id = $data['controller'] . '_' . $data['action'];
 
 //表单字段
@@ -25,10 +26,9 @@ if (!empty($api)) {
 }
 
 $apiInfo['action'] = trim($apiInfo['action']);
-$action = '//' . $api_host . $apiInfo['action'];
+$action = rtrim($api_host, '/') . '/' . ltrim($apiInfo['action'], '/');
 ?>
 <div class="action-list-container" id="<?php echo $list_container_id; ?>">
-
     <form class="form-inline" data-toggle="validator" role="form"
           method="<?php echo $apiInfo['method'] ?>"
           action="<?php echo $action ?>" enctype="multipart/form-data">
@@ -38,7 +38,9 @@ $action = '//' . $api_host . $apiInfo['action'];
                 <a href="javascript:void(0)" onclick="apiActionList('<?php echo $list_container_id; ?>')">
                     <?php echo $apiInfo['desc'] ?>
                 </a>
-                (<?php echo $apiInfo['action'] ?>)
+                <span class="hidden-xs">
+                    (<?php echo $apiInfo['action'] ?>)
+                </span>
             </div>
         </div>
 
@@ -67,7 +69,7 @@ $action = '//' . $api_host . $apiInfo['action'];
                                 <tr>
                                     <th>参数</th>
                                     <th>值</th>
-                                    <th>名称</th>
+                                    <th><span class="hidden-xs">名称</span></th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -89,13 +91,14 @@ $action = '//' . $api_host . $apiInfo['action'];
                                     $input_addition_html = '';
                                     if ($field['is_require'] == 1) {
                                         $input_tag_data['required'] = 1;
-                                        $input_addition_html = '&nbsp;<span style="form-control-static">*</span>';
+                                        $input_addition_html = '<b style="form-control-static">*</b>';
                                     }
 
                                     switch ($input_type) {
                                         case 'textarea':
                                             $input_ele_type = 'textarea';
-                                            $input_tag_data['style'] = 'width:300px;height:90px;';
+                                            $input_tag_data['rows'] = 5;
+                                            $input_tag_data['style'] = 'min-width:80%';
                                             $input_tag_data['placeholder'] = $field_name;
                                             $input = $this->htmlTag($input_ele_type, $input_tag_data);
                                             break;
@@ -131,47 +134,38 @@ $action = '//' . $api_host . $apiInfo['action'];
 
                                     ?>
                                     <tr>
-                                        <td> <?php echo $field_name ?> </td>
                                         <td>
-                                            <div class="form-group">
-                                                <?php echo $input . $input_addition_html ?>
+                                            <div class="form-control-static">
+                                                <?php echo $field_name ?>
                                             </div>
                                         </td>
-                                        <td> <?php echo $field['txt'] ?> </td>
+                                        <td>
+                                            <div class="form-group col-lg-12">
+                                                <?php echo $input ?>
+                                                <span class="hidden-xs">
+                                                    <?php echo $input_addition_html ?>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-control-static">
+                                                <span class="visible-xs">
+                                                    <?php echo $input_addition_html ?>
+                                                </span>
+                                                <span class="hidden-xs">
+                                                    <?php echo $field['txt'] ?>
+                                                </span>
+                                            </div>
+                                        </td>
                                     </tr>
                                     <?php
                                 }
+
+                                //公共参数表单
+                                if($global_params_status) {
+                                    echo '<?php globalParamsInput($global_config) ?>';
+                                }
                                 ?>
-                                <tr>
-                                    <td>platform</td>
-                                    <td>
-                                        <input type="text" class="form-control" name="platform"
-                                               value="<?php echo '<?php echo $_COOKIE["platform"] ?>' ?>"
-                                               placeholder="platform">
-                                        &nbsp;<span style="form-control-static">*</span>
-                                    </td>
-                                    <td>平台</td>
-                                </tr>
-                                <tr>
-                                    <td>channel</td>
-                                    <td>
-                                        <input type="text" class="form-control" name="channel"
-                                               value="<?php echo '<?php echo $_COOKIE["channel"] ?>' ?>"
-                                               placeholder="channel">
-                                        &nbsp;<span style="form-control-static">*</span>
-                                    </td>
-                                    <td>渠道</td>
-                                </tr>
-                                <tr>
-                                    <td>version</td>
-                                    <td>
-                                        <input type="text" class="form-control" name="version"
-                                               value="<?php echo '<?php echo $_COOKIE["version"] ?>' ?>"
-                                               placeholder="version">
-                                        &nbsp;<span style="form-control-static">*</span>
-                                    </td>
-                                    <td>客户端版本号</td>
-                                </tr>
                                 </tbody>
                             </table>
                             <div class="row">
