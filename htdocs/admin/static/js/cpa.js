@@ -1,11 +1,12 @@
 $(function () {
     //顶部居中的确认弹窗
     $('.confirm-href-flag').on('click', function () {
-        pop.confirm($(this).attr('title'), {
+        var vm = $(this);
+        pop.confirm(vm.attr('title'), {
             btn: {yes: '确认', no: '取消'},
             actions: {
                 yes: function () {
-                    location.href = $(this).attr('action') || location.href;
+                    location.href = vm.attr('action') || location.href;
                 }
             }
         })
