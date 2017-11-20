@@ -3,6 +3,7 @@
  * @Auth: wonli <wonli@live.com>
  * skeleton
  */
+
 namespace app\cli\controllers;
 
 use Cross\MVC\Controller;
@@ -19,11 +20,17 @@ abstract class Cli extends Controller
      */
     protected $command;
 
+    /**
+     * @var array
+     */
+    protected $oriParams;
+
     function __construct()
     {
         parent::__construct();
 
         //处理注释配置中的参数
+        $this->oriParams = &$this->params;
         if (!empty($this->action_annotate['params'])) {
             $params = $this->action_annotate['params'];
         } else {
@@ -36,11 +43,13 @@ abstract class Cli extends Controller
         foreach ($this->params as $p) {
             if ((false === strpos($p, '=')) && $i == 0) {
                 $this->command = trim($p);
-            } elseif (!empty($p)) {
+            } elseif (!empty($p) && false !== strpos($p, '=')) {
                 list($key, $value) = explode('=', $p);
                 if ($key && $value) {
                     $params[trim(trim($key, '-'))] = trim($value);
                 }
+            } else {
+                $params[] = trim($p);
             }
 
             $i++;
