@@ -18,7 +18,6 @@
             $class = '';
             if (0 === strcasecmp($data['controller'], $data['current_controller']) &&
                 0 === strcasecmp($m['link'], $this->action)) {
-                $data['action_menu_name'] = $m['name'];
                 $class = 'active';
             }
             ?>

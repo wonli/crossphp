@@ -32,6 +32,11 @@ class AdminView extends View
     private $all_menu;
 
     /**
+     * @var array
+     */
+    private $action_name;
+
+    /**
      * 输出消息
      *
      * @param $code
@@ -129,6 +134,7 @@ class AdminView extends View
      */
     function setAllMenu($menu, $menu_icon = array())
     {
+        $action_name = &$this->action_name;
         foreach ($menu as $name => &$m) {
             $menu_icon_config = &$menu_icon[$name];
             if (is_array($menu_icon_config)) {
@@ -140,14 +146,24 @@ class AdminView extends View
             }
 
             $m['icon'] = $icon;
+            $m['child_menu_num'] = 0;
             foreach ($m['child_menu'] as $id => &$mc) {
+                $ca = strtolower($m['link'] . ':' . $mc['link']);
+                $action_name[$ca] = $mc['link'];
+                if ($mc['name']) {
+                    $action_name[$ca] = $mc['name'];
+                }
+
                 if (is_array($child_menu_icon_config)) {
                     $mc_icon = &$child_menu_icon_config[$mc['link']];
                 } else {
                     $mc_icon = &$child_menu_icon_config;
                 }
+
                 $mc['icon'] = $mc_icon;
-                if ($mc['display'] != 1) {
+                if ($mc['display'] == 1) {
+                    $m['child_menu_num']++;
+                } else {
                     unset($m['child_menu'][$id]);
                 }
             }
@@ -165,6 +181,9 @@ class AdminView extends View
     function renderNavMenu(&$controller_menu_name = '', &$action_menu_name = '')
     {
         $controller = lcfirst($this->controller);
+        $ca = strtolower($controller . ':' . $this->action);
+        $action_menu_name = $this->action_name[$ca];
+
         if (!empty($this->all_menu)) {
             foreach ($this->all_menu as $m) {
                 if ($m['display'] != 1) {
@@ -182,7 +201,7 @@ class AdminView extends View
                     $class = 'active';
                 }
 
-                $child_node_num = count($m['child_menu']);
+                $child_node_num = &$m['child_menu_num'];
                 if ($child_node_num > 0) {
                     $class = "treeview {$class}";
                 }
@@ -198,7 +217,6 @@ class AdminView extends View
                 $child_menu = array(
                     'controller' => &$m['link'],
                     'current_controller' => $controller,
-                    'action_menu_name' => &$action_menu_name,
                     'child' => &$m['child_menu']
                 );
 
@@ -239,10 +257,12 @@ class AdminView extends View
      * 分页方法
      *
      * @param array $data
+     * @param string $class
      * @param string $tpl
      */
-    function page(array $data, $tpl = 'default')
+    function page(array $data, $class = 'pagination', $tpl = 'default')
     {
+        $data['pagination_class'] = $class;
         if (!isset($data['link'])) {
             $params = array();
             $current_controller = lcfirst($this->controller);
@@ -268,6 +288,6 @@ class AdminView extends View
             $data['half'] = 5;
         }
 
-        include $this->tpl("page/{$tpl}");
+        $this->renderTpl("page/{$tpl}", $data);
     }
 }
