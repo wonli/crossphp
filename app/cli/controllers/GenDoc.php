@@ -1,6 +1,6 @@
 <?php
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * GenDoc.php
  */
 
@@ -14,12 +14,15 @@ use ReflectionClass;
 /**
  * 生成API文档
  *
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class GenDoc
  * @package app\cli\controllers
  */
 class GenDoc extends Cli
 {
+    /**
+     * @throws CoreException
+     */
     function index()
     {
         if (!empty($this->params['source'])) {

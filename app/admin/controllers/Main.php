@@ -1,18 +1,18 @@
 <?php
 /**
- * @Auth wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Main.php
  */
 namespace app\admin\controllers;
 
-use modules\admin\AdminUserModule;
-use modules\admin\SecurityModule;
+use app\admin\supervise\AdminUserModule;
+use app\admin\supervise\SecurityModule;
 use Cross\MVC\Controller;
 
 /**
  * 登录和退出
  *
- * @Auth wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  *
  * Class Main
  * @package app\admin\controllers
@@ -45,6 +45,8 @@ class Main extends Controller
 
     /**
      * 登录入口
+     *
+     * @throws \Cross\Exception\CoreException
      */
     function login()
     {
@@ -70,6 +72,8 @@ class Main extends Controller
 
     /**
      * 退出登录
+     * 
+     * @throws \Cross\Exception\CoreException
      */
     function logout()
     {

@@ -1,16 +1,16 @@
 <?php
 /**
- * @Author: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Security.php
  */
 
 namespace app\admin\controllers;
 
-use modules\admin\SecurityModule;
+use app\admin\supervise\SecurityModule;
 
 /**
  * 安全管理,密码和密保卡
- * @Auth wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  *
  * Class Security
  * @package app\admin\controllers
@@ -18,12 +18,15 @@ use modules\admin\SecurityModule;
 class Security extends Admin
 {
     /**
-     * 密保卡module
-     *
-     * @var \modules\admin\SecurityModule
+     * @var SecurityModule
      */
     private $SEC;
 
+    /**
+     * Security constructor.
+     *
+     * @throws \Cross\Exception\CoreException
+     */
     function __construct()
     {
         parent::__construct();
@@ -32,6 +35,8 @@ class Security extends Admin
 
     /**
      * 默认跳转到修改密码页面
+     *
+     * @throws \Cross\Exception\CoreException
      */
     function index()
     {
@@ -39,7 +44,10 @@ class Security extends Admin
     }
 
     /**
+     * 密保卡
+     *
      * @cp_params act=preview
+     * @throws \Cross\Exception\CoreException
      */
     function securityCard()
     {
@@ -80,6 +88,8 @@ class Security extends Admin
 
     /**
      * 更改密码
+     *
+     * @throws \Cross\Exception\CoreException
      */
     function changePassword()
     {
@@ -100,6 +110,8 @@ class Security extends Admin
 
     /**
      * 创建用户存储密保卡的表
+     *
+     * @throws \Cross\Exception\CoreException
      */
     function create()
     {

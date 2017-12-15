@@ -1,6 +1,6 @@
 <?php
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * GenDocView.php
  */
 
@@ -11,7 +11,7 @@ use Cross\MVC\View;
 /**
  * 生成文档视图控制器
  *
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class GenDocView
  * @package app\cli\views
  */

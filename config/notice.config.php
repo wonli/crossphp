@@ -2,7 +2,7 @@
 /**
  * 状态码管理
  *
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  */
 return array(
 

@@ -21,6 +21,6 @@
 </div>
 <?php
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * title.tpl.php
  */

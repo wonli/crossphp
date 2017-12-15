@@ -10,6 +10,8 @@ class Main extends Web
 {
     /**
      * 默认控制器
+     *
+     * @throws \Cross\Exception\CoreException
      */
     function index()
     {

@@ -1,13 +1,13 @@
 <?php
 
 /**
- * @Author: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  */
 
 namespace app\admin\views;
 
 /**
- * @Auth wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  *
  * Class AclView
  * @package app\admin\views

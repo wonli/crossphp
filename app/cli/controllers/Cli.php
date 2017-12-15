@@ -1,6 +1,6 @@
 <?php
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * skeleton
  */
 
@@ -9,7 +9,7 @@ namespace app\cli\controllers;
 use Cross\MVC\Controller;
 
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class Cli
  * @package app\cli\controllers
  */

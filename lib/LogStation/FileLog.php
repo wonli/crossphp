@@ -1,4 +1,10 @@
 <?php
+/**
+ * Cross - a micro PHP 5 framework
+ *
+ * @link        http://www.crossphp.com
+ * @license     MIT License
+ */
 
 namespace lib\LogStation;
 
@@ -7,7 +13,7 @@ use Exception;
 /**
  * 日志
  *
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * FileLog.php
  */
 class FileLog extends LogBase
@@ -17,6 +23,12 @@ class FileLog extends LogBase
      */
     private $logPath;
 
+    /**
+     * FileLog constructor.
+     *
+     * @param string $path
+     * @throws Exception
+     */
     function __construct($path = '')
     {
         parent::__construct();
@@ -50,7 +62,12 @@ class FileLog extends LogBase
      */
     function write($log, $name = 'exception')
     {
-        $this->addToLog($log);
+        if (is_array($log)) {
+            $this->addToLog($name, $log);
+        } else {
+            $this->addToLog($log);
+        }
+
         return $this->save($name);
     }
 

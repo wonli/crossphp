@@ -1,6 +1,6 @@
 <?php
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * case.tpl.php
  */
 $info = &$data['info'];

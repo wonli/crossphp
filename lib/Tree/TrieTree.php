@@ -1,7 +1,9 @@
 <?php
 /**
- * @Auth wonli <wonli@live.com>
- * TrieTree.php
+ * Cross - a micro PHP 5 framework
+ *
+ * @link        http://www.crossphp.com
+ * @license     MIT License
  */
 
 namespace lib\Tree;
@@ -11,7 +13,7 @@ use Exception;
 
 /**
  * 前缀树生成和关键词匹配替换
- * @Auth wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  *
  * Class TrieTree
  * @package lib\Structure

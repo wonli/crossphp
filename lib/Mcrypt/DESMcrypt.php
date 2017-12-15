@@ -8,7 +8,7 @@
 namespace lib\Mcrypt;
 
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class DESMcrypt
  */
 class DESMcrypt extends DEcode
@@ -36,7 +36,7 @@ class DESMcrypt extends DEcode
 
     /**
      * @param $input
-     * @return string
+     * @return array
      */
     public function enCode($input)
     {

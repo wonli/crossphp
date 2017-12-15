@@ -176,6 +176,8 @@ class Captcha
 
     /**
      * @see output()
+     *
+     * @throws CoreException
      */
     public function getImage()
     {
@@ -187,6 +189,7 @@ class Captcha
      * @see base64encode()
      *
      * @return string
+     * @throws CoreException
      */
     function getImageBase64encode()
     {
@@ -196,6 +199,8 @@ class Captcha
 
     /**
      * 初始化图片数据
+     *
+     * @throws CoreException
      */
     protected function initCreateImages()
     {
@@ -303,6 +308,8 @@ class Captcha
 
     /**
      * 写字
+     *
+     * @throws CoreException
      */
     protected function write()
     {

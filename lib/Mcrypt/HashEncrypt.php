@@ -10,7 +10,7 @@ namespace lib\Mcrypt;
 use Cross\Exception\CoreException;
 
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class HashEncrypt
  */
 class HashEncrypt

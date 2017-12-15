@@ -1,17 +1,17 @@
 <?php
 /**
- * @Auth wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * AdminUserModule.php
  */
 
-namespace modules\admin;
+namespace app\admin\supervise;
 
 use Cross\Core\Helper;
 use Exception;
 
 /**
  * 后台用户相关
- * @Auth wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  *
  * Class AdminUserModule
  * @package modules\admin
@@ -26,6 +26,7 @@ class AdminUserModule extends AdminModule
      * @param string $code_location
      * @param string $code_value
      * @return array|string
+     * @throws \Cross\Exception\CoreException
      */
     function checkAdmin($username, $password, $code_location = '', $code_value = '')
     {
@@ -68,7 +69,10 @@ class AdminUserModule extends AdminModule
     }
 
     /**
-     * 获取所有管理员
+     * 管理员列表
+     *
+     * @return mixed
+     * @throws \Cross\Exception\CoreException
      */
     function getAdminUserList()
     {
@@ -81,6 +85,7 @@ class AdminUserModule extends AdminModule
      *
      * @param $data
      * @return bool
+     * @throws \Cross\Exception\CoreException
      */
     function addAdmin($data)
     {
@@ -107,6 +112,7 @@ class AdminUserModule extends AdminModule
      *
      * @param $condition
      * @return mixed
+     * @throws \Cross\Exception\CoreException
      */
     function getAdminInfo($condition)
     {
@@ -118,6 +124,7 @@ class AdminUserModule extends AdminModule
      *
      * @param $condition
      * @return mixed
+     * @throws \Cross\Exception\CoreException
      */
     function del($condition)
     {
@@ -135,6 +142,7 @@ class AdminUserModule extends AdminModule
      * @param int $id
      * @param array $data
      * @return array|string
+     * @throws \Cross\Exception\CoreException
      */
     function update($id, $data)
     {
@@ -160,8 +168,9 @@ class AdminUserModule extends AdminModule
     /**
      * 验证当前密码
      *
-     * @param $pwd
+     * @param string $pwd
      * @return bool
+     * @throws \Cross\Exception\CoreException
      */
     function checkPassword($pwd)
     {
@@ -174,6 +183,7 @@ class AdminUserModule extends AdminModule
      *
      * @param string $pwd
      * @return array|string
+     * @throws \Cross\Exception\CoreException
      */
     function updatePassword($pwd)
     {

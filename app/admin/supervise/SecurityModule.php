@@ -1,14 +1,14 @@
 <?php
 /**
- * @Author: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  */
 
-namespace modules\admin;
+namespace app\admin\supervise;
 
 /**
  * 密保卡
  *
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class SecurityModule
  * @package modules\admin
  */
@@ -42,6 +42,7 @@ class SecurityModule extends AdminModule
      *
      * @param $bind_user
      * @return int
+     * @throws \Cross\Exception\CoreException
      */
     function bindCard($bind_user)
     {
@@ -70,6 +71,7 @@ class SecurityModule extends AdminModule
      *
      * @param string $bind_user
      * @return int
+     * @throws \Cross\Exception\CoreException
      */
     function updateCard($bind_user)
     {
@@ -98,6 +100,7 @@ class SecurityModule extends AdminModule
      * @param string $bind_user
      * @param bool $check_usc
      * @return bool
+     * @throws \Cross\Exception\CoreException
      */
     function unBind($bind_user, $check_usc = true)
     {
@@ -127,6 +130,7 @@ class SecurityModule extends AdminModule
      *
      * @param string $bind_user
      * @return bool
+     * @throws \Cross\Exception\CoreException
      */
     public function checkBind($bind_user)
     {
@@ -143,6 +147,7 @@ class SecurityModule extends AdminModule
      *
      * @param $bind_user
      * @return int
+     * @throws \Cross\Exception\CoreException
      */
     function securityData($bind_user)
     {
@@ -164,6 +169,7 @@ class SecurityModule extends AdminModule
      *
      * @param $bind_user
      * @return array|string|bool
+     * @throws \Cross\Exception\CoreException
      */
     function makeSecurityCardImage($bind_user)
     {
@@ -240,6 +246,7 @@ class SecurityModule extends AdminModule
      * @param $location
      * @param $input_code
      * @return bool|int
+     * @throws \Cross\Exception\CoreException
      */
     function verifyCode($user, $location, $input_code)
     {
@@ -266,6 +273,7 @@ class SecurityModule extends AdminModule
      *
      * @param string
      * @return array|bool
+     * @throws \Cross\Exception\CoreException
      */
     function getSecurityData($bind_user)
     {
@@ -283,6 +291,7 @@ class SecurityModule extends AdminModule
      * 创建代码
      *
      * @return mixed
+     * @throws \Cross\Exception\CoreException
      */
     function createTable()
     {

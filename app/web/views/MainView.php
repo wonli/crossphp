@@ -5,7 +5,7 @@
 namespace app\web\views;
 
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class MainView
  * @package app\web\views
  */

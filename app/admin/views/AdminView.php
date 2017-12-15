@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @Author: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  */
 
 namespace app\admin\views;
@@ -9,7 +9,7 @@ namespace app\admin\views;
 use Cross\MVC\View;
 
 /**
- * @Auth wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  *
  * Class AdminView
  * @package app\admin\views
@@ -177,6 +177,7 @@ class AdminView extends View
      *
      * @param string $controller_menu_name
      * @param string $action_menu_name
+     * @throws \Cross\Exception\CoreException
      */
     function renderNavMenu(&$controller_menu_name = '', &$action_menu_name = '')
     {
@@ -243,6 +244,7 @@ class AdminView extends View
      * @param string $params
      * @param string $link_text
      * @param string $confirm_title
+     * @throws \Cross\Exception\CoreException
      */
     function confirmUrl($controller, $params, $link_text, $confirm_title = '确定执行该操作吗?')
     {

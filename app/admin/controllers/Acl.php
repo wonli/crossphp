@@ -1,17 +1,17 @@
 <?php
 /**
- * @Author: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Acl.php
  */
 
 namespace app\admin\controllers;
 
-use modules\admin\AclModule;
-use modules\admin\SecurityModule;
+use app\admin\supervise\SecurityModule;
+use app\admin\supervise\AclModule;
 
 /**
  * 权限管理(菜单,角色及用户)
- * @Auth wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  *
  * Class Acl
  * @package app\admin\controllers
@@ -25,12 +25,20 @@ class Acl extends Admin
      */
     protected $ACL;
 
+    /**
+     * Acl constructor.
+     *
+     * @throws \Cross\Exception\CoreException
+     */
     function __construct()
     {
         parent::__construct();
         $this->ACL = new AclModule;
     }
 
+    /**
+     * @throws \Cross\Exception\CoreException
+     */
     function index()
     {
         $this->to("acl:navManager");
@@ -40,6 +48,7 @@ class Acl extends Admin
      * 子菜单管理
      *
      * @cp_params id
+     * @throws \Cross\Exception\CoreException
      */
     function editMenu()
     {
@@ -68,6 +77,8 @@ class Acl extends Admin
 
     /**
      * 导航菜单管理
+     *
+     * @throws \Cross\Exception\CoreException
      */
     function navManager()
     {
@@ -96,6 +107,7 @@ class Acl extends Admin
      * 删除
      *
      * @cp_params id, e
+     * @throws \Cross\Exception\CoreException
      */
     function del()
     {
@@ -112,6 +124,8 @@ class Acl extends Admin
 
     /**
      * 添加管理角色
+     *
+     * @throws \Cross\Exception\CoreException
      */
     function addRole()
     {
@@ -138,6 +152,8 @@ class Acl extends Admin
 
     /**
      * 角色列表
+     *
+     * @throws \Cross\Exception\CoreException
      */
     function roleList()
     {
@@ -156,7 +172,7 @@ class Acl extends Admin
      * 编辑角色
      *
      * @cp_params rid
-     * @return array|string
+     * @throws \Cross\Exception\CoreException
      */
     function editRole()
     {
@@ -186,6 +202,7 @@ class Acl extends Admin
      * 删除角色
      *
      * @cp_params rid
+     * @throws \Cross\Exception\CoreException
      */
     function delRole()
     {
@@ -202,6 +219,8 @@ class Acl extends Admin
 
     /**
      * 管理员列表
+     *
+     * @throws \Cross\Exception\CoreException
      */
     function user()
     {
@@ -255,6 +274,8 @@ class Acl extends Admin
 
     /**
      * 操作密保卡
+     *
+     * @throws \Cross\Exception\CoreException
      */
     function userSecurityCard()
     {
@@ -278,6 +299,7 @@ class Acl extends Admin
      * 删除管理员
      *
      * @cp_params uid
+     * @throws \Cross\Exception\CoreException
      */
     function delUser()
     {

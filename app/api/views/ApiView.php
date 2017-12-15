@@ -7,7 +7,7 @@ namespace app\api\views;
 use Cross\MVC\View;
 
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class ApiView
  * @package app\api\views
  */

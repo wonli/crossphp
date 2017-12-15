@@ -1,11 +1,11 @@
 <?php
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  */
 namespace app\admin\views;
 
 /**
- * @Auth wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  *
  * Class MainView
  * @package app\admin\views

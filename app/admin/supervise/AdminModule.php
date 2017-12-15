@@ -1,16 +1,16 @@
 <?php
 /**
- * @Author: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  */
 
-namespace modules\admin;
+namespace app\admin\supervise;
 
 use Cross\MVC\Module;
 
 /**
  * cpa基类
  *
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class AdminModule
  * @package modules\admin
  */

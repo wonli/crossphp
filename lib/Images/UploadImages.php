@@ -1,10 +1,17 @@
 <?php
+/**
+ * Cross - a micro PHP 5 framework
+ *
+ * @link        http://www.crossphp.com
+ * @license     MIT License
+ */
+
 namespace lib\Images;
 
 use Exception;
 
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class UploadImages
  */
 class UploadImages
@@ -132,6 +139,8 @@ class UploadImages
 
     /**
      * 保存图片
+     *
+     * @throws Exception
      */
     public function save()
     {
@@ -153,6 +162,8 @@ class UploadImages
      * @param bool $save_ori_images 是否保留原图
      * @param bool $square 是否生成方图
      * @return array
+     * @throws \Cross\Exception\CoreException
+     * @throws Exception
      */
     public function thumb($thumb_size_config = array(), $save_ori_images = true, $square = false)
     {
@@ -186,6 +197,7 @@ class UploadImages
      * @param array $coordinate
      * @param bool $save_ori_images
      * @return array
+     * @throws Exception
      */
     public function cut($thumb_size = '100x100', $coordinate = array('x' => 0, 'y' => 0, 'w' => 0, 'h' => 0), $save_ori_images = true)
     {
@@ -323,6 +335,7 @@ class UploadImages
      * 保存文件
      *
      * @return string
+     * @throws Exception
      */
     protected function getSaveFileName()
     {
@@ -334,6 +347,7 @@ class UploadImages
      * 检查上传文件
      *
      * @return bool|int
+     * @throws Exception
      */
     protected function check()
     {
@@ -354,6 +368,7 @@ class UploadImages
      * 移动上传的文件到指定目录
      *
      * @return array
+     * @throws Exception
      */
     protected function moveUploadFile()
     {
@@ -383,6 +398,7 @@ class UploadImages
      * @param array $thumb_size_config 缩略图尺寸
      * @param array $coordinate 坐标(x,y,w,h)
      * @return array
+     * @throws Exception
      */
     protected function makeCutThumb($images_path, $thumb_size_config, $coordinate)
     {
@@ -424,7 +440,7 @@ class UploadImages
             return $result;
         }
 
-        $Thumb = new ImageThumb($images_path, $square);
+        $Thumb = new ImageThumb($images_path);
         foreach ($thumb_size_config as $val) {
             if (false !== strpos($val, 'x')) {
                 list($width, $height) = explode('x', $val);
@@ -441,6 +457,8 @@ class UploadImages
 
     /**
      * 检查文件类型
+     *
+     * @throws Exception
      */
     protected function checkFileType()
     {
@@ -457,6 +475,7 @@ class UploadImages
      * 检查文件大小
      *
      * @return bool|int
+     * @throws Exception
      */
     protected function checkFileSize()
     {
@@ -474,6 +493,7 @@ class UploadImages
      * 保存的文件全路径
      *
      * @return string
+     * @throws Exception
      */
     protected function getSaveFileFullPath()
     {

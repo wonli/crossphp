@@ -1,11 +1,17 @@
 <?php
+/**
+ * Cross - a micro PHP 5 framework
+ *
+ * @link        http://www.crossphp.com
+ * @license     MIT License
+ */
 
 namespace lib\LogStation;
 
 /**
  * 将日志发送到中转站, 由中转站通过socket转发至客户端
  *
- * @Auth wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * LogStation.php
  */
 class HttpLog extends LogBase

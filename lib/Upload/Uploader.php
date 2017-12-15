@@ -10,7 +10,7 @@ namespace lib\Upload;
 use Cross\Exception\CoreException;
 
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class Uploader
  */
 class Uploader
@@ -93,6 +93,7 @@ class Uploader
      * @param string $dir 文件路径
      * @param string $name 文件名
      * @return bool
+     * @throws CoreException
      */
     function save($dir, &$name = null)
     {

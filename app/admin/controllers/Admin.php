@@ -1,17 +1,17 @@
 <?php
 /**
- * @Author: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  */
 
 namespace app\admin\controllers;
 
-use modules\admin\AdminUserModule;
-use modules\admin\AclModule;
+use app\admin\supervise\AdminUserModule;
+use app\admin\supervise\AclModule;
 use Cross\MVC\Controller;
 
 /**
  * 管理模块控制器基类(导航菜单及权限验证)
- * @Auth wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  *
  * Class Admin
  * @package app\admin\controllers
@@ -38,6 +38,11 @@ abstract class Admin extends Controller
      */
     protected $data = array('status' => 1);
 
+    /**
+     * Admin constructor.
+     *
+     * @throws \Cross\Exception\CoreException
+     */
     function __construct()
     {
         parent::__construct();
@@ -65,12 +70,12 @@ abstract class Admin extends Controller
         }
 
         //权限判断, 超级管理员rid=0
+        $child_menu = array();
         $role_id = $user_info['rid'];
         if ($role_id == 0) {
             $this->view->setNavMenu($nav_menu_data);
             $all_menu = $this->ACL->getNavChildMenu($nav_menu_data);
 
-            $child_menu = array();
             if (isset($nav_menu_data [$controller])) {
                 $child_menu = $all_menu[$controller]['child_menu'];
             }
@@ -142,6 +147,7 @@ abstract class Admin extends Controller
      *
      * @param int $code
      * @return array|string
+     * @throws \Cross\Exception\CoreException
      */
     protected function getStatus($code)
     {
@@ -153,6 +159,7 @@ abstract class Admin extends Controller
      *
      * @param int $code
      * @return string
+     * @throws \Cross\Exception\CoreException
      */
     protected function getStatusMessage($code)
     {

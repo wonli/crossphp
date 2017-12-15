@@ -1,12 +1,12 @@
 <?php
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * skeleton
  */
 namespace app\cli\controllers;
 
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class Main
  * @package app\cli\controllers
  */

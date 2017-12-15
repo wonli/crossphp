@@ -1,6 +1,6 @@
 <?php
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Web.php
  */
 
@@ -11,7 +11,7 @@ use app\api\views\ApiView;
 use Cross\MVC\Controller;
 
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class Api
  * @package app\api\controllers
  *
@@ -87,6 +87,11 @@ abstract class Api extends Controller
      */
     abstract function index();
 
+    /**
+     * Api constructor.
+     *
+     * @throws \Cross\Exception\CoreException
+     */
     function __construct()
     {
         parent::__construct();
@@ -144,6 +149,7 @@ abstract class Api extends Controller
      * @param string $key
      * @param bool $filter_data 是否使用过滤器
      * @return string
+     * @throws \Cross\Exception\CoreException
      */
     function getInputData($key, $filter_data = true)
     {
@@ -176,6 +182,7 @@ abstract class Api extends Controller
      * @param string $key
      * @param string $value
      * @return int|string
+     * @throws \Cross\Exception\CoreException
      */
     protected function filterData($key, $value)
     {
@@ -215,7 +222,8 @@ abstract class Api extends Controller
      * @param string $key
      * @param string $filter_name
      * @param bool $is_multi 是否是多文件
-     * @return string
+     * @return array
+     * @throws \Cross\Exception\CoreException
      */
     function getFileData($key, $filter_name = 'images', &$is_multi = false)
     {
@@ -248,6 +256,7 @@ abstract class Api extends Controller
      * @param null $data
      * @param null $method
      * @param int $http_response_status
+     * @throws \Cross\Exception\CoreException
      */
     function display($data = null, $method = null, $http_response_status = 200)
     {
@@ -301,6 +310,7 @@ abstract class Api extends Controller
      *
      * @param int $status
      * @return string
+     * @throws \Cross\Exception\CoreException
      */
     private function getStatusMessage($status)
     {
@@ -325,6 +335,7 @@ abstract class Api extends Controller
      * @param string $tmp_file 临时文件路径
      * @param int $size
      * @return mixed
+     * @throws \Cross\Exception\CoreException
      */
     private function checkUploadImage($upload_file_name, $tmp_file, $size = 3000000)
     {

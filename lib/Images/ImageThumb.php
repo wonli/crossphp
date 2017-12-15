@@ -1,10 +1,17 @@
 <?php
+/**
+ * Cross - a micro PHP 5 framework
+ *
+ * @link        http://www.crossphp.com
+ * @license     MIT License
+ */
+
 namespace lib\Images;
 
 use Cross\Exception\CoreException;
 
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class ImageThumb
  */
 class ImageThumb

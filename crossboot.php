@@ -1,6 +1,6 @@
 <?php
 /**
- * @Author: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  */
 //框架依赖的唯一常量
 define('PROJECT_PATH', __DIR__);

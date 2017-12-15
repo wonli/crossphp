@@ -8,7 +8,7 @@
 namespace lib\Mcrypt;
 
 /**
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class DEcode
  */
 abstract class DEcode

@@ -1,9 +1,9 @@
 <?php
 /**
- * @Author: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  */
 
-namespace modules\admin;
+namespace app\admin\supervise;
 
 use ReflectionMethod;
 use ReflectionClass;
@@ -11,7 +11,7 @@ use ReflectionClass;
 /**
  * 权限处理
  *
- * @Auth: wonli <wonli@live.com>
+ * @author wonli <wonli@live.com>
  * Class AclModule
  * @package modules\admin
  */
@@ -20,10 +20,11 @@ class AclModule extends AdminModule
     /**
      * 增加导航菜单
      *
-     * @param $name
-     * @param $link
+     * @param string $name
+     * @param string $link
      * @param int $pid
      * @return array|string
+     * @throws \Cross\Exception\CoreException
      */
     function addNav($name, $link, $pid = 0)
     {
@@ -43,8 +44,9 @@ class AclModule extends AdminModule
     /**
      * 删除导航
      *
-     * @param $nav_id
+     * @param int $nav_id
      * @return mixed
+     * @throws \Cross\Exception\CoreException
      */
     function delNav($nav_id)
     {
@@ -55,6 +57,7 @@ class AclModule extends AdminModule
      * 初始化菜单
      *
      * @return mixed
+     * @throws \Cross\Exception\CoreException
      */
     function initMenuList()
     {
@@ -184,8 +187,9 @@ class AclModule extends AdminModule
     /**
      * 保存导航菜单
      *
-     * @param $params
+     * @param array $params
      * @return bool
+     * @throws \Cross\Exception\CoreException
      */
     function saveNav(array $params)
     {
@@ -216,6 +220,7 @@ class AclModule extends AdminModule
      * 返回菜单列表
      *
      * @return array
+     * @throws \Cross\Exception\CoreException
      */
     function getMenu()
     {
@@ -239,6 +244,7 @@ class AclModule extends AdminModule
      *
      * @param $nav_menu
      * @return mixed
+     * @throws \Cross\Exception\CoreException
      */
     function getNavChildMenu($nav_menu)
     {
@@ -251,6 +257,8 @@ class AclModule extends AdminModule
 
     /**
      * 从控制器中初始化菜单数据
+     *
+     * @throws \Cross\Exception\CoreException
      */
     function initMenu4controllers()
     {
@@ -262,6 +270,7 @@ class AclModule extends AdminModule
      * 菜单修改(批量更新导航菜单)
      *
      * @param array $menu
+     * @throws \Cross\Exception\CoreException
      */
     function saveMenu(array $menu)
     {
@@ -321,9 +330,10 @@ class AclModule extends AdminModule
     /**
      * 给类添加子菜单
      *
-     * @param $class
-     * @param $method
+     * @param string $class
+     * @param string $method
      * @param array $menu_data
+     * @throws \Cross\Exception\CoreException
      */
     function addClassMethodMenu($class, $method, &$menu_data = array())
     {
@@ -346,8 +356,9 @@ class AclModule extends AdminModule
     /**
      * 添加二级导航菜单
      *
-     * @param $data
+     * @param array $data
      * @return bool
+     * @throws \Cross\Exception\CoreException
      */
     function addAclMenuFunction(&$data)
     {
@@ -366,7 +377,10 @@ class AclModule extends AdminModule
     }
 
     /**
+     * 角色列表
+     *
      * @return mixed 角色列表
+     * @throws \Cross\Exception\CoreException
      */
     function getRoleList()
     {
@@ -376,8 +390,9 @@ class AclModule extends AdminModule
     /**
      * 查询role详细信息
      *
-     * @param $condition
+     * @param array|string $condition
      * @return mixed
+     * @throws \Cross\Exception\CoreException
      */
     function getRoleInfo($condition)
     {
@@ -399,9 +414,10 @@ class AclModule extends AdminModule
     /**
      * 保存菜单设置
      *
-     * @param $menu_name
-     * @param $data
+     * @param string $menu_name
+     * @param array $data
      * @return array|string
+     * @throws \Cross\Exception\CoreException
      */
     function saveRoleMenu($menu_name, $data)
     {
@@ -431,10 +447,11 @@ class AclModule extends AdminModule
     /**
      * 编辑角色菜单权限
      *
-     * @param $rid
-     * @param $menu_name
-     * @param $data
+     * @param int $rid
+     * @param string $menu_name
+     * @param array $data
      * @return array|string
+     * @throws \Cross\Exception\CoreException
      */
     function editRoleMenu($rid, $menu_name, $data)
     {
@@ -466,8 +483,9 @@ class AclModule extends AdminModule
     /**
      * 根据菜单ID获取信息
      *
-     * @param $id
+     * @param int $id
      * @return mixed
+     * @throws \Cross\Exception\CoreException
      */
     function getMenuInfo($id)
     {
@@ -479,6 +497,7 @@ class AclModule extends AdminModule
      *
      * @param null $pid
      * @return mixed
+     * @throws \Cross\Exception\CoreException
      */
     function getMenuList($pid = null)
     {
@@ -495,6 +514,7 @@ class AclModule extends AdminModule
      *
      * @param array $un_save_menu
      * @return mixed
+     * @throws \Cross\Exception\CoreException
      */
     function getNavList(& $un_save_menu = array())
     {
@@ -518,8 +538,9 @@ class AclModule extends AdminModule
     /**
      * 根据父级id查询子菜单
      *
-     * @param $pid
+     * @param int $pid
      * @return mixed
+     * @throws \Cross\Exception\CoreException
      */
     function getChildMenu($pid)
     {
@@ -532,6 +553,7 @@ class AclModule extends AdminModule
      * @param array|string $condition
      * @param array|string $order
      * @return array
+     * @throws \Cross\Exception\CoreException
      */
     function getMenuByCondition($condition, $order = '`order` ASC')
     {
