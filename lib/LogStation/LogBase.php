@@ -60,12 +60,16 @@ abstract class LogBase
      * 增加到stack
      *
      * @param string $content
-     * @param array $data
+     * @param array|string $data
      * @return $this
      */
-    function addToLog($content, array $data = array())
+    function addToLog($content, $data = array())
     {
         if (!empty($data)) {
+            if (!is_array($data)) {
+                $data = array($data);
+            }
+
             $content = self::prettyArray($content, $data);
         }
 
