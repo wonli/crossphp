@@ -183,7 +183,9 @@ class AdminView extends View
     {
         $controller = lcfirst($this->controller);
         $ca = strtolower($controller . ':' . $this->action);
-        $action_menu_name = $this->action_name[$ca];
+        if (isset($this->action_name[$ca])) {
+            $action_menu_name = $this->action_name[$ca];
+        }
 
         if (!empty($this->all_menu)) {
             foreach ($this->all_menu as $m) {
