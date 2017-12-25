@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `cp_acl_menu` (
+CREATE TABLE IF NOT EXISTS `cpa_acl_menu` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `pid` int(11) unsigned NOT NULL DEFAULT '0',
   `type` tinyint(4) unsigned NOT NULL DEFAULT '1' COMMENT '0,系统 1,用户',
@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS `cp_acl_menu` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DELETE FROM `cp_acl_menu`;
-INSERT INTO `cp_acl_menu` (`id`, `pid`, `type`, `name`, `link`, `display`, `order`) VALUES
+DELETE FROM `cpa_acl_menu`;
+INSERT INTO `cpa_acl_menu` (`id`, `pid`, `type`, `name`, `link`, `display`, `order`) VALUES
 	(1, 0, 1, '权限', 'acl', 1, 990),
 	(2, 0, 1, 'admin', 'admin', 0, 0),
 	(3, 0, 1, 'main', 'main', 0, 0),
@@ -32,18 +32,18 @@ INSERT INTO `cp_acl_menu` (`id`, `pid`, `type`, `name`, `link`, `display`, `orde
 	(19, 5, 1, '更改密码', 'changePassword', 1, 0),
 	(20, 5, 1, '', 'create', 0, 0);
 
-CREATE TABLE IF NOT EXISTS `cp_acl_role` (
+CREATE TABLE IF NOT EXISTS `cpa_acl_role` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL DEFAULT '' COMMENT '角色名称',
   `behavior` mediumtext COMMENT '允许的行为',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色管理';
 
-DELETE FROM `cp_acl_role`;
-INSERT INTO `cp_acl_role` (`id`, `name`, `behavior`) VALUES
+DELETE FROM `cpa_acl_role`;
+INSERT INTO `cpa_acl_role` (`id`, `name`, `behavior`) VALUES
 	(1, '默认用户', '2,3,4,16,5,17,18,19,20');
 
-CREATE TABLE IF NOT EXISTS `cp_admin` (
+CREATE TABLE IF NOT EXISTS `cpa_admin` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
@@ -55,11 +55,11 @@ CREATE TABLE IF NOT EXISTS `cp_admin` (
   KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DELETE FROM `cp_admin`;
-INSERT INTO `cp_admin` (`id`, `name`, `password`, `salt`, `usc`, `t`, `rid`) VALUES
+DELETE FROM `cpa_admin`;
+INSERT INTO `cpa_admin` (`id`, `name`, `password`, `salt`, `usc`, `t`, `rid`) VALUES
 	(1, 'admin', '5f77498804fde517ba653162490cc4e5ca204779754f974078e35d3407b32bce', '1234567887654321', 1, 1, 0);
 
-CREATE TABLE IF NOT EXISTS `cp_security_card` (
+CREATE TABLE IF NOT EXISTS `cpa_security_card` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `card_data` text NOT NULL,
   `bind_user` varchar(255) NOT NULL,
@@ -68,4 +68,4 @@ CREATE TABLE IF NOT EXISTS `cp_security_card` (
   KEY `bind_user` (`bind_user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DELETE FROM `cp_security_card`;
+DELETE FROM `cpa_security_card`;

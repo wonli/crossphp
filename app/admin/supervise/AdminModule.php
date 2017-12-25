@@ -21,27 +21,27 @@ class AdminModule extends Module
      *
      * @var string
      */
-    protected $t_admin = 'cp_admin';
+    protected $t_admin = 'cpa_admin';
 
     /**
      * 角色表名
      *
      * @var string
      */
-    protected $t_role = 'cp_acl_role';
+    protected $t_role = 'cpa_acl_role';
 
     /**
      * 权限表
      *
      * @var string
      */
-    protected $t_acl_menu = 'cp_acl_menu';
+    protected $t_acl_menu = 'cpa_acl_menu';
 
     /**
      * 存储密保卡的表名
      *
      * @var string
      */
-    protected $t_security_card = 'cp_security_card';
+    protected $t_security_card = 'cpa_security_card';
 }
 
