@@ -62,7 +62,7 @@ abstract class Admin extends Controller
         $controller = lcfirst($this->controller);
 
         //加载菜单icon配置文件
-        $icon = $this->parseGetFile('config::menu_icon.config.php');
+        $icon = $this->parseGetFile('app::config/menu_icon.config.php');
         $tpl_dir_name = $this->config->get('sys', 'default_tpl_dir');
         $icon_config = array();
         if (isset($icon[$tpl_dir_name])) {

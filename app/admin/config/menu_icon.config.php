@@ -8,5 +8,5 @@ return array(
         'panel' =>  'fa fa-dashboard',
         'security'  =>  'fa fa-shield',
         'acl'   =>  'fa fa-wrench',
-    ),
+    )
 );
