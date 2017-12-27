@@ -105,7 +105,7 @@ class FileLog extends LogBase
     function save($filePrefix = 'exception')
     {
         $log_id = self::genLogID();
-        $space = str_pad('-', 30, '-');
+        $space = str_pad('-', 28, '-');
         $start = sprintf("%s ( %s - %s ) %s", $space, date('Y-m-d H:i:s'), $log_id, $space);
 
         //加入头部
@@ -137,8 +137,8 @@ class FileLog extends LogBase
      */
     private static function genLogID()
     {
-        return date('Ymd.') .
-            str_pad(time() - strtotime(date('Y-m-d')), 5, 0, STR_PAD_LEFT) .
-            '.' . mt_rand(100, 999);
+        return date('md.') .
+            str_pad(time() - strtotime('00:00'), 5, 0, STR_PAD_LEFT) .
+            '.' . mt_rand(1000, 9999);
     }
 }
