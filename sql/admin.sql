@@ -28,9 +28,11 @@ INSERT INTO `cpa_acl_menu` (`id`, `pid`, `type`, `name`, `link`, `display`, `ord
 	(15, 1, 1, '', 'delUser', 0, 0),
 	(16, 4, 1, '主页', 'index', 1, 0),
 	(17, 5, 1, '', 'index', 0, 0),
-	(18, 5, 1, '密保卡', 'securityCard', 1, 0),
-	(19, 5, 1, '更改密码', 'changePassword', 1, 0),
-	(20, 5, 1, '', 'create', 0, 0);
+	(18, 5, 1, '密保卡', 'securityCard', 1, 1),
+	(19, 5, 1, '更改密码', 'changePassword', 1, 10),
+	(20, 5, 1, '', 'create', 0, 0),
+	(22, 1, 1, '', 'userSecurityCard', 0, 0),
+	(23, 5, 1, '个人信息', 'profile', 1, 5);
 
 CREATE TABLE IF NOT EXISTS `cpa_acl_role` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -41,23 +43,45 @@ CREATE TABLE IF NOT EXISTS `cpa_acl_role` (
 
 DELETE FROM `cpa_acl_role`;
 INSERT INTO `cpa_acl_role` (`id`, `name`, `behavior`) VALUES
-	(1, '默认用户', '2,3,4,16,5,17,18,19,20');
+	(1, '默认用户', '2,3,4,16,5,17,18,19,23');
+
+CREATE TABLE IF NOT EXISTS `cpa_act_log` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `controller` varchar(255) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `params` text,
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `ip` varchar(128) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DELETE FROM `cpa_act_log`;
 
 CREATE TABLE IF NOT EXISTS `cpa_admin` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
+  `nickname` varchar(255) NOT NULL DEFAULT '' COMMENT '对外显示名称',
+  `real_name` varchar(255) NOT NULL DEFAULT '' COMMENT '真实姓名',
+  `avatar` varchar(255) NOT NULL DEFAULT '' COMMENT '头像',
+  `cellphone` varchar(32) NOT NULL DEFAULT '' COMMENT '手机号',
   `password` varchar(255) NOT NULL,
+  `token` varchar(64) NOT NULL DEFAULT '' COMMENT '授权访问时身份验证令牌',
+  `theme` varchar(32) NOT NULL DEFAULT '' COMMENT '主题风格名称',
   `salt` char(16) NOT NULL,
   `usc` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '是否允许解绑密保卡',
-  `t` int(11) unsigned NOT NULL DEFAULT '1' COMMENT '0,禁用 1,正常',
+  `last_login_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_login_ip` varchar(128) NOT NULL,
   `rid` int(11) unsigned NOT NULL DEFAULT '1' COMMENT '角色ID',
+  `t` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '0,禁用 1,正常',
   PRIMARY KEY (`id`),
   KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DELETE FROM `cpa_admin`;
-INSERT INTO `cpa_admin` (`id`, `name`, `password`, `salt`, `usc`, `t`, `rid`) VALUES
-	(1, 'admin', '5f77498804fde517ba653162490cc4e5ca204779754f974078e35d3407b32bce', '1234567887654321', 1, 1, 0);
+INSERT INTO `cpa_admin` (`id`, `name`, `nickname`, `real_name`, `avatar`, `cellphone`, `password`, `token`, `theme`, `salt`, `usc`, `last_login_date`, `last_login_ip`, `rid`, `t`) VALUES
+	(1, 'admin', 'admin', 'admin', '', '13800138000', '5f77498804fde517ba653162490cc4e5ca204779754f974078e35d3407b32bce', 'B16um0dnBF4qqy0DqZ0eBuuyBFA3d080', 'skin-black', '1234567887654321', 1, '2018-01-16 14:59:26', '127.0.0.1', 0, 1),
 
 CREATE TABLE IF NOT EXISTS `cpa_security_card` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,

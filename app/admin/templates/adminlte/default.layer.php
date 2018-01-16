@@ -22,7 +22,7 @@
     <![endif]-->
 </head>
 <!-- sidebar-collapse ! layout-boxed ! fixed ! skin-[blue|black|purple|green|red|yellow]-light -->
-<body class="hold-transition skin-black sidebar-mini" style="display: none">
+<body class="<?php echo $this->e($_SESSION, 'theme', 'skin-black') ?> sidebar-mini" style="display:none">
 <div class="wrapper">
     <header class="main-header">
         <a href="" class="logo">
@@ -45,7 +45,7 @@
                 <ul class="nav navbar-nav">
                     <li>
                         <a href="<?php echo $this->url("main:logout") ?>" target="_top">
-                            <?php echo $_SESSION['u'] ?> <i class="fa fa-sign-out"></i>
+                            <?php echo $_SESSION['u']['name'] ?> <i class="fa fa-sign-out"></i>
                         </a>
                     </li>
                 </ul>

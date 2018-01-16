@@ -3,6 +3,7 @@
  * @author wonli <wonli@live.com>
  * Main.php
  */
+
 namespace app\admin\controllers;
 
 use app\admin\supervise\AdminUserModule;
@@ -55,13 +56,13 @@ class Main extends Controller
             if (isset($_POST['user']) && isset($_POST['pwd']) && isset($_POST['v']) && isset($_POST['vv'])) {
                 $check_ret = $this->ADMIN->checkAdmin($_POST['user'], $_POST['pwd'], $_POST['v'], $_POST['vv']);
                 if ($check_ret['status'] == 1) {
-                    $_SESSION['u'] = $_POST['user'];
-                    $this->to("panel");
+                    $_SESSION['u'] = $check_ret['message'];
+                    $this->to('panel');
                 } else {
                     $data['status'] = $check_ret['status'];
                 }
             } else {
-                $data ['status'] = 100230;
+                $data['status'] = 100230;
             }
         }
 
@@ -72,7 +73,7 @@ class Main extends Controller
 
     /**
      * 退出登录
-     * 
+     *
      * @throws \Cross\Exception\CoreException
      */
     function logout()

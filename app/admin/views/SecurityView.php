@@ -29,6 +29,16 @@ class SecurityView extends AdminView
     }
 
     /**
+     * 个人信息
+     *
+     * @param array $data
+     */
+    function profile(array $data = array())
+    {
+        $this->renderTpl('security/profile', $data);
+    }
+
+    /**
      * 修改密码
      *
      * @param $data

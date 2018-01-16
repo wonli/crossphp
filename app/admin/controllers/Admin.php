@@ -19,9 +19,25 @@ use Cross\MVC\Controller;
 abstract class Admin extends Controller
 {
     /**
+     * 管理员登录名
+     *
      * @var string
      */
     protected $u;
+
+    /**
+     * 管理员用户ID
+     *
+     * @var int
+     */
+    protected $uid;
+
+    /**
+     * 管理员角色分组ID
+     *
+     * @var int
+     */
+    protected $rid;
 
     /**
      * @var AclModule
@@ -46,15 +62,28 @@ abstract class Admin extends Controller
     function __construct()
     {
         parent::__construct();
-        $this->u = &$_SESSION['u'];
+        $loginInfo = &$_SESSION['u'];
+        $this->u = $loginInfo['name'];
+        $this->uid = $loginInfo['id'];
+        $this->rid = $loginInfo['rid'];
 
         $this->ACL = new AclModule();
         $this->ADMIN = new AdminUserModule();
+
+        //保存操作日志
+        if ($this->is_post()) {
+            $this->ADMIN->updateActLog($this->u);
+        }
 
         //查询登录用户信息
         $user_info = $this->ADMIN->getAdminInfo(array('name' => $this->u));
         if (empty($user_info)) {
             $this->to();
+        }
+
+        //用户主题
+        if (!empty($user_info['theme'])) {
+            $_SESSION['theme'] = &$user_info['theme'];
         }
 
         //导航菜单数据

@@ -31,6 +31,13 @@ class AdminModule extends Module
     protected $t_role = 'cpa_acl_role';
 
     /**
+     * 操作日志
+     *
+     * @var string
+     */
+    protected $t_act_log = 'cpa_act_log';
+
+    /**
      * 权限表
      *
      * @var string

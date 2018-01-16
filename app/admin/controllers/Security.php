@@ -97,14 +97,64 @@ class Security extends Admin
             if ($_POST['np1'] != $_POST['np2']) {
                 $this->data['status'] = 100220;
             } else {
-                $is_right = $this->ADMIN->checkPassword($_POST['op']);
+                $is_right = $this->ADMIN->checkPassword($this->u, $_POST['op']);
                 if ($is_right) {
-                    $this->ADMIN->updatePassword($_POST['np1']);
+                    $this->ADMIN->updatePassword($this->u, $_POST['np1']);
                 } else {
                     $this->data['status'] = 100221;
                 }
             }
         }
+        $this->display($this->data);
+    }
+
+    /**
+     * 个人信息
+     *
+     * @cp_params act
+     * @throws \Cross\Exception\CoreException
+     */
+    function profile()
+    {
+        $adminInfo = $this->ADMIN->getAdminInfo(array('id' => $this->uid));
+        if ($this->is_post()) {
+            $this->ADMIN->update($this->uid, $_POST);
+            $this->to('security:profile');
+        }
+
+        //判断是否有主题配置
+        $themeConfig = $this->parseGetFile('app::config/theme.config.php');
+        $tplDir = $this->config->get('sys', 'default_tpl_dir');
+
+        $hasTheme = false;
+        $tplThemeList = array();
+        if (isset($themeConfig[$tplDir])) {
+            $hasTheme = true;
+            $tplThemeList = &$themeConfig[$tplDir];
+        }
+
+        if (!empty($this->params['act'])) {
+            switch ($this->params['act']) {
+                case 'setTheme':
+                    $theme = &$this->params['theme'];
+                    if ($hasTheme && $theme) {
+                        $useTheme = &$tplThemeList['themes'][$theme];
+                        if ($useTheme && !empty($useTheme['class'])) {
+                            $this->ADMIN->update($this->uid, array('theme' => $useTheme['class']));
+                        }
+                    }
+
+                    $this->to('security:profile');
+                    break;
+
+                default:
+                    $this->to('security:profile');
+            }
+        }
+
+        $this->data['themeList'] = $tplThemeList;
+        $this->data['hasTheme'] = $hasTheme;
+        $this->data['admin'] = $adminInfo;
         $this->display($this->data);
     }
 

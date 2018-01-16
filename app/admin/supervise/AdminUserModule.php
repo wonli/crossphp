@@ -19,6 +19,11 @@ use Exception;
 class AdminUserModule extends AdminModule
 {
     /**
+     * 最多保存多少条操作日志
+     */
+    const MAX_ACT_LOG = 200;
+
+    /**
      * 登录验证
      *
      * @param string $username
@@ -59,9 +64,24 @@ class AdminUserModule extends AdminModule
             }
 
             $user_password = self::genPassword($password, $user_info['salt']);
-            if ($user_password === $user_info["password"]) {
-                return $this->result(1);
+            if ($user_password === $user_info['password']) {
+
+                //更新登录信息
+                $token = Helper::random(32);
+                $this->update($user_info['id'], array(
+                    'token' => $token,
+                    'last_login_date' => date('Y-m-d H:i:s'),
+                    'last_login_ip' => $this->request->getClientIPAddress()
+                ));
+
+                return $this->result(1, array(
+                    'id' => $user_info['id'],
+                    'rid' => $user_info['rid'],
+                    'name' => $user_info['name'],
+                    'token' => $token
+                ));
             }
+
             return $this->result(100212);
         }
 
@@ -146,46 +166,89 @@ class AdminUserModule extends AdminModule
      */
     function update($id, $data)
     {
+        unset($data['id']);
         $admin_info = $this->link->get($this->t_admin, '*', array('id' => $id));
         if (!$admin_info) {
             return $this->result(100400);
         }
 
-        $nameUser = $this->link->get($this->t_admin, '*', array('name' => $data['name']));
-        if (!empty($nameUser) && $nameUser['id'] != $id) {
-            return $this->result(100420);
+        //更新用户名
+        if (isset($data['name'])) {
+            $nameUser = $this->link->get($this->t_admin, '*', array('name' => $data['name']));
+            if (!empty($nameUser) && $nameUser['id'] != $id) {
+                return $this->result(100420);
+            }
         }
 
-        //更新密码
-        if ($data['password'] !== $admin_info['password']) {
+        //重新生成密码
+        if (isset($data['password']) && ($data['password'] !== $admin_info['password'])) {
             $data ['password'] = self::genPassword($data['password'], $data['salt']);
         }
 
-        $this->link->update($this->t_admin, $data, array('id' => $id));
-        return $this->result(1);
+        $ret = $this->link->update($this->t_admin, $data, array('id' => $id));
+        if ($ret) {
+            return $this->result(1);
+        }
+
+        return $this->result(100421);
+    }
+
+    /**
+     * 更新登录日志
+     *
+     * @param string $name
+     * @throws \Cross\Exception\CoreException
+     */
+    function updateActLog($name)
+    {
+        $params = array();
+        if (!empty($_POST)) {
+            $params = json_encode($_POST);
+        }
+
+        $data = array(
+            'name' => $name,
+            'controller' => $this->controller,
+            'action' => $this->action,
+            'params' => $params,
+            'date' => date('Y-m-d H:i:s'),
+            'ip' => $this->request->getClientIPAddress()
+        );
+
+        $act_info = $this->link->get($this->t_act_log, 'count(id) has, min(id) del_act_id', array(
+            'name' => $name
+        ));
+
+        if ($act_info['has'] >= self::MAX_ACT_LOG) {
+            $this->link->del($this->t_act_log, array('id' => $act_info['del_act_id']));
+        }
+
+        $this->link->add($this->t_act_log, $data);
     }
 
     /**
      * 验证当前密码
      *
+     * @param string $name
      * @param string $pwd
      * @return bool
      * @throws \Cross\Exception\CoreException
      */
-    function checkPassword($pwd)
+    function checkPassword($name, $pwd)
     {
-        $admin_info = $this->link->get($this->t_admin, '*', array('name' => $_SESSION['u']));
+        $admin_info = $this->link->get($this->t_admin, '*', array('name' => $name));
         return $admin_info ['password'] === self::genPassword($pwd, $admin_info['salt']);
     }
 
     /**
      * 更新密码
      *
+     * @param string $name
      * @param string $pwd
      * @return array|string
      * @throws \Cross\Exception\CoreException
      */
-    function updatePassword($pwd)
+    function updatePassword($name, $pwd)
     {
         $np = self::genPassword($pwd, $salt);
         $data = array(
@@ -193,7 +256,7 @@ class AdminUserModule extends AdminModule
             'salt' => $salt
         );
 
-        $status = $this->link->update($this->t_admin, $data, array('name' => $_SESSION['u']));
+        $status = $this->link->update($this->t_admin, $data, array('name' => $name));
         if ($status) {
             return $this->result(1);
         }
