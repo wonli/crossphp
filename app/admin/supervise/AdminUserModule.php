@@ -197,26 +197,34 @@ class AdminUserModule extends AdminModule
      * 更新登录日志
      *
      * @param string $name
+     * @param string|array $params
+     * @param string $type
      * @throws \Cross\Exception\CoreException
      */
-    function updateActLog($name)
+    function updateActLog($name, $params, $type = 'post')
     {
-        $params = array();
-        if (!empty($_POST)) {
-            $params = json_encode($_POST);
+        if (is_array($params)) {
+            $params = array_filter($params);
+            if (!empty($params)) {
+                $params = json_encode($params);
+            } else {
+                $params = '';
+            }
         }
 
         $data = array(
             'name' => $name,
             'controller' => $this->controller,
             'action' => $this->action,
+            'type' => $type,
             'params' => $params,
             'date' => date('Y-m-d H:i:s'),
             'ip' => $this->request->getClientIPAddress()
         );
 
         $act_info = $this->link->get($this->t_act_log, 'count(id) has, min(id) del_act_id', array(
-            'name' => $name
+            'name' => $name,
+            'type' => $type
         ));
 
         if ($act_info['has'] >= self::MAX_ACT_LOG) {

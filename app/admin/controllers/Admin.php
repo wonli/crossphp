@@ -72,11 +72,21 @@ abstract class Admin extends Controller
 
         //保存操作日志
         if ($this->is_post()) {
-            $this->ADMIN->updateActLog($this->u);
+            $type = 'post';
+            $actParams = $_POST;
+        } else {
+            $type = 'get';
+            $actParams = $this->params;
         }
 
+        if ($this->is_ajax_request()) {
+            $type = $type . '|' . 'ajax';
+        }
+
+        $this->ADMIN->updateActLog($this->u, $actParams, $type);
+
         //查询登录用户信息
-        $user_info = $this->ADMIN->getAdminInfo(array('name' => $this->u));
+        $user_info = $this->ADMIN->getAdminInfo(array('id' => $this->uid));
         if (empty($user_info)) {
             $this->to();
         }

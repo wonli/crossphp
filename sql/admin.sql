@@ -48,13 +48,15 @@ INSERT INTO `cpa_acl_role` (`id`, `name`, `behavior`) VALUES
 CREATE TABLE IF NOT EXISTS `cpa_act_log` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
+  `type` varchar(32) NOT NULL,
   `controller` varchar(255) NOT NULL,
   `action` varchar(255) NOT NULL,
   `params` text,
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `ip` varchar(128) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
-  KEY `name` (`name`)
+  KEY `name` (`name`),
+  KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DELETE FROM `cpa_act_log`;
