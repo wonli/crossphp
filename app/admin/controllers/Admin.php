@@ -58,6 +58,7 @@ abstract class Admin extends Controller
      * Admin constructor.
      *
      * @throws \Cross\Exception\CoreException
+     * @throws \ReflectionException
      */
     function __construct()
     {

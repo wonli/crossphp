@@ -234,9 +234,9 @@ class AclModule extends AdminModule
         }
 
         $menu = $this->link->getAll($this->t_acl_menu, '*', array('pid' => 0), '`order` ASC');
-        foreach ($menu as $m) {
-            $menu_list[$m["link"]] = $m;
-        }
+        array_map(function ($m) use (&$menu_list) {
+            $menu_list[$m['link']] = $m;
+        }, $menu);
 
         return $menu_list;
     }

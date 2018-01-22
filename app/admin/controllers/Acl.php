@@ -29,6 +29,7 @@ class Acl extends Admin
      * Acl constructor.
      *
      * @throws \Cross\Exception\CoreException
+     * @throws \ReflectionException
      */
     function __construct()
     {
@@ -79,6 +80,7 @@ class Acl extends Admin
      * 导航菜单管理
      *
      * @throws \Cross\Exception\CoreException
+     * @throws \ReflectionException
      */
     function navManager()
     {
@@ -126,6 +128,7 @@ class Acl extends Admin
      * 添加管理角色
      *
      * @throws \Cross\Exception\CoreException
+     * @throws \ReflectionException
      */
     function addRole()
     {
@@ -173,6 +176,7 @@ class Acl extends Admin
      *
      * @cp_params rid
      * @throws \Cross\Exception\CoreException
+     * @throws \ReflectionException
      */
     function editRole()
     {
