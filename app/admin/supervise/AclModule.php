@@ -58,6 +58,7 @@ class AclModule extends AdminModule
      *
      * @return mixed
      * @throws \Cross\Exception\CoreException
+     * @throws \ReflectionException
      */
     function initMenuList()
     {
@@ -221,6 +222,7 @@ class AclModule extends AdminModule
      *
      * @return array
      * @throws \Cross\Exception\CoreException
+     * @throws \ReflectionException
      */
     function getMenu()
     {
@@ -248,9 +250,20 @@ class AclModule extends AdminModule
      */
     function getNavChildMenu($nav_menu)
     {
-        foreach ($nav_menu as & $m) {
-            $m['child_menu'] = $this->getMenuByCondition(array('pid' => $m['id']));
+        $pidMaps = array();
+        $allChildMenu = $this->getMenuByCondition(array('pid' => array('<>', 0)));
+        if (!empty($allChildMenu)) {
+            array_map(function ($m) use (&$pidMaps) {
+                $pidMaps[$m['pid']][] = $m;
+            }, $allChildMenu);
         }
+
+        array_walk($nav_menu, function (&$m) use ($pidMaps) {
+            $m['child_menu'] = array();
+            if (isset($pidMaps[$m['id']])) {
+                $m['child_menu'] = $pidMaps[$m['id']];
+            }
+        });
 
         return $nav_menu;
     }
@@ -259,6 +272,7 @@ class AclModule extends AdminModule
      * 从控制器中初始化菜单数据
      *
      * @throws \Cross\Exception\CoreException
+     * @throws \ReflectionException
      */
     function initMenu4controllers()
     {
@@ -515,6 +529,7 @@ class AclModule extends AdminModule
      * @param array $un_save_menu
      * @return mixed
      * @throws \Cross\Exception\CoreException
+     * @throws \ReflectionException
      */
     function getNavList(& $un_save_menu = array())
     {
@@ -582,6 +597,7 @@ class AclModule extends AdminModule
      *
      * @param bool $hashMap
      * @return array
+     * @throws \ReflectionException
      */
     private function scanControllers($hashMap = false)
     {
