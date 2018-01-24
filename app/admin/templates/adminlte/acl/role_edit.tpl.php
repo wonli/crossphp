@@ -20,7 +20,7 @@
                 <tr>
                     <td>
                         <?php
-                        $this->renderTpl('acl/acl_behavior', array(
+                        $this->renderTpl('acl/behavior', array(
                             'menu_list' => $data['menu_list'],
                             'menu_select' => $data ['menu_select'],
                         ))

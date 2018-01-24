@@ -18,7 +18,7 @@
                 </tr>
 
                 <tr>
-                    <td><?php $this->renderTpl('acl/acl_behavior', $data) ?></td>
+                    <td><?php $this->renderTpl('acl/behavior', $data) ?></td>
                 </tr>
             </table>
         </form>
