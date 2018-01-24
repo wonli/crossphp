@@ -160,8 +160,7 @@ abstract class Admin extends Controller
             //跳转到第一个有权限的action
             if (!isset($nav_menu_data[$controller])) {
                 if (!empty($allow_menu)) {
-                    list($controller, $action) = each($allow_menu);
-                    $this->to("{$controller}:{$action}");
+                    $this->to(key($allow_menu) . ':' . current($allow_menu));
                 }
             }
 
