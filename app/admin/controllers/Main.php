@@ -32,6 +32,7 @@ class Main extends Controller
 
     /**
      * 设置layer
+     * @throws \Cross\Exception\CoreException
      */
     function __construct()
     {

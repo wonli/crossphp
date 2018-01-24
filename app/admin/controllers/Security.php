@@ -26,6 +26,7 @@ class Security extends Admin
      * Security constructor.
      *
      * @throws \Cross\Exception\CoreException
+     * @throws \ReflectionException
      */
     function __construct()
     {

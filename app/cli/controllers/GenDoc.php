@@ -22,6 +22,7 @@ class GenDoc extends Cli
 {
     /**
      * @throws CoreException
+     * @throws \ReflectionException
      */
     function index()
     {
@@ -83,6 +84,7 @@ class GenDoc extends Cli
      *
      * @param string $source
      * @return array
+     * @throws \ReflectionException
      */
     private function scanSource($source)
     {
