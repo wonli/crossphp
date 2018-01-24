@@ -5,23 +5,19 @@
  * @link        http://www.crossphp.com
  * @license     MIT License
  */
-namespace lib\Mcrypt;
+
+namespace lib\Mcrypt\Encoder;
 
 /**
  * @author wonli <wonli@live.com>
- * Class HexCrypt
+ * Class HexEncoder
  */
-class HexCrypt extends DEcode
+class HexEncoder extends Encoder
 {
-    public function __construct()
-    {
-
-    }
-
     /**
      * 加密
      *
-     * @param $data
+     * @param string $data
      * @return array
      */
     public function enCode($data)
@@ -32,11 +28,11 @@ class HexCrypt extends DEcode
     /**
      * 解密
      *
-     * @param $data
+     * @param string $data
      * @return string
      */
     public function deCode($data)
     {
-        return @pack('H*', $data);
+        return hex2bin($data);
     }
 }

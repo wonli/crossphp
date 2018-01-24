@@ -5,81 +5,79 @@
  * @link        http://www.crossphp.com
  * @license     MIT License
  */
+
 namespace lib\Mcrypt;
+
+use lib\Mcrypt\Encoder\HexEncoder;
+use lib\Mcrypt\Encoder\Encoder;
 
 /**
  * @author wonli <wonli@live.com>
  * Class Mcrypt
  */
-class Mcrypt extends DEcode
+class Mcrypt
 {
-    /**
-     * iv
-     *
-     * @var string
-     */
-    private $iv;
-
-    /**
-     * HexCrypt
-     *
-     * @var HexCrypt
-     */
-    private $hexCrypt;
-
-    /**
-     * 是否解码
-     *
-     * @var bool
-     */
-    private $isDecode = true;
-
-    /**
-     * 加密/解密的字符串是否包含iv前16个字节
-     *
-     * @var bool
-     */
-    private $isContainIV = true;
-
-    /**
-     * key
-     *
-     * @var string
-     */
-    private $default_key = 'corssphp(*)9<>@$12v';
-
     /**
      * @var string
      */
     private $key;
 
     /**
-     * 初始化参数
+     * @var string
      */
-    function __construct()
+    private $cryptKey = '@!c#r$o%*s^&s#p!h%p&!@#';
+
+    /**
+     * @var string
+     */
+    private $method = 'AES-256-CBC';
+
+    /**
+     * @var Encoder
+     */
+    private $encoder;
+
+    /**
+     * @var int
+     */
+    private $ivLength;
+
+    /**
+     * @var bool
+     */
+    private $useEncoder = true;
+
+    /**
+     * Mcrypt constructor.
+     *
+     * @param string $method
+     */
+    function __construct($method = 'AES-256-CBC')
     {
-        if ($this->isDecode) {
-            $this->hexCrypt = new HexCrypt ();
+        if ($method != $this->method) {
+            $cipher_methods = openssl_get_cipher_methods(true);
+            if (in_array($method, $cipher_methods)) {
+                $this->method = $method;
+            }
         }
+
+        $this->ivLength = openssl_cipher_iv_length($this->method);
     }
 
     /**
      * 加密
      *
-     * @param $data
-     * @return array
+     * @param string $data
+     * @return string
      */
-    public function enCode($data)
+    public function encrypt($data)
     {
         $key = $this->getKey();
-        $iv = $this->getIV();
-        $s = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $this->pkcs5Pad($data), MCRYPT_MODE_CBC, $iv);
-        if ($this->isContainIV) {
-            $s = $iv . $s;
-        }
+        $iv = openssl_random_pseudo_bytes($this->ivLength);
 
-        if ($this->isDecode && $this->hexCrypt) {
-            return $this->hexCrypt->EnCode($s);
+        $s = openssl_encrypt($data, $this->method, $key, 0, $iv) . $iv;
+        if ($this->useEncoder) {
+            return $this->getEncoder()->EnCode($s);
         }
 
         return $s;
@@ -91,37 +89,17 @@ class Mcrypt extends DEcode
      * @param $data
      * @return string
      */
-    public function deCode($data)
+    public function decrypt($data)
     {
+        if ($this->useEncoder) {
+            $data = $this->getEncoder()->DeCode($data);
+        }
+
+        $iv = substr($data, -$this->ivLength);
+        $data = substr($data, 0, -$this->ivLength);
         $key = $this->getKey();
 
-        if ($this->isDecode && $this->hexCrypt) {
-            $data = $this->hexCrypt->DeCode($data);
-        }
-
-        if ($this->isContainIV) {
-            $iv = substr($data, 0, 16);
-            $data = substr($data, 16);
-        } else {
-            $iv = $this->getIV();
-        }
-
-        $str = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, $iv);
-        return $this->pkcs5Unpad($str);
-    }
-
-    /**
-     * 获取key
-     *
-     * @return string
-     */
-    function getKey()
-    {
-        if (!$this->key) {
-            return md5($this->default_key);
-        }
-
-        return $this->key;
+        return openssl_decrypt($data, $this->method, $key, 0, $iv);
     }
 
     /**
@@ -133,60 +111,56 @@ class Mcrypt extends DEcode
     function setKey($key)
     {
         $this->key = $key;
-
         return $this;
     }
 
     /**
-     * 设置IV
+     * isDecode
      *
-     * @param $iv
+     * @param bool $useEncoder
+     */
+    function setUseEncoder($useEncoder)
+    {
+        $this->useEncoder = $useEncoder;
+    }
+
+    /**
+     * setEncoder
+     *
+     * @param Encoder $encoder
      * @return $this
      */
-    function setIV($iv)
+    function setEncoder(Encoder $encoder)
     {
-        $this->iv = $iv;
-
+        $this->encoder = $encoder;
         return $this;
     }
 
     /**
-     * 加解密是否需要先解码
+     * 获取key
      *
-     * @param $isDecode
-     * @return $this
+     * @return string
      */
-    function isDecode($isDecode)
+    protected function getKey()
     {
-        $this->isDecode = $isDecode;
-
-        return $this;
-    }
-
-    /**
-     * 设置加解密是否包含iv
-     *
-     * @param $isContainIV
-     * @return $this
-     */
-    function isContainIV($isContainIV)
-    {
-        $this->isContainIV = $isContainIV;
-
-        return $this;
-    }
-
-    /**
-     * 获取IV
-     */
-    function getIV()
-    {
-        if (empty($this->iv)) {
-            $td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
-            $iv = @mcrypt_create_iv(mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
-            $this->setIV($iv);
+        if (!$this->key) {
+            return md5($this->cryptKey);
         }
 
-        return $this->iv;
+        return $this->key;
+    }
+
+    /**
+     * getEncoder
+     *
+     * @return Encoder
+     */
+    protected function getEncoder()
+    {
+        if (!$this->encoder) {
+            $this->setEncoder(new HexEncoder());
+        }
+
+        return $this->encoder;
     }
 }
