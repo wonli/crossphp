@@ -138,9 +138,9 @@ abstract class Api extends Controller
         }
 
         //公共参数赋值
-        $this->channel = $this->getInputData('channel');
-        $this->platform = $this->getInputData('platform');
-        $this->version = $this->getInputData('version');
+        $this->channel = $this->getInputData('channel', true, true);
+        $this->platform = $this->getInputData('platform', true, true);
+        $this->version = $this->getInputData('version', true, true);
     }
 
     /**
@@ -148,32 +148,32 @@ abstract class Api extends Controller
      *
      * @param string $key
      * @param bool $filter_data 是否使用过滤器
+     * @param bool $is_force_params 是否强制验证
      * @return string
      * @throws \Cross\Exception\CoreException
      */
-    function getInputData($key, $filter_data = true)
+    function getInputData($key, $filter_data = true, $is_force_params = false)
     {
-        if (isset($this->force_params[$key])) {
+        $value = '';
+        if (isset($this->force_params[$key]) || $is_force_params) {
             if (!isset($this->data_container[$key]) || '' == trim($this->data_container[$key])) {
+                $value = '';
                 $this->data['status'] = 200100;
                 $this->data['data']['need_params'] = $key;
                 $this->display($this->data);
-                return false;
             } elseif ($filter_data) {
-                return $this->filterData($key, $this->data_container[$key]);
+                $value = $this->filterInputData($key, $this->data_container[$key]);
             } else {
-                return trim($this->data_container[$key]);
+                $value = trim($this->data_container[$key]);
             }
         } elseif (isset($this->data_container[$key])) {
             $value = trim($this->data_container[$key]);
             if ($filter_data && '' != $value) {
-                return $this->filterData($key, $this->data_container[$key]);
+                $value = $this->filterInputData($key, $this->data_container[$key]);
             }
-
-            return $value;
-        } else {
-            return '';
         }
+
+        return $value;
     }
 
     /**
@@ -184,7 +184,7 @@ abstract class Api extends Controller
      * @return int|string
      * @throws \Cross\Exception\CoreException
      */
-    protected function filterData($key, $value)
+    protected function filterInputData($key, $value)
     {
         switch ($key) {
 
