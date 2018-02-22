@@ -101,30 +101,30 @@ abstract class Api extends Controller
         $request_type = &$this->request_type;
         $annotate_api = &$this->action_annotate['api'];
         if (!empty($annotate_api)) {
-            @list($request_type) = explode(',', $annotate_api);
-            if (!isset($_SERVER['REQUEST_METHOD'])
-                || strcasecmp($_SERVER['REQUEST_METHOD'], trim($request_type)) !== 0
-            ) {
+            $request_method = $this->request->SERVER('REQUEST_METHOD');
+            list($request_type) = explode(',', $annotate_api);
+            if (strcasecmp($request_method, trim($request_type)) !== 0) {
                 $this->data['status'] = 200000;
                 $this->display($this->data);
             }
         }
 
-        //验证请求所需数据
+        //验证请求所需参数
         $this->data_container = $this->getDataContainer($request_type);
         $annotate_request = &$this->action_annotate['request'];
         if (!empty($annotate_request)) {
             $request = explode(',', $annotate_request);
             if (!empty($request)) {
                 foreach ($request as $p) {
-                    @list($params, $message, $require) = explode('|', trim($p));
+                    list($params, $message, $require) = explode('|', trim($p));
                     if ($require) {
-                        @list($param_name, $input_type) = explode(':', $params);
-                        $this->force_params[$param_name] = true;
-                        if (!empty($input_type) && isset($this->input_data_container[$input_type])) {
-                            $data_container = $this->getDataContainer($input_type);
-                        } else {
-                            $data_container = $this->data_container;
+                        $param_name = $params;
+                        $data_container = $this->data_container;
+                        if (strpos($params, ':') !== 0) {
+                            list($param_name, $input_type) = explode(':', $params);
+                            if (isset($this->input_data_container[$input_type])) {
+                                $data_container = $this->getDataContainer($input_type);
+                            }
                         }
 
                         if (!isset($data_container[$param_name])) {
@@ -137,7 +137,7 @@ abstract class Api extends Controller
             }
         }
 
-        //公共参数赋值
+        //设置公共参数
         $this->channel = $this->getInputData('channel', true, true);
         $this->platform = $this->getInputData('platform', true, true);
         $this->version = $this->getInputData('version', true, true);
@@ -155,21 +155,26 @@ abstract class Api extends Controller
     function getInputData($key, $filter_data = true, $is_force_params = false)
     {
         $value = '';
+        $defaultValue = &$this->data_container[$key];
+        if ($defaultValue) {
+            $defaultValue = htmlentities(strip_tags(trim($defaultValue)), ENT_COMPAT, 'utf-8');
+        }
+
         if (isset($this->force_params[$key]) || $is_force_params) {
-            if (!isset($this->data_container[$key]) || '' == trim($this->data_container[$key])) {
-                $value = '';
+            if (!isset($this->data_container[$key]) || '' == $defaultValue) {
                 $this->data['status'] = 200100;
                 $this->data['data']['need_params'] = $key;
                 $this->display($this->data);
             } elseif ($filter_data) {
-                $value = $this->filterInputData($key, $this->data_container[$key]);
+                $value = $this->filterInputData($key, $defaultValue);
             } else {
-                $value = trim($this->data_container[$key]);
+                $value = $defaultValue;
             }
         } elseif (isset($this->data_container[$key])) {
-            $value = trim($this->data_container[$key]);
             if ($filter_data && '' != $value) {
-                $value = $this->filterInputData($key, $this->data_container[$key]);
+                $value = $this->filterInputData($key, $defaultValue);
+            } else {
+                $value = $defaultValue;
             }
         }
 
