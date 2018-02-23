@@ -120,7 +120,7 @@ abstract class Api extends Controller
                     if ($require) {
                         $param_name = $params;
                         $data_container = $this->data_container;
-                        if (strpos($params, ':') !== 0) {
+                        if (strpos($params, ':') !== false) {
                             list($param_name, $input_type) = explode(':', $params);
                             if (isset($this->input_data_container[$input_type])) {
                                 $data_container = $this->getDataContainer($input_type);
