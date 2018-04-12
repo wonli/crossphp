@@ -137,7 +137,7 @@ class FileLog extends LogBase
      */
     private static function genLogID()
     {
-        return date('md.') .
+        return date('Ymd.') .
             str_pad(time() - strtotime('00:00'), 5, 0, STR_PAD_LEFT) .
             '.' . mt_rand(1000, 9999);
     }
