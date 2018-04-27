@@ -112,7 +112,7 @@ class Security extends Admin
     /**
      * 个人信息
      *
-     * @cp_params act
+     * @cp_params act, theme
      * @throws \Cross\Exception\CoreException
      */
     function profile()
