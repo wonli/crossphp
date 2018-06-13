@@ -2,9 +2,10 @@
     <?php
     if (!empty($data['child'])) {
         foreach ($data['child'] as $m) {
-            $icon = 'fa fa-circle-o';
             if (!empty($m['icon'])) {
                 $icon = &$m['icon'];
+            } else {
+                $icon = 'fa dot';
             }
 
             if ($m['type'] == 1) {

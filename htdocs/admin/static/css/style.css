@@ -68,3 +68,12 @@
     color: #666;
     border: 1px solid #e6e6e6;
 }
+
+.treeview-menu > li > a > .dot:before {
+    top: -4px;
+    left: 20px;
+    font-size: 36px;
+    content: "\00b7";
+    display: block;
+    position: absolute;
+}
