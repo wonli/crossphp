@@ -35,7 +35,7 @@
             </span>
         </a>
         <nav class="navbar navbar-static-top">
-            <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+            <a href="#" id="sidebar-toggle" class="sidebar-toggle" data-toggle="push-menu" role="button">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -100,6 +100,7 @@
 </div>
 <script src="<?php echo $this->res('libs/bootstrap/3.3.7/js/bootstrap.min.js') ?>"></script>
 <script src="<?php echo $this->res('libs/toggle/2.2.2/js/bootstrap-toggle.min.js') ?>"></script>
+<script src="<?php echo $this->res('libs/store.js/2.0.12/store.legacy.min.js') ?>"></script>
 <script src="<?php echo $this->res('libs/nprogress/0.2.0/nprogress.js') ?>"></script>
 <script src="<?php echo $this->res('libs/pop/pop.min.js') ?>"></script>
 <script src="<?php echo $this->res('adminlte/2.4.2/dist/js/adminlte.min.js') ?>"></script>
@@ -112,9 +113,21 @@
     });
 
     NProgress.start();
+    var body = $('body');
+    if (store.get('collapse')) {
+        body.addClass('sidebar-collapse');
+    } else {
+        body.removeClass('sidebar-collapse');
+    }
+
     $(function () {
         NProgress.done();
-        $('body').show();
+        body.show();
+
+        $('#sidebar-toggle').click(function () {
+            var v = (store.get('collapse') === 1) ? 0 : 1;
+            store.set('collapse', v);
+        })
     });
 </script>
 </body>
