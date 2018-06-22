@@ -186,15 +186,29 @@ class AclModule extends AdminModule
     }
 
     /**
+     * 获取所有子菜单数据
+     *
+     * @param int $pid
+     * @return mixed
+     * @throws \Cross\Exception\CoreException
+     */
+    function getChildMenuData($pid)
+    {
+        return $this->link->getAll($this->t_acl_menu, '*', array(
+            'pid' => $pid
+        ));
+    }
+
+    /**
      * 保存导航菜单
      *
-     * @param array $params
+     * @param array $menus
      * @return bool
      * @throws \Cross\Exception\CoreException
      */
-    function saveNav(array $params)
+    function saveNav(array $menus)
     {
-        foreach ($params as $p) {
+        foreach ($menus as $p) {
             if (empty($p['name']) || empty($p['link'])) {
                 continue;
             }
@@ -276,8 +290,12 @@ class AclModule extends AdminModule
      */
     function initMenu4controllers()
     {
+        //处理类菜单
         $nav_data = $this->scanControllers();
         $this->saveNav($nav_data);
+
+        //处理子菜单
+        $this->initMenuList();
     }
 
     /**
@@ -531,13 +549,15 @@ class AclModule extends AdminModule
      * @throws \Cross\Exception\CoreException
      * @throws \ReflectionException
      */
-    function getNavList(& $un_save_menu = array())
+    function getNavList(&$un_save_menu = array())
     {
+        $result = array();
         $controllers_lists = $this->scanControllers();
         $saved_menus = $this->getMenuByCondition(array('pid' => 0), '`order` ASC, type ASC');
 
         $saved_menu_link_hash = array();
-        array_map(function ($m) use (&$saved_menu_link_hash) {
+        array_map(function ($m) use (&$saved_menu_link_hash, &$result) {
+            $result[$m['id']] = $m;
             $saved_menu_link_hash[$m['link']] = true;
         }, $saved_menus);
 
@@ -547,7 +567,7 @@ class AclModule extends AdminModule
             }
         }
 
-        return $saved_menus;
+        return $result;
     }
 
     /**
@@ -608,16 +628,16 @@ class AclModule extends AdminModule
             $class_name = $fi['filename'];
             $menuName = lcfirst($class_name);
 
-            $fullName = "app\\" . parent::getConfig()->get('app', 'name') . '\\controllers\\' . $class_name;
+            $fullName = 'app\\' . parent::getConfig()->get('app', 'name') . '\\controllers\\' . $class_name;
             $rc = new ReflectionClass($fullName);
 
             $display = 1;
-            if ($rc->isAbstract() || $menuName == 'main') {
+            if ($rc->isAbstract() || 0 === strcasecmp($menuName, 'main')) {
                 $display = 0;
             }
 
             $ori_nav_data = array(
-                'name' => $menuName,
+                'name' => $class_name,
                 'link' => $menuName,
                 'display' => $display
             );

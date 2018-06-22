@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `cpa_acl_menu` (
   `pid` int(11) unsigned NOT NULL DEFAULT '0',
   `type` tinyint(4) unsigned NOT NULL DEFAULT '1' COMMENT '0,系统 1,用户',
   `name` varchar(128) NOT NULL DEFAULT '',
-  `link` varchar(64) NOT NULL DEFAULT '',
+  `link` varchar(255) NOT NULL DEFAULT '',
   `display` tinyint(4) unsigned NOT NULL DEFAULT '1' COMMENT '0,不显示 1,显示',
   `order` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '排序',
   PRIMARY KEY (`id`)
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `cpa_admin` (
 
 DELETE FROM `cpa_admin`;
 INSERT INTO `cpa_admin` (`id`, `name`, `nickname`, `real_name`, `avatar`, `cellphone`, `password`, `token`, `theme`, `salt`, `usc`, `last_login_date`, `last_login_ip`, `rid`, `t`) VALUES
-	(1, 'admin', 'admin', 'admin', '', '13800138000', '5f77498804fde517ba653162490cc4e5ca204779754f974078e35d3407b32bce', 'B16um0dnBF4qqy0DqZ0eBuuyBFA3d080', 'skin-black', '1234567887654321', 1, '2018-01-16 14:59:26', '127.0.0.1', 0, 1),
+	(1, 'admin', 'admin', 'admin', '', '13800138000', '5f77498804fde517ba653162490cc4e5ca204779754f974078e35d3407b32bce', 'B16um0dnBF4qqy0DqZ0eBuuyBFA3d080', 'skin-black', '1234567887654321', 1, '2018-01-16 14:59:26', '127.0.0.1', 0, 1);
 
 CREATE TABLE IF NOT EXISTS `cpa_security_card` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
