@@ -67,9 +67,7 @@ class GenDoc extends Cli
         $annotate = $this->scanSource($source);
 
         //处理公共配置
-        if (!empty($annotate['global_params'])) {
-            $this->globalParams($annotate['global_params'], $output_dir);
-        }
+        $this->globalParams($annotate['global_params'], $output_dir);
 
         $data['asset_server'] = $asset_server;
         $data['output_dir'] = $output_dir;
@@ -242,8 +240,12 @@ class GenDoc extends Cli
             }
         }
 
+        $global_config_file = $output_dir . '.global.json';
+        if (file_exists($global_config_file)) {
+            unlink($global_config_file);
+        }
+
         if (!empty($data)) {
-            $global_config_file = $output_dir . '.global.json';
             file_put_contents($global_config_file, json_encode($data));
         }
     }
