@@ -113,21 +113,23 @@
     });
 
     NProgress.start();
-    var body = $('body');
-    if (store.get('collapse')) {
-        body.addClass('sidebar-collapse');
-    } else {
-        body.removeClass('sidebar-collapse');
-    }
-
     $(function () {
+        var body = $('body');
+        if($(document).width() > 767) {
+            if (store.get('collapse')) {
+                body.addClass('sidebar-collapse');
+            } else {
+                body.removeClass('sidebar-collapse');
+            }
+
+            $('#sidebar-toggle').click(function () {
+                var v = (store.get('collapse') === 1) ? 0 : 1;
+                store.set('collapse', v);
+            })
+        }
+
         NProgress.done();
         body.show();
-
-        $('#sidebar-toggle').click(function () {
-            var v = (store.get('collapse') === 1) ? 0 : 1;
-            store.set('collapse', v);
-        })
     });
 </script>
 </body>
