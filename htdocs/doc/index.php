@@ -139,12 +139,15 @@ function basicAuth($users, $options = array())
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="" title="生成时间 2018-07-04 16:04:10">
+        <a class="navbar-brand" href="" title="生成时间 2018-07-04 16:31:49">
             API文档            <small><sup>v1.0</sup></small>
         </a>
     </div>
 
     <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+                    </ul>
+
         <ul class="nav navbar-nav navbar-right">
                     </ul>
     </div>

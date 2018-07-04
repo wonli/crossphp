@@ -12,23 +12,27 @@
     </div>
 
     <div class="navbar-collapse collapse">
-        <ul class="nav navbar-nav navbar-right">
+        <ul class="nav navbar-nav">
             <?php
             if (!empty($data['top_nav'])) {
                 foreach ($data['top_nav'] as $name => $url) {
-                    if(is_array($url)) {
+                    if (is_array($url)) {
                         $url['@content'] = $name;
                         echo $this->wrap('li')->wrap('a', $url)->html('');
                     } else {
                         echo $this->wrap('li')->a($name, $url);
                     }
                 }
+            }
+            ?>
+        </ul>
 
-                if ($data['has_global_params']) {
-                    $this->wrap('li')->a('公共参数配置', 'javascript:void(0)', array(
-                        'id' => 'commonModalSwitch'
-                    ));
-                }
+        <ul class="nav navbar-nav navbar-right">
+            <?php
+            if ($data['has_global_params']) {
+                echo $this->wrap('li')->a('公共参数配置', 'javascript:void(0)', array(
+                    'id' => 'commonModalSwitch'
+                ));
             }
             ?>
         </ul>
