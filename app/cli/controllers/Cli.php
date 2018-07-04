@@ -62,12 +62,16 @@ abstract class Cli extends Controller
      * 输出消息并刷新输入输出缓存
      *
      * @param string $message
+     * @param bool $newLine
      */
-    function flushMessage($message)
+    function flushMessage($message, $newLine = true)
     {
-        echo $message . PHP_EOL;
-        flush();
-        ob_flush();
+        $msg = '(' . $_SERVER['argv'][1] . ') ' . $message;
+        if ($newLine) {
+            $msg .= PHP_EOL;
+        }
+
+        fputs(STDOUT, $msg);
     }
 
     /**

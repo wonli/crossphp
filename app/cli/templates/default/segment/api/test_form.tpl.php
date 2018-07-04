@@ -4,7 +4,7 @@
  * test_form.tpl.php
  */
 $api = &$data['api'];
-$api_host = &$this->data['api_host'];
+$api_host = &$data['api_host'];
 $formFields = &$data['request'];
 $apiInfo = $formFieldsArray = array();
 $global_params_status = &$data['global_params'];
@@ -63,127 +63,121 @@ $action = rtrim($api_host, '/') . '/' . ltrim($apiInfo['action'], '/');
                             </div>
                         </div>
 
-                        <?php if (!empty($formFieldsArray)): ?>
-                            <div class="panel-body">
-                                <table class="table table-striped table-hover">
-                                    <thead>
-                                    <tr>
-                                        <th>参数</th>
-                                        <th>值</th>
-                                        <th><span class="hidden-xs">名称</span></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <?php foreach ($formFieldsArray as $field) {
-                                        if (false !== strpos($field['name'], ':')) {
-                                            @list($field_name, $input_type, $options) = explode(':', $field['name']);
-                                        } else {
-                                            $field_name = $field['name'];
-                                            $input_type = 'text';
-                                            $options = '';
-                                        }
+                        <div class="panel-body">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th>参数</th>
+                                    <th>值</th>
+                                    <th><span class="hidden-xs">名称</span></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <?php foreach ($formFieldsArray as $field) {
+                                    if (false !== strpos($field['name'], ':')) {
+                                        @list($field_name, $input_type, $options) = explode(':', $field['name']);
+                                    } else {
+                                        $field_name = $field['name'];
+                                        $input_type = 'text';
+                                        $options = '';
+                                    }
 
-                                        $input_tag_data = array(
-                                            'name' => $field_name,
-                                            'type' => $input_type,
-                                            'class' => 'form-control',
-                                        );
+                                    $input_tag_data = array(
+                                        'name' => $field_name,
+                                        'type' => $input_type,
+                                        'class' => 'form-control',
+                                    );
 
-                                        $input_addition_html = '';
-                                        if ($field['is_require'] == 1) {
-                                            $input_tag_data['required'] = 1;
-                                            $input_addition_html = '<b style="form-control-static">*</b>';
-                                        }
+                                    $input_addition_html = '';
+                                    if ($field['is_require'] == 1) {
+                                        $input_tag_data['required'] = 1;
+                                        $input_addition_html = '<b style="form-control-static">*</b>';
+                                    }
 
-                                        switch ($input_type) {
-                                            case 'textarea':
-                                                $input_ele_type = 'textarea';
-                                                $input_tag_data['rows'] = 5;
-                                                $input_tag_data['style'] = 'min-width:80%';
-                                                $input_tag_data['placeholder'] = $field_name;
-                                                $input = $this->htmlTag($input_ele_type, $input_tag_data);
-                                                break;
+                                    switch ($input_type) {
+                                        case 'textarea':
+                                            $input_ele_type = 'textarea';
+                                            $input_tag_data['rows'] = 5;
+                                            $input_tag_data['style'] = 'min-width:80%';
+                                            $input_tag_data['placeholder'] = $field_name;
+                                            $input = $this->htmlTag($input_ele_type, $input_tag_data);
+                                            break;
 
-                                            case 'select':
-                                                $input_ele_type = 'select';
-                                                $options = explode(' ', trim($options));
-                                                $selectOptions = array();
-                                                if (!empty($options)) {
-                                                    foreach ($options as $op) {
-                                                        list($opValue, $opTxt) = explode('-', $op);
-                                                        $selectOptions[$opValue] = $opTxt;
-                                                    }
+                                        case 'select':
+                                            $input_ele_type = 'select';
+                                            $options = explode(' ', trim($options));
+                                            $selectOptions = array();
+                                            if (!empty($options)) {
+                                                foreach ($options as $op) {
+                                                    list($opValue, $opTxt) = explode('-', $op);
+                                                    $selectOptions[$opValue] = $opTxt;
                                                 }
+                                            }
 
-                                                $input = $this->select($selectOptions, null, $input_tag_data);
-                                                break;
+                                            $input = $this->select($selectOptions, null, $input_tag_data);
+                                            break;
 
-                                            case 'multi_file':
-                                                $input_ele_type = 'input';
-                                                $input_tag_data['name'] = sprintf('%s[]', $field_name);
-                                                $input_tag_data['type'] = 'file';
-                                                $input_tag_data['placeholder'] = $field_name;
-                                                $input_tag_data['multiple'] = true;
-                                                $input = $this->htmlTag($input_ele_type, $input_tag_data);
-                                                break;
+                                        case 'multi_file':
+                                            $input_ele_type = 'input';
+                                            $input_tag_data['name'] = sprintf('%s[]', $field_name);
+                                            $input_tag_data['type'] = 'file';
+                                            $input_tag_data['placeholder'] = $field_name;
+                                            $input_tag_data['multiple'] = true;
+                                            $input = $this->htmlTag($input_ele_type, $input_tag_data);
+                                            break;
 
-                                            default:
-                                                $input_ele_type = 'input';
-                                                $input_tag_data['placeholder'] = $field_name;
-                                                $input = $this->htmlTag($input_ele_type, $input_tag_data);
-                                        }
+                                        default:
+                                            $input_ele_type = 'input';
+                                            $input_tag_data['placeholder'] = $field_name;
+                                            $input = $this->htmlTag($input_ele_type, $input_tag_data);
+                                    }
 
-                                        ?>
-                                        <tr>
-                                            <td>
-                                                <div class="form-control-static">
-                                                    <?php echo $field_name ?>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="form-group col-lg-12">
-                                                    <?php echo $input ?>
-                                                    <span class="hidden-xs">
+                                    ?>
+                                    <tr>
+                                        <td>
+                                            <div class="form-control-static">
+                                                <?php echo $field_name ?>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group col-lg-12">
+                                                <?php echo $input ?>
+                                                <span class="hidden-xs">
                                                     <?php echo $input_addition_html ?>
                                                 </span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="form-control-static">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-control-static">
                                                 <span class="visible-xs">
                                                     <?php echo $input_addition_html ?>
                                                 </span>
-                                                    <span class="hidden-xs">
+                                                <span class="hidden-xs">
                                                     <?php echo $field['txt'] ?>
                                                 </span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <?php
-                                    }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php
+                                }
 
-                                    //公共参数表单
-                                    if ($global_params_status) {
-                                        echo '<?php globalParamsInput($global_config) ?>';
-                                    }
-                                    ?>
-                                    </tbody>
-                                </table>
-                                <div class="row">
-                                    <?php if (!empty($data['desc'])) {
-                                        printf('<div class="col-md-12">%s</div>', $data['desc']);
-                                    } ?>
-                                </div>
+                                //公共参数表单
+                                if ($global_params_status) {
+                                    echo '<?php globalParamsInput($global_config) ?>';
+                                }
+                                ?>
+                                </tbody>
+                            </table>
+                            <div class="row">
+                                <?php if (!empty($data['desc'])) {
+                                    printf('<div class="col-md-12">%s</div>', $data['desc']);
+                                } ?>
                             </div>
+                        </div>
 
-                            <div class="panel-footer">
-                                <button type="submit" class="btn btn-primary">试一试</button>
-                            </div>
-                        <?php else: ?>
-                            <div class="panel-body">
-                                <button type="submit" class="btn btn-primary">试一试</button>
-                            </div>
-                        <?php endif ?>
+                        <div class="panel-footer">
+                            <button type="submit" class="btn btn-primary">试一试</button>
+                        </div>
                     </div>
                 </div>
             </div>

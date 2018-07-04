@@ -1,7 +1,7 @@
 <?php
 /**
  * @author wonli <wonli@live.com>
- * Web.php
+ * Api.php
  */
 
 namespace app\api\controllers;
@@ -14,8 +14,6 @@ use Cross\MVC\Controller;
  * @author wonli <wonli@live.com>
  * Class Api
  * @package app\api\controllers
- *
- * @cp_doc_info array('title' => 'CrossPHP API', 'version' => '0.0.1')
  */
 abstract class Api extends Controller
 {
@@ -136,11 +134,6 @@ abstract class Api extends Controller
                 }
             }
         }
-
-        //设置公共参数
-        $this->channel = $this->getInputData('channel', true, true);
-        $this->platform = $this->getInputData('platform', true, true);
-        $this->version = $this->getInputData('version', true, true);
     }
 
     /**

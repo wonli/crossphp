@@ -13,9 +13,24 @@
 
     <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav navbar-right">
-            <li>
-                <a id="commonModalSwitch" href="javascript:void(0)">公共参数配置</a>
-            </li>
+            <?php
+            if (!empty($data['top_nav'])) {
+                foreach ($data['top_nav'] as $name => $url) {
+                    if(is_array($url)) {
+                        $url['@content'] = $name;
+                        echo $this->wrap('li')->wrap('a', $url)->html('');
+                    } else {
+                        echo $this->wrap('li')->a($name, $url);
+                    }
+                }
+
+                if ($data['has_global_params']) {
+                    $this->wrap('li')->a('公共参数配置', 'javascript:void(0)', array(
+                        'id' => 'commonModalSwitch'
+                    ));
+                }
+            }
+            ?>
         </ul>
     </div>
 </div>

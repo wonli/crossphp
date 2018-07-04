@@ -4,16 +4,10 @@
  * case.tpl.php
  */
 $info = &$data['info'];
-$class_annotate = &$data['class_annotate'];
-$parent_annotate = &$data['parent_annotate'];
-$action_annotate = &$data['action_annotate'];
-
-if (!empty($parent_annotate)) {
-    $class_annotate = array_merge($class_annotate, $parent_annotate);
-}
-
-$class = $info['class'];
+$class = &$info['class'];
 $api_title = !empty($info['desc'])?$info['desc']:$info['class'];
+
+$action_annotate = &$data['action_annotate'];
 ?>
 <div class="panel panel-api-case">
     <div class="panel-heading">

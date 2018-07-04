@@ -139,17 +139,14 @@ function basicAuth($users, $options = array())
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="" title="生成时间 2017-11-02 17:30:53">
-            CrossPHP API            <small><sup>v0.0.1</sup></small>
+        <a class="navbar-brand" href="" title="生成时间 2018-07-04 16:04:10">
+            API文档            <small><sup>v1.0</sup></small>
         </a>
     </div>
 
     <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav navbar-right">
-            <li>
-                <a id="commonModalSwitch" href="javascript:void(0)">公共参数配置</a>
-            </li>
-        </ul>
+                    </ul>
     </div>
 </div>
 </div>
