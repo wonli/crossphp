@@ -123,7 +123,7 @@ class GenDoc extends Cli
                     $server_ip = $_SERVER['SERVER_ADDR'];
                 }
 
-                $api_host = trim($server_ip);
+                $api_host = '//' . trim($server_ip);
             }
 
             $asset_server = &$config['asset_server'];
@@ -164,7 +164,7 @@ class GenDoc extends Cli
      * @return array
      * @throws \ReflectionException
      */
-    private function scanSource($source, $additionData = array())
+    private function scanSource($source)
     {
         //过滤的类名称
         $ingotController = array(
