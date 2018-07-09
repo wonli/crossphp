@@ -186,7 +186,7 @@ class AdminUserModule extends AdminModule
         }
 
         $ret = $this->link->update($this->t_admin, $data, array('id' => $id));
-        if ($ret) {
+        if ($ret !== false) {
             return $this->result(1);
         }
 
@@ -265,7 +265,7 @@ class AdminUserModule extends AdminModule
         );
 
         $status = $this->link->update($this->t_admin, $data, array('name' => $name));
-        if ($status) {
+        if ($status !== false) {
             return $this->result(1);
         }
 

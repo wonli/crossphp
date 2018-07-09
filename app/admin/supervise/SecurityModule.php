@@ -83,8 +83,8 @@ class SecurityModule extends AdminModule
                 'card_data' => $card_data,
             );
 
-            $up_status = $this->link->update($this->t_security_card, $data, array('bind_user' => $bind_user));
-            if ($up_status) {
+            $status = $this->link->update($this->t_security_card, $data, array('bind_user' => $bind_user));
+            if ($status !== false) {
                 return $this->result(1);
             } else {
                 return $this->result(100502);

@@ -505,7 +505,7 @@ class AclModule extends AdminModule
 
         $rid = $role_info['id'];
         $status = $this->link->update($this->t_role, $save_data, array('id' => $rid));
-        if ($status) {
+        if ($status !== false) {
             return $this->result(1, $rid);
         }
 
