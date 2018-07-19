@@ -21,7 +21,7 @@ $action_annotate = &$data['action_annotate'];
         <?php
         if (!empty($action_annotate)) {
             foreach($action_annotate as $action => $d) {
-                $this->renderTpl('segment/api/child_menu', $d);
+                $this->renderTpl('doc/api/child_menu', $d);
             }
         }
         ?>

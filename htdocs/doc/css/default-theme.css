@@ -51,6 +51,10 @@ h3 {
     border-radius: 5px;
 }
 
+.jsonview {
+    font-size: 14px !important;
+}
+
 #goTop, #fold {
     display: none;
     padding: 5px 0;

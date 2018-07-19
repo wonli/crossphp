@@ -33,13 +33,19 @@ return array(
             'version' => '1.0'
         ),
         //顶部超链接
-        //名称 => 链接(可以是数组, 配置target等参考View)
+        //名称 => 链接(可以是数组, 参考View::a()参数)
         'top_nav' => array(
 
         ),
         //公共参数
         //参数名称 => 参数标题
         'global_params' => array(
+
+        ),
+        //通过curl请求接口
+        'use_curl' => true,
+        //参考curl CURLOPT_HTTPHEADER
+        'header_params' => array(
 
         ),
         //basic认证

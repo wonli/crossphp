@@ -1,5 +1,5 @@
+<?php echo $data['basic_auth'] ?>
 <?php echo $data['action']; ?>
-<?php echo $data['do_action'] ?>
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
@@ -104,6 +104,7 @@
         });
 
         $('html, body').animate({scrollTop: 0}, 5);
+        $('.leftContainer').hide();
     }
 
     function apiClassList(className) {
@@ -140,6 +141,10 @@
         if (hashContent) {
             showContent(hashContent);
         }
+
+        $('#collapseBtn').on('click', function(){
+            $('.leftContainer').toggle();
+        });
 
         $('.request-action').on('click', function () {
             $(this).select();

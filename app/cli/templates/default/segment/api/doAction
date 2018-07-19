@@ -1,5 +1,0 @@
-<?php echo '<?php ' ?>
-
-basicAuth('<?php echo json_encode($data) ?>');
-
-<?php echo '?>' ?>

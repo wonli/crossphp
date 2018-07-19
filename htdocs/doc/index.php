@@ -84,34 +84,6 @@ function globalParamsInput($global_config)
         }
     }
 }
-
-function basicAuth($users, $options = array())
-{
-    $user = &$_SERVER['PHP_AUTH_USER'];
-    $password = &$_SERVER['PHP_AUTH_PW'];
-
-    $users = json_decode($users, true);
-    if (isset($users[$user]) && (0 === strcmp($password, $users[$user]))) {
-        $_SERVER['CP_AUTH_USER'] = $user;
-        return true;
-    }
-
-    $realm = &$options['realm'];
-    if (null === $realm) {
-        $realm = 'CP Login Required';
-    }
-
-    $message = &$options['fail_msg'];
-    if (null === $message) {
-        $message = 'Unauthorized';
-    }
-
-    header("401");
-    header('WWW-Authenticate: Basic realm="' . $realm . '"');
-    echo $message;
-    exit(0);
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="zh-cn">
@@ -134,12 +106,12 @@ function basicAuth($users, $options = array())
 <div class="navbar navbar-default navbar-inverse navbar-static-top" role="navigation">
     <div class="container">
     <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <button id="collapseBtn" type="button" class="navbar-toggle" data-toggle="collapse" data-target="leftContainer">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="" title="生成时间 2018-07-04 16:31:49">
+        <a class="navbar-brand" href="" title="生成时间 2018-07-19 13:48:52">
             API文档            <small><sup>v1.0</sup></small>
         </a>
     </div>
@@ -180,14 +152,14 @@ function basicAuth($users, $options = array())
                     <div class="panel-api-case">
     <div class="action-list" id="mainActionList">
         <div class="action-list-container" id="main_index">
-    <form class="form-inline" data-toggle="validator" role="form"
-          method="get"
-          action="//127.0.0.1/skeleton/htdocs/api/main/index" enctype="multipart/form-data">
+    <form class="form-inline" data-toggle="validator" role="form" target="_blank"
+          method="post"
+          action="request/?method=get&api=%2Fmain%2Findex" enctype="multipart/form-data">
         <div class="row">
             <div class="col-md-12" style="margin:10px 0">
                 <span class="badge">get</span>
                 <a href="javascript:void(0)" onclick="apiActionList('main_index')">
-                     获取框架当前版本号                </a>
+                    获取框架当前版本号                </a>
                 <span class="hidden-xs">
                     (/main/index)
                 </span>
@@ -195,7 +167,6 @@ function basicAuth($users, $options = array())
         </div>
 
         <div class="action-form" id="main_index_action_list" style="display: none">
-
             <div class="row" style="margin-top:10px;">
                 <div class="col-md-12">
                     <div class="panel panel-default">
@@ -222,27 +193,27 @@ function basicAuth($users, $options = array())
                                 </tr>
                                 </thead>
                                 <tbody>
-                                                                    <tr>
-                                        <td>
-                                            <div class="form-control-static">
-                                                t                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group col-lg-12">
-                                                <input name="t" type="text" class="form-control" required="1" placeholder="t">                                                <span class="hidden-xs">
+                                                                        <tr>
+                                            <td>
+                                                <div class="form-control-static">
+                                                    t                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group col-lg-12">
+                                                    <input name="t" type="text" class="form-control" required="1" placeholder="t">                                                    <span class="hidden-xs">
                                                     <b style="form-control-static">*</b>                                                </span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-control-static">
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-control-static">
                                                 <span class="visible-xs">
                                                     <b style="form-control-static">*</b>                                                </span>
-                                                <span class="hidden-xs">
+                                                    <span class="hidden-xs">
                                                     当前时间                                                </span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <?php globalParamsInput($global_config) ?>                                </tbody>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <?php globalParamsInput($global_config) ?>                                </tbody>
                             </table>
                             <div class="row">
                                                             </div>
@@ -331,6 +302,7 @@ function basicAuth($users, $options = array())
         });
 
         $('html, body').animate({scrollTop: 0}, 5);
+        $('.leftContainer').hide();
     }
 
     function apiClassList(className) {
@@ -367,6 +339,10 @@ function basicAuth($users, $options = array())
         if (hashContent) {
             showContent(hashContent);
         }
+
+        $('#collapseBtn').on('click', function(){
+            $('.leftContainer').toggle();
+        });
 
         $('.request-action').on('click', function () {
             $(this).select();

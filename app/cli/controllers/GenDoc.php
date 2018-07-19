@@ -110,6 +110,11 @@ class GenDoc extends Cli
                 mkdir($output_dir, 0755, true);
             }
 
+            $request_out_dir = $output_dir . 'request';
+            if (!is_dir($request_out_dir)) {
+                mkdir($request_out_dir, 0755, true);
+            }
+
             $api_host = &$config['api_host'];
             if (!$api_host) {
                 if (PHP_SAPI == 'cli') {
@@ -137,19 +142,12 @@ class GenDoc extends Cli
             $global_params = &$config['global_params'];
             $this->globalParams($global_params, $output_dir);
 
-            $data['doc_info'] = &$config['info'];
-            $data['top_nav'] = &$config['top_nav'];
-            $data['basic_auth'] = &$config['basic_auth'];
-            $data['asset_server'] = $asset_server;
-            $data['output_dir'] = $output_dir;
-            $data['api_host'] = $api_host;
-            $data['annotate'] = array(
-                'global_params' => $global_params,
-                'data' => $annotate
-            );
+            $data['config'] = $config;
+            $data['annotate'] = $annotate;
 
             $ret = $this->view->index($data);
-            if ($ret) {
+            $requestRet = $this->view->makeRequestFile($config);
+            if ($ret && $requestRet) {
                 $this->flushMessage("生成{$name}文档 [成功]");
             } else {
                 $this->flushMessage("生成{$name}文档 [失败]");
@@ -245,8 +243,30 @@ class GenDoc extends Cli
                     if ($methodRc->isPublic() && !$methodRc->isAbstract()) {
                         $annotate = Annotate::getInstance($this->delegate)->parse($methodRc->getDocComment());
                         if (!empty($annotate)) {
+
+                            if (isset($annotate['api'])) {
+                                @list($method, $apiUrl, $apiDesc) = explode(',', $annotate['api']);
+                                $annotate['method'] = trim($method);
+                                $annotate['apiUrl'] = trim($apiUrl);
+                                $annotate['apiDesc'] = trim($apiDesc);
+                            }
+
+                            $apiParams = array();
+                            if (isset($annotate['request'])) {
+                                if (!empty($annotate['request'])) {
+                                    $request = explode(',', $annotate['request']);
+                                    foreach ($request as $f) {
+                                        $d = array();
+                                        @list($d['name'], $d['txt'], $d['is_require']) = explode('|', $f);
+                                        $apiParams[] = array_map('trim', $d);
+                                    }
+                                }
+                            }
+
                             $annotate['action'] = $action->name;
                             $annotate['controller'] = $controllerName;
+                            $annotate['apiParams'] = $apiParams;
+
                             if (!isset($annotate['global_params'])) {
                                 $annotate['global_params'] = $global_params_status;
                             }

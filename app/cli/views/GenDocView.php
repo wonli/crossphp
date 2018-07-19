@@ -31,34 +31,63 @@ class GenDocView extends View
 
         $leftNav = $main = '';
         $layer_data = array();
-        $annotate_data = &$data['annotate']['data'];
-        $global_params = &$data['annotate']['global_params'];
+        $config = &$data['config'];
+        $annotate_data = &$data['annotate'];
+        $global_params = &$config['global_params'];
+
+        $use_curl = $config['use_curl'];
+        if (!empty($config['header_params'])) {
+            $use_curl = true;
+        }
+
         if (!empty($annotate_data)) {
             foreach ($annotate_data as $d) {
-                $d['api_host'] = &$data['api_host'];
-                $leftNav .= $this->obRenderTpl('segment/api/nav', $d);
-                $main .= $this->obRenderTpl('segment/api/main', $d);
+                $d['use_curl'] = &$use_curl;
+                $d['api_host'] = &$config['api_host'];
+
+                $leftNav .= $this->obRenderTpl('doc/api/nav', $d);
+                $main .= $this->obRenderTpl('doc/api/main', $d);
             }
         }
 
         $layer_data['nav'] = $leftNav;
         $layer_data['main'] = $main;
 
-        $docInfo = &$data['doc_info'];
-        $docInfo['top_nav'] = &$data['top_nav'];
+        $docInfo = &$config['info'];
+        $docInfo['top_nav'] = &$config['top_nav'];
         $docInfo['has_global_params'] = !empty($global_params);
-        $layer_data['head'] = $this->obRenderTpl('segment/api/title', $docInfo);
+        $layer_data['head'] = $this->obRenderTpl('doc/api/title', $docInfo);
 
-        $layer_data['action'] = file_get_contents($this->getTplPath() . 'segment/api/action');
-        $layer_data['asset_server'] = &$data['asset_server'];
+        $layer_data['action'] = file_get_contents($this->getTplPath() . 'doc/api/action');
+        $layer_data['asset_server'] = &$config['asset_server'];
 
-        $layer_data['do_action'] = '';
-        if (!empty($data['basic_auth'])) {
-            $layer_data['do_action'] = $this->obRenderFile($this->getTplPath() . 'segment/api/doAction', $data['basic_auth']);
+        $layer_data['basic_auth'] = '';
+        if (!empty($config['basic_auth'])) {
+            $layer_data['basic_auth'] = $this->obRenderFile($this->getTplPath() . 'doc/api/basic_auth', $config['basic_auth']);
         }
 
-        $content = $this->obRenderTpl('segment/api_layer', $layer_data);
-        $out_put_index_file = $data['output_dir'] . 'index.php';
+        $content = $this->obRenderTpl('doc/api_layer', $layer_data);
+        $out_put_index_file = $config['output'] . 'index.php';
+        return file_put_contents($out_put_index_file, $content, LOCK_EX);
+    }
+
+    /**
+     * 生成处理请求的
+     *
+     * @param array $data
+     * @return bool
+     */
+    function makeRequestFile(array $data)
+    {
+        $layer_data['action'] = $this->obRenderFile($this->getTplPath() . 'doc/api/request_action', $data);
+        $layer_data['basic_auth'] = '';
+        if (!empty($data['basic_auth'])) {
+            $layer_data['basic_auth'] = $this->obRenderFile($this->getTplPath() . 'doc/api/basic_auth', $data['basic_auth']);
+        }
+
+        $layer_data['asset_server'] = &$data['asset_server'];
+        $content = $this->obRenderTpl('doc/request_layer', $layer_data);
+        $out_put_index_file = $data['output'] . 'request' . DIRECTORY_SEPARATOR . 'index.php';
         return file_put_contents($out_put_index_file, $content, LOCK_EX);
     }
 
@@ -70,7 +99,24 @@ class GenDocView extends View
      */
     function makeDocConfigFile($docFile)
     {
-        $content = $this->tpl('segment/config/doc.config', true, false);
+        $content = $this->tpl('doc/config/doc.config', true, false);
         return file_put_contents($docFile, $content);
+    }
+
+    /**
+     * 输出PHP代码片段
+     *
+     * @param string $code
+     * @param bool $newLine
+     * @return string
+     */
+    protected function phpCode($code, $newLine = true)
+    {
+        $code = '<?php ' . $code . ' ?>';
+        if ($newLine) {
+            $code .= PHP_EOL;
+        }
+
+        return $code;
     }
 }
