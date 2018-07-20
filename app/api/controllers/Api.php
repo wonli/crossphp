@@ -215,6 +215,23 @@ abstract class Api extends Controller
     }
 
     /**
+     * 获取通过header传送的数据
+     *
+     * @param string $key
+     * @return string
+     */
+    function getHeaderData($key)
+    {
+        $data = $this->request->SERVER('HTTP_' . strtoupper($key));
+        if (!$data && function_exists('getallheaders')) {
+            $headers = getallheaders();
+            $data = &$headers[$key];
+        }
+
+        return $data;
+    }
+
+    /**
      * 从FILES中获取数据
      *
      * @param string $key
