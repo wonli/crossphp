@@ -29,8 +29,8 @@
 
         <ul class="nav navbar-nav navbar-right">
             <?php
-            if ($data['has_global_params']) {
-                echo $this->wrap('li')->a('公共参数配置', 'javascript:void(0)', array(
+            if ($data['set_params']) {
+                echo $this->wrap('li')->a('参数配置', 'javascript:void(0)', array(
                     'id' => 'commonModalSwitch'
                 ));
             }

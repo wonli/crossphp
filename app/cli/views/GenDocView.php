@@ -34,9 +34,10 @@ class GenDocView extends View
         $config = &$data['config'];
         $annotate_data = &$data['annotate'];
         $global_params = &$config['global_params'];
+        $header_params = &$config['header_params'];
 
         $use_curl = $config['use_curl'];
-        if (!empty($config['header_params'])) {
+        if (!empty($header_params)) {
             $use_curl = true;
         }
 
@@ -55,7 +56,7 @@ class GenDocView extends View
 
         $docInfo = &$config['info'];
         $docInfo['top_nav'] = &$config['top_nav'];
-        $docInfo['has_global_params'] = !empty($global_params);
+        $docInfo['set_params'] = !empty($global_params) || !empty($header_params);
         $layer_data['head'] = $this->obRenderTpl('doc/api/title', $docInfo);
 
         $layer_data['action'] = file_get_contents($this->getTplPath() . 'doc/api/action');

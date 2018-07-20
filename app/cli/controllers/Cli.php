@@ -66,7 +66,12 @@ abstract class Cli extends Controller
      */
     function flushMessage($message, $newLine = true)
     {
-        $msg = '(' . $_SERVER['argv'][1] . ') ' . $message;
+        $tip = strtolower("{$this->controller}.{$this->action}");
+        if (isset($_SERVER['argv']) && !empty($_SERVER['argv'][1])) {
+            $tip = &$_SERVER['argv'][1];
+        }
+
+        $msg = '(' . $tip . ') ' . $message;
         if ($newLine) {
             $msg .= PHP_EOL;
         }

@@ -1,50 +1,55 @@
 <?php
-if (!empty($_POST)) {
-    $custom_config = array();
-    if (!empty($_POST['global'])) {
-        foreach ($_POST['global'] as $g) {
-            $g = array_map('trim', $g);
-            if (!empty($g['f'])) {
-                $custom_config[$g['f']] = $g['v'];
+function savePostData($name)
+{
+    if (!empty($_POST)) {
+        $custom_config = array();
+        if (!empty($_POST[$name])) {
+            foreach ($_POST[$name] as $g) {
+                $g = array_map('trim', $g);
+                if (!empty($g['f'])) {
+                    $custom_config[$g['f']] = $g['v'];
+                }
+            }
+
+            if (!empty($custom_config)) {
+                setcookie("__api_{$name}_params__", json_encode($custom_config), time() + 86400000, '/');
             }
         }
+    } elseif (!empty($_COOKIE["__api_{$name}_params__"])) {
+        $custom_config = json_decode($_COOKIE["__api_{$name}_params__"], true);
+    } else {
+        $custom_config = array();
+    }
 
-        if (!empty($custom_config)) {
-            setcookie('__api_global_params__', json_encode($custom_config), time() + 86400000, '/');
+    $config_data = array();
+    if (file_exists(".{$name}.json")) {
+        $config_data = json_decode(file_get_contents(".{$name}.json"), true);
+        foreach ($config_data as &$g) {
+            if (isset($custom_config[$g['f']])) {
+                $g['v'] = $custom_config[$g['f']];
+            }
         }
     }
-} elseif (!empty($_COOKIE['__api_global_params__'])) {
-    $custom_config = json_decode($_COOKIE['__api_global_params__'], true);
-} else {
-    $custom_config = array();
+
+    return $config_data;
 }
 
-$global_config = array();
-if(file_exists('.global.json')) {
-    $global_config = json_decode(file_get_contents('.global.json'), true);
-    foreach($global_config as &$g) {
-        if(isset($custom_config[$g['f']])) {
-            $g['v'] = $custom_config[$g['f']];
-        }
-    }
-}
-
-function globalParams($global_config)
+function formParams($data, $name = 'global')
 {
-    if (!empty($global_config)) {
-        foreach ($global_config as $k => $global) {
+    if (!empty($data)) {
+        foreach ($data as $k => $d) {
             ?>
             <div class="form-group">
                 <div class="col-sm-3">
-                    <input type="hidden" name="global[<?php echo $k ?>][f]" value="<?php echo $global['f'] ?>">
-                    <label for="" class="form-control-static"><?php echo $global['f'] ?></label>
+                    <input type="hidden" name="<?php echo $name ?>[<?php echo $k ?>][f]" value="<?php echo $d['f'] ?>">
+                    <label for="" class="form-control-static"><?php echo $d['f'] ?></label>
                 </div>
-                <div class="col-sm-4">
-                    <input type="text" class="form-control" name="global[<?php echo $k ?>][v]"
-                           value="<?php echo $global['v'] ?>" placeholder="值">
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" name="<?php echo $name ?>[<?php echo $k ?>][v]"
+                           value="<?php echo $d['v'] ?>" placeholder="值">
                 </div>
-                <div class="col-sm-5 text-left form-control-static">
-                    <?php echo $global['t'] ?>
+                <div class="col-sm-3 text-left form-control-static">
+                    <?php echo $d['t'] ?>
                 </div>
             </div>
             <?php
@@ -84,4 +89,7 @@ function globalParamsInput($global_config)
         }
     }
 }
+
+$global_config = savePostData('global');
+$header_config = savePostData('header');
 ?>

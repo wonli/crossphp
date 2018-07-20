@@ -110,11 +110,6 @@ class GenDoc extends Cli
                 mkdir($output_dir, 0755, true);
             }
 
-            $request_out_dir = $output_dir . 'request';
-            if (!is_dir($request_out_dir)) {
-                mkdir($request_out_dir, 0755, true);
-            }
-
             $api_host = &$config['api_host'];
             if (!$api_host) {
                 if (PHP_SAPI == 'cli') {
@@ -140,7 +135,11 @@ class GenDoc extends Cli
 
             //处理公共配置
             $global_params = &$config['global_params'];
-            $this->globalParams($global_params, $output_dir);
+            $this->configParams($global_params, $output_dir);
+
+            //处理header参数
+            $header_params = &$config['header_params'];
+            $this->configParams($header_params, $output_dir, 'header');
 
             $data['config'] = $config;
             $data['annotate'] = $annotate;
@@ -292,29 +291,30 @@ class GenDoc extends Cli
     }
 
     /**
-     * 处理全局参数
+     * 处理配置参数
      *
-     * @param array $global_params
+     * @param array $params
      * @param string $output_dir
+     * @param string $name
      */
-    private function globalParams(array $global_params, $output_dir)
+    private function configParams(array $params, $output_dir, $name = 'global')
     {
         $data = array();
-        if (!empty($global_params)) {
-            foreach ($global_params as $k => $v) {
+        if (!empty($params)) {
+            foreach ($params as $k => $v) {
                 if (!empty($k) && !empty($v)) {
                     $data[] = array('t' => $v, 'f' => $k, 'v' => '');
                 }
             }
         }
 
-        $global_config_file = $output_dir . '.global.json';
-        if (file_exists($global_config_file)) {
-            unlink($global_config_file);
+        $config_file = $output_dir . ".{$name}.json";
+        if (file_exists($config_file)) {
+            unlink($config_file);
         }
 
         if (!empty($data)) {
-            file_put_contents($global_config_file, json_encode($data));
+            file_put_contents($config_file, json_encode($data));
         }
     }
 }

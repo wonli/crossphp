@@ -42,12 +42,14 @@ return array(
         'global_params' => array(
 
         ),
-        //通过curl请求接口
-        'use_curl' => true,
-        //参考curl CURLOPT_HTTPHEADER
+        //header传参
+        //参数名称 => 参数标题
         'header_params' => array(
 
         ),
+        //是否通过CURL请求接口
+        //当header_params配置不为空时，强制使用curl
+        'use_curl' => false,
         //basic认证
         //用户名 => 密码
         'basic_auth' => array(

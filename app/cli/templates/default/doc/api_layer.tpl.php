@@ -60,12 +60,32 @@
                     <h4 class="modal-title" id="myModalLabel">公共参数配置</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <div class="col-sm-3">表单字段名</div>
-                        <div class="col-sm-4">值</div>
-                        <div class="col-sm-5">名称</div>
+                    <ul id="paramsTab" class="nav nav-tabs">
+                        <li class="active">
+                            <a href="#globalParams" data-toggle="tab">公共参数</a>
+                        </li>
+                        <li>
+                            <a href="#headerParams" data-toggle="tab">Header参数</a>
+                        </li>
+                    </ul>
+                    <div id="paramsTabContent" class="tab-content" style="margin-top:15px">
+                        <div class="tab-pane fade in active" id="globalParams">
+                            <div class="form-group">
+                                <div class="col-sm-3">表单字段名</div>
+                                <div class="col-sm-6">值</div>
+                                <div class="col-sm-3">名称</div>
+                            </div>
+                            <?php echo $this->phpCode('formParams($global_config)') ?>
+                        </div>
+                        <div class="tab-pane fade" id="headerParams">
+                            <div class="form-group">
+                                <div class="col-sm-3">参数名</div>
+                                <div class="col-sm-6">值</div>
+                                <div class="col-sm-3">名称</div>
+                            </div>
+                            <?php echo $this->phpCode('formParams($header_config, "header")') ?>
+                        </div>
                     </div>
-                    <?php echo '<?php globalParams($global_config) ?>' ?>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
@@ -116,7 +136,7 @@
             window.location.hash = '';
         }
 
-       // target.parent().addClass("current").siblings().removeClass("current");
+        // target.parent().addClass("current").siblings().removeClass("current");
 
         $('.menu-list').each(function () {
             var id = $(this).attr('id');
@@ -142,7 +162,7 @@
             showContent(hashContent);
         }
 
-        $('#collapseBtn').on('click', function(){
+        $('#collapseBtn').on('click', function () {
             $('.leftContainer').toggle();
         });
 

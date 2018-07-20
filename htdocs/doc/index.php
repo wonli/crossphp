@@ -1,50 +1,55 @@
 <?php
-if (!empty($_POST)) {
-    $custom_config = array();
-    if (!empty($_POST['global'])) {
-        foreach ($_POST['global'] as $g) {
-            $g = array_map('trim', $g);
-            if (!empty($g['f'])) {
-                $custom_config[$g['f']] = $g['v'];
+function savePostData($name)
+{
+    if (!empty($_POST)) {
+        $custom_config = array();
+        if (!empty($_POST[$name])) {
+            foreach ($_POST[$name] as $g) {
+                $g = array_map('trim', $g);
+                if (!empty($g['f'])) {
+                    $custom_config[$g['f']] = $g['v'];
+                }
+            }
+
+            if (!empty($custom_config)) {
+                setcookie("__api_{$name}_params__", json_encode($custom_config), time() + 86400000, '/');
             }
         }
+    } elseif (!empty($_COOKIE["__api_{$name}_params__"])) {
+        $custom_config = json_decode($_COOKIE["__api_{$name}_params__"], true);
+    } else {
+        $custom_config = array();
+    }
 
-        if (!empty($custom_config)) {
-            setcookie('__api_global_params__', json_encode($custom_config), time() + 86400000, '/');
+    $config_data = array();
+    if (file_exists(".{$name}.json")) {
+        $config_data = json_decode(file_get_contents(".{$name}.json"), true);
+        foreach ($config_data as &$g) {
+            if (isset($custom_config[$g['f']])) {
+                $g['v'] = $custom_config[$g['f']];
+            }
         }
     }
-} elseif (!empty($_COOKIE['__api_global_params__'])) {
-    $custom_config = json_decode($_COOKIE['__api_global_params__'], true);
-} else {
-    $custom_config = array();
+
+    return $config_data;
 }
 
-$global_config = array();
-if(file_exists('.global.json')) {
-    $global_config = json_decode(file_get_contents('.global.json'), true);
-    foreach($global_config as &$g) {
-        if(isset($custom_config[$g['f']])) {
-            $g['v'] = $custom_config[$g['f']];
-        }
-    }
-}
-
-function globalParams($global_config)
+function formParams($data, $name = 'global')
 {
-    if (!empty($global_config)) {
-        foreach ($global_config as $k => $global) {
+    if (!empty($data)) {
+        foreach ($data as $k => $d) {
             ?>
             <div class="form-group">
                 <div class="col-sm-3">
-                    <input type="hidden" name="global[<?php echo $k ?>][f]" value="<?php echo $global['f'] ?>">
-                    <label for="" class="form-control-static"><?php echo $global['f'] ?></label>
+                    <input type="hidden" name="<?php echo $name ?>[<?php echo $k ?>][f]" value="<?php echo $d['f'] ?>">
+                    <label for="" class="form-control-static"><?php echo $d['f'] ?></label>
                 </div>
-                <div class="col-sm-4">
-                    <input type="text" class="form-control" name="global[<?php echo $k ?>][v]"
-                           value="<?php echo $global['v'] ?>" placeholder="值">
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" name="<?php echo $name ?>[<?php echo $k ?>][v]"
+                           value="<?php echo $d['v'] ?>" placeholder="值">
                 </div>
-                <div class="col-sm-5 text-left form-control-static">
-                    <?php echo $global['t'] ?>
+                <div class="col-sm-3 text-left form-control-static">
+                    <?php echo $d['t'] ?>
                 </div>
             </div>
             <?php
@@ -84,6 +89,9 @@ function globalParamsInput($global_config)
         }
     }
 }
+
+$global_config = savePostData('global');
+$header_config = savePostData('header');
 ?>
 <!DOCTYPE html>
 <html lang="zh-cn">
@@ -111,7 +119,7 @@ function globalParamsInput($global_config)
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="" title="生成时间 2018-07-19 13:48:52">
+        <a class="navbar-brand" href="" title="生成时间 2018-07-20 10:26:09">
             API文档            <small><sup>v1.0</sup></small>
         </a>
     </div>
@@ -153,8 +161,8 @@ function globalParamsInput($global_config)
     <div class="action-list" id="mainActionList">
         <div class="action-list-container" id="main_index">
     <form class="form-inline" data-toggle="validator" role="form" target="_blank"
-          method="post"
-          action="request/?method=get&api=%2Fmain%2Findex" enctype="multipart/form-data">
+          method="get"
+          action="//127.0.0.1/skeleton/htdocs/api/main/index" enctype="multipart/form-data">
         <div class="row">
             <div class="col-md-12" style="margin:10px 0">
                 <span class="badge">get</span>
@@ -259,12 +267,33 @@ function globalParamsInput($global_config)
                     <h4 class="modal-title" id="myModalLabel">公共参数配置</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <div class="col-sm-3">表单字段名</div>
-                        <div class="col-sm-4">值</div>
-                        <div class="col-sm-5">名称</div>
+                    <ul id="paramsTab" class="nav nav-tabs">
+                        <li class="active">
+                            <a href="#globalParams" data-toggle="tab">公共参数</a>
+                        </li>
+                        <li>
+                            <a href="#headerParams" data-toggle="tab">Header参数</a>
+                        </li>
+                    </ul>
+                    <div id="paramsTabContent" class="tab-content" style="margin-top:15px">
+                        <div class="tab-pane fade in active" id="globalParams">
+                            <div class="form-group">
+                                <div class="col-sm-3">表单字段名</div>
+                                <div class="col-sm-6">值</div>
+                                <div class="col-sm-3">名称</div>
+                            </div>
+                            <?php formParams($global_config) ?>
+                        </div>
+                        <div class="tab-pane fade" id="headerParams">
+                            <div class="form-group">
+                                <div class="col-sm-3">参数名</div>
+                                <div class="col-sm-6">值</div>
+                                <div class="col-sm-3">名称</div>
+                            </div>
+                            <?php formParams($header_config, "header") ?>
+                        </div>
                     </div>
-                    <?php globalParams($global_config) ?>                </div>
+                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
                     <button type="submit" class="btn btn-primary">保存配置</button>
@@ -314,7 +343,7 @@ function globalParamsInput($global_config)
             window.location.hash = '';
         }
 
-       // target.parent().addClass("current").siblings().removeClass("current");
+        // target.parent().addClass("current").siblings().removeClass("current");
 
         $('.menu-list').each(function () {
             var id = $(this).attr('id');
@@ -340,7 +369,7 @@ function globalParamsInput($global_config)
             showContent(hashContent);
         }
 
-        $('#collapseBtn').on('click', function(){
+        $('#collapseBtn').on('click', function () {
             $('.leftContainer').toggle();
         });
 

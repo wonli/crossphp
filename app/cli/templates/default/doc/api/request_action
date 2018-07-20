@@ -65,8 +65,19 @@ $method = &$_GET['method'];
 
 $isHTML = $isJSON = false;
 if ($api && $method) {
+    $add_header = array();
+    $header_params = &$_COOKIE['__api_header_params__'];
+    if (!empty($header_params)) {
+        $header_params = json_decode($header_params, true);
+        foreach($header_params as $k => $v) {
+            $add_header[] = trim($k) . ': ' . trim($v);
+        }
+    }
+
     $vars = &$_POST;
-    $vars['___header___'] = '<?php echo json_encode($data['header_params']) ?>';
+    if(!empty($add_header)) {
+        $vars['___header___'] = json_encode($add_header);
+    }
 
     $apiHost = '<?php echo $data['api_host'] ?>';
     $apiHostInfo = parse_url($apiHost);
