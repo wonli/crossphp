@@ -3,10 +3,9 @@
  * 文档生成配置文件
  *
  * 调用方法
- * cd tools/cli
- * php index.php genDoc
+ * php cp genDoc
  * 生成指定名称的文档
- * php index.php genDoc:api
+ * php cp genDoc:api
  *
  * 类扩展注释
  * @cp_api_spec 分组名称
