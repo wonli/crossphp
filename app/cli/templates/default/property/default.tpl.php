@@ -211,7 +211,7 @@ use Cross\MVC\Module;
      */
     function useIndex($indexName, $indexValue = '')
     {
-        if (!isset($this->{$indexName})) {
+        if (!property_exists($this, $indexName)) {
             throw new CoreException('不支持的索引名称');
         }
 
