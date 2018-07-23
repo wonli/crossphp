@@ -166,7 +166,7 @@ use PDO;
      * 查询数据, 并更新本类属性
      *
      * @param array $where
-     * @return mixed
+     * @return $this
      * @throws CoreException
      */
     function property($where = array())
