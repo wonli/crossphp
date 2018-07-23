@@ -5,6 +5,7 @@ namespace <?php echo $data['namespace'] ?>;
 
 use Cross\Exception\CoreException;
 use Cross\MVC\Module;
+use PDO;
 
 <?php echo $data['propertyType'] ?> <?php echo $data['className'] . PHP_EOL ?>
 {
@@ -182,6 +183,24 @@ use Cross\MVC\Module;
     }
 
     /**
+     * 查询数据, 并更新本类属性
+     *
+     * @param array $where
+     * @return mixed
+     * @throws CoreException
+     */
+    function property($where = array())
+    {
+        if (empty($where)) {
+            $where = $this->getDefaultCondition();
+        }
+
+        $stmt = $this->db()->select('*')->from($this->getTable())->where($where)->stmt();
+        $stmt->setFetchMode(PDO::FETCH_CLASS, self::class);
+        return $stmt->fetch();
+    }
+
+    /**
      * 获取数据库链接
      *
      * @return \Cross\Cache\Driver\RedisDriver|\Cross\DB\Drivers\CouchDriver|\Cross\DB\Drivers\MongoDriver|\Cross\DB\Drivers\PDOSqlDriver
@@ -265,6 +284,22 @@ use Cross\MVC\Module;
             return self::$propertyInfo[$property];
         } else {
             return false;
+        }
+    }
+
+    /**
+     * 更新属性值
+     *
+     * @param array $data
+     */
+    function updateProperty(array $data)
+    {
+        if (!empty($data)) {
+            foreach ($data as $property => $value) {
+                if (property_exists($this, $property)) {
+                    $this->{$property} = $value;
+                }
+            }
         }
     }
 
@@ -373,7 +408,7 @@ use Cross\MVC\Module;
         foreach ($this->index as $indexName) {
             $indexValue = $this->{$indexName};
             if (null === $indexValue || '' === $indexValue) {
-                throw new CoreException("请为索引 {$indexName} 赋值");
+                throw new CoreException("{$indexName} 的值不能为空");
             }
 
             $index[$indexName] = $indexValue;
