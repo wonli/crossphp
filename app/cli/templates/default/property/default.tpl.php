@@ -1,4 +1,4 @@
-<?php echo '<?php' . PHP_EOL ?>
+<?php echo '<?php' . PHP_EOL . PHP_EOL ?>
 <?php if(!empty($data['namespace'])) : ?>
 namespace <?php echo $data['namespace'] ?>;
 <?php endif ?>
@@ -9,17 +9,7 @@ use PDO;
 
 <?php echo $data['propertyType'] ?> <?php echo $data['className'] . PHP_EOL ?>
 {
-    <?php
-    $i = 0;
-    foreach($data['mate_data'] as $mate_key => $mate_info) {
-        if($i != 0) {
-            echo '    public $' . $mate_key .' = null;'. PHP_EOL;
-        } else {
-            echo 'public $' . $mate_key .' = null;'. PHP_EOL;
-        }
-        $i ++;
-    }
-    ?>
+    <?php $this->makePropertyFields($data['mate_data']); ?>
 
     /**
      * 表名
@@ -61,17 +51,7 @@ use PDO;
      * @var array
      */
     private static $propertyInfo = array(
-        <?php
-        $i = 0;
-        foreach($data['mate_data'] as $mate_key => $mate_info) {
-            if($i != 0) {
-                echo '        \''. $mate_key .'\' => array('. $this->fieldsConfig($mate_info) .'), '. PHP_EOL;
-            } else {
-                echo '\''. $mate_key .'\' => array('. $this->fieldsConfig($mate_info) .'), '. PHP_EOL;
-            }
-            $i ++;
-        }
-        ?>
+        <?php $this->makePropertyInfo($data['mate_data']) ?>
     );
 
     /**

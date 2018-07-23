@@ -40,6 +40,43 @@ class PropertyView extends View
     }
 
     /**
+     * 生成字段属性
+     *
+     * @param array $data
+     */
+    protected function makePropertyFields($data)
+    {
+        $i = 0;
+        foreach($data as $mate_key => $mate_info) {
+            if($i != 0) {
+                echo '    public $' . $mate_key .' = null;'. PHP_EOL;
+            } else {
+                echo 'public $' . $mate_key .' = null;'. PHP_EOL;
+            }
+            $i ++;
+        }
+    }
+
+    /**
+     * 生成属性字段
+     *
+     * @param $data
+     * @throws CoreException
+     */
+    protected function makePropertyInfo($data)
+    {
+        $i = 0;
+        foreach ($data as $mate_key => $mate_info) {
+            if ($i != 0) {
+                echo '        \'' . $mate_key . '\' => array(' . $this->fieldsConfig($mate_info) . '),' . PHP_EOL;
+            } else {
+                echo '\'' . $mate_key . '\' => array(' . $this->fieldsConfig($mate_info) . '),' . PHP_EOL;
+            }
+            $i++;
+        }
+    }
+
+    /**
      * 获取值
      *
      * @param string|null|int $value
@@ -82,6 +119,7 @@ class PropertyView extends View
      */
     protected function fieldsConfig(array $a)
     {
+        $i = 0;
         $result = '';
         foreach ($a as $ak => $av) {
             $v = '';
@@ -100,9 +138,14 @@ class PropertyView extends View
                     $v = $this->getFieldsDefaultValue($av);
             }
 
-            $result .= "'{$ak}' => {$v},";
+            if ($i == 0) {
+                $result .= "'{$ak}' => {$v},";
+            } else {
+                $result .= " '{$ak}' => {$v},";
+            }
+            $i++;
         }
 
-        return $result;
+        return trim($result, ',');
     }
 }
