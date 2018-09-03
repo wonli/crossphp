@@ -247,7 +247,7 @@ class Acl extends Admin
                     $v['usc'] = 0;
                 }
 
-                if ($k == '+') {
+                if (0 == strcmp($k, '+')) {
                     if (!empty($v ['name']) && !empty($v ['password'])) {
                         $ret = $this->ADMIN->addAdmin($v);
                     } else {
