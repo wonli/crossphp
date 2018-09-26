@@ -58,19 +58,24 @@ abstract class LogBase
 
     /**
      * 增加到stack
+     * <pre>
+     * 字符串类型的日志只传第一个参数即可
+     * 当日志内容为一个数组时, 第一个参数为日志的分组key
+     * </pre>
      *
-     * @param string $content
+     * @param string $e
      * @param array|string $data
      * @return $this
      */
-    function addToLog($content, $data = array())
+    function addToLog($e, $data = array())
     {
+        $content = $e;
         if (!empty($data)) {
             if (!is_array($data)) {
                 $data = array($data);
             }
 
-            $content = self::prettyArray($content, $data);
+            $content = self::prettyArray($e, $data);
         }
 
         $this->stack[] = $content;
@@ -141,37 +146,40 @@ abstract class LogBase
     /**
      * 格式化远程日志
      *
-     * @param array|string|object $log
      * @param string $name
+     * @param string $type
+     * @return array
+     */
+    protected function formatRemoteLog($name = '', $type = 'udp')
+    {
+        $content = $this->getLogContent(false);
+        if (!empty($content)) {
+            array_walk($content, function (&$v) {
+                $v = $v . PHP_EOL;
+            });
+            $content = implode(PHP_EOL, $content);
+        } else {
+            $content = '';
+        }
+
+        return array(
+            'type' => $type,
+            'name' => $name,
+            'content' => $content,
+            'time' => date('Y-m-d H:i:s'),
+        );
+    }
+
+    /**
+     * 用于远程日志验证的签名
+     *
+     * @param string $app_id
+     * @param string $app_key
      * @return string
      */
-    protected function formatRemoteLog($log, $name = '')
+    protected function makeSign($app_id, $app_key)
     {
-        if (is_scalar($log)) {
-            $log = (string)$log;
-        } elseif (is_array($log)) {
-            $log = self::prettyArray($name, $log);
-        } elseif (is_object($log)) {
-            $log = var_export($log, true);
-        } else {
-            $log = '!!!不支持的LOG格式!!!';
-        }
-
-        if ($name) {
-            $log = sprintf("[%s] %s %s", $name, date('Y-m-d H:i:s'), $log);
-        } else {
-            $log = sprintf("%s %s", date('Y-m-d H:i:s'), $log);
-        }
-
-        $this->addToLog($log);
-        $content = $this->getLogContent(false);
-
-        //处理换行
-        array_walk($content, function (&$v) {
-            $v = $v . PHP_EOL;
-        });
-
-        return implode(PHP_EOL, $content);
+        return md5($app_id . $app_key);
     }
 
     /**
@@ -189,6 +197,8 @@ abstract class LogBase
             array_walk($data, function (&$v, $k) use ($i, $space) {
                 if (is_array($v)) {
                     $v = $space . self::prettyArray($k, $v, $i + 2);
+                } elseif (is_object($v)) {
+                    $v = $space . self::prettyArray($k, get_object_vars($v), $i + 2);
                 } else {
                     if (!is_int($k)) {
                         $v = $k . ': ' . $v;
@@ -218,7 +228,7 @@ abstract class LogBase
         $file = 'app::' . str_replace(PROJECT_REAL_PATH, 'APP', $file);
         $message = sprintf("[发送日志时产生错误] %s (%s, line %s, error %s)", $str, $file, $line, $no);
         if (is_resource($this->fp)) {
-            fwrite($this->fp, $message);
+            $this->addToLog('- logStation -', $message);
         }
     }
 

@@ -12,30 +12,41 @@ namespace lib\LogStation;
  * 将日志发送到中转站, 由中转站通过socket转发至客户端
  *
  * @author wonli <wonli@live.com>
- * LogStation.php
+ * HttpLog.php
  */
 class HttpLog extends LogBase
 {
-    private $station_server;
-    private $port;
-    private $timeout;
+    private $app_id = '';
+    private $app_key = '';
+
+    private $station_server = '118.24.73.121';
+    private $port = 9090;
+    private $timeout = null;
 
     /**
      * LogStation constructor.
      *
      * @param string $station_server
      * @param string $port
-     * @param int $timeout
+     * @param string|int $timeout
      */
-    function __construct($station_server = '10.29.194.237', $port = '9090', $timeout = 1)
+    function __construct($station_server = '', $port = '', $timeout = '')
     {
         parent::__construct();
         $this->setDefaultLogData('');
-        $this->station_server = $station_server;
-        $this->port = $port;
-        $this->timeout = $timeout;
+        if (!empty($station_server)) {
+            $this->station_server = $station_server;
+        }
 
-        $fp = @fsockopen($station_server, $port, $error_no, $error_string, $timeout);
+        if (!empty($port)) {
+            $this->port = $port;
+        }
+
+        if (!empty($timeout)) {
+            $this->timeout = $timeout;
+        }
+
+        $fp = @fsockopen($this->station_server, $this->port, $error_no, $error_string, $this->timeout);
         if (!$fp) {
             return;
         }
@@ -56,16 +67,36 @@ class HttpLog extends LogBase
      */
     function write($log, $name = '')
     {
+        if (is_array($log)) {
+            $this->addToLog($name, $log);
+        } else {
+            $this->addToLog($log);
+        }
+
+        $this->send($name);
+    }
+
+    /**
+     * 发送日志
+     *
+     * @param string $name
+     */
+    function send($name)
+    {
         if (is_resource($this->fp)) {
-            $log = parent::formatRemoteLog($log, $name);
-            $content_length = strlen($log);
+            $log = parent::formatRemoteLog($name, 'http');
+            $logContent = json_encode($log);
+            $contentLength = strlen($logContent);
+            $sign = $this->makeSign($this->app_id, $this->app_key);
             $q = array(
                 'POST /write HTTP/1.1',
                 "Host: {$this->station_server}",
                 "User-Agent: LogStation Client",
-                "Content-Length: {$content_length}",
+                "Content-Length: {$contentLength}",
+                "App-Id: {$this->app_id}",
+                "App-Sign: {$sign}",
                 "Connection: Close\r\n",
-                $log
+                $logContent
             );
 
             $string = implode("\r\n", $q);
