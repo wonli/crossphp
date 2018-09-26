@@ -80,9 +80,6 @@ abstract class Api extends Controller
      */
     private $force_params = array();
 
-    /**
-     * @return mixed
-     */
     abstract function index();
 
     /**
