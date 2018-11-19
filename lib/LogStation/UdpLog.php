@@ -16,12 +16,12 @@ namespace lib\LogStation;
  */
 class UdpLog extends LogBase
 {
-    private $app_id;
-    private $app_key;
+    protected $app_id;
+    protected $app_key;
 
-    private $station_server = '118.24.73.121';
-    private $port = 9091;
-    private $timeout = null;
+    protected $station_server = '118.24.73.121';
+    protected $port = 9091;
+    protected $timeout = null;
 
     /**
      * LogStation constructor.
@@ -42,29 +42,24 @@ class UdpLog extends LogBase
      * 写入日志
      *
      * @param string|array $log
-     * @param string $name
+     * @param string $tag
      * @return mixed|void
      */
-    function write($log, $name = '')
+    function write($tag, $log)
     {
-        if (is_array($log)) {
-            $this->addToLog($name, $log);
-        } else {
-            $this->addToLog($log);
-        }
-
-        $this->send($name);
+        $this->addToLog($tag, $log);
+        $this->send($tag);
     }
 
     /**
      * 发送日志
      *
-     * @param string $name
+     * @param string $tag
      */
-    function send($name = '')
+    function send($tag)
     {
         if (is_resource($this->fp)) {
-            $content = $this->formatRemoteLog($name, 'udp');
+            $content = $this->formatRemoteLog($tag, 'udp');
             $body = pack('a*', json_encode($content));
 
             //日志分割成小块(456字节, 加上头部56字节, 每个包最大512字节)

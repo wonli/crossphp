@@ -16,12 +16,12 @@ namespace lib\LogStation;
  */
 class HttpLog extends LogBase
 {
-    private $app_id = '';
-    private $app_key = '';
+    protected $app_id;
+    protected $app_key;
 
-    private $station_server = '118.24.73.121';
-    private $port = 9090;
-    private $timeout = null;
+    protected $station_server = '118.24.73.121';
+    protected $port = 9090;
+    protected $timeout = null;
 
     /**
      * LogStation constructor.
@@ -62,29 +62,24 @@ class HttpLog extends LogBase
      * 写入日志
      *
      * @param string|array $log
-     * @param string $name
+     * @param string $tag
      * @return mixed|void
      */
-    function write($log, $name = '')
+    function write($tag, $log)
     {
-        if (is_array($log)) {
-            $this->addToLog($name, $log);
-        } else {
-            $this->addToLog($log);
-        }
-
-        $this->send($name);
+        $this->addToLog($tag, $log);
+        $this->send($tag);
     }
 
     /**
      * 发送日志
      *
-     * @param string $name
+     * @param string $tag
      */
-    function send($name)
+    function send($tag)
     {
         if (is_resource($this->fp)) {
-            $log = parent::formatRemoteLog($name, 'http');
+            $log = parent::formatRemoteLog($tag, 'http');
             $logContent = json_encode($log);
             $contentLength = strlen($logContent);
             $sign = $this->makeSign($this->app_id, $this->app_key);

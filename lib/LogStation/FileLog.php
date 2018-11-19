@@ -21,7 +21,7 @@ class FileLog extends LogBase
     /**
      * @var string
      */
-    private $logPath;
+    protected $logPath;
 
     /**
      * FileLog constructor.
@@ -56,19 +56,14 @@ class FileLog extends LogBase
     /**
      * 写入日志
      *
-     * @param string $log
-     * @param string $name
+     * @param string $logFileName
+     * @param mixed $log
      * @return bool|string
      */
-    function write($log, $name = 'exception')
+    function write($logFileName, $log)
     {
-        if (is_array($log)) {
-            $this->addToLog($name, $log);
-        } else {
-            $this->addToLog($log);
-        }
-
-        return $this->save($name);
+        $this->addToLog($logFileName, $log);
+        return $this->save($logFileName);
     }
 
     /**
@@ -84,7 +79,7 @@ class FileLog extends LogBase
 
         //隐藏trace中的路径
         if (defined('PROJECT_REAL_PATH')) {
-            array_walk($trace, function(&$v) {
+            array_walk($trace, function (&$v) {
                 $v = str_replace(array(PROJECT_REAL_PATH, CP_PATH, str_replace('/', DIRECTORY_SEPARATOR, $_SERVER['DOCUMENT_ROOT'])),
                     array('Project->', 'Cross->', 'Index->'), $v);
             });

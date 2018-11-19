@@ -43,42 +43,34 @@ abstract class LogBase
 
     function __construct()
     {
-        error_reporting(0);
         date_default_timezone_set('Asia/Shanghai');
         set_error_handler(array($this, 'errorHandler'));
         register_shutdown_function(array($this, 'fatalHandler'));
     }
 
     /**
-     * @param string $log
-     * @param string $name
+     * write
+     *
+     * @param string $e 文件名或tag
+     * @param mixed $log
      * @return mixed
      */
-    abstract function write($log, $name);
+    abstract function write($e, $log);
 
     /**
-     * 增加到stack
-     * <pre>
-     * 字符串类型的日志只传第一个参数即可
-     * 当日志内容为一个数组时, 第一个参数为日志的分组key
-     * </pre>
+     * stack
      *
-     * @param string $e
-     * @param array|string $data
+     * @param string $tag
+     * @param mixed $data
      * @return $this
      */
-    function addToLog($e, $data = array())
+    function addToLog($tag, $data = array())
     {
-        $content = $e;
-        if (!empty($data)) {
-            if (!is_array($data)) {
-                $data = array($data);
-            }
-
-            $content = self::prettyArray($e, $data);
+        if (!is_array($data)) {
+            $data = array($data);
         }
 
-        $this->stack[] = $content;
+        $this->stack[] = self::prettyArray($tag, $data);
         return $this;
     }
 
@@ -146,11 +138,11 @@ abstract class LogBase
     /**
      * 格式化远程日志
      *
-     * @param string $name
+     * @param string $tag
      * @param string $type
      * @return array
      */
-    protected function formatRemoteLog($name = '', $type = 'udp')
+    protected function formatRemoteLog($tag, $type = 'udp')
     {
         $content = $this->getLogContent(false);
         if (!empty($content)) {
@@ -164,7 +156,7 @@ abstract class LogBase
 
         return array(
             'type' => $type,
-            'name' => $name,
+            'name' => $tag,
             'content' => $content,
             'time' => date('Y-m-d H:i:s'),
         );
@@ -185,12 +177,12 @@ abstract class LogBase
     /**
      * 格式化数组
      *
-     * @param string $name
+     * @param string $tag
      * @param array $data
      * @param int $i
      * @return string
      */
-    static function prettyArray($name, array $data, $i = 2)
+    static function prettyArray($tag, array $data, $i = 2)
     {
         $space = str_pad('', $i, ' ', STR_PAD_LEFT);
         if (!empty($data)) {
@@ -211,7 +203,7 @@ abstract class LogBase
             $data[] = $space . '-';
         }
 
-        array_unshift($data, $name);
+        array_unshift($data, $tag);
         return implode(PHP_EOL, $data);
     }
 
