@@ -61,7 +61,7 @@ use PDO;
      */
     function __construct($modeName = '')
     {
-        if (empty($mode)) {
+        if (empty($modeName)) {
             $this->modeName = $this->modelInfo['mode'];
         }
     }
