@@ -71,9 +71,10 @@ abstract class Cli extends Controller
             $tip = &$_SERVER['argv'][1];
         }
 
-        $msg = '(' . $tip . ') ' . $message;
         if ($newLine) {
-            $msg .= PHP_EOL;
+            $msg = '(' . $tip . ') ' . $message . PHP_EOL;
+        } else {
+            $msg = $message;
         }
 
         fputs(STDOUT, $msg);
