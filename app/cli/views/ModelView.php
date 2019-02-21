@@ -10,7 +10,7 @@ use Cross\MVC\View;
  * Class PropertyView
  * @package app\cli\views
  */
-class PropertyView extends View
+class ModelView extends View
 {
     /**
      * 单个类生成
@@ -20,11 +20,11 @@ class PropertyView extends View
      */
     function genClass($data = array())
     {
-        $content = $this->obRenderTpl('property/default', $data);
+        $content = $this->obRenderTpl('model/default', $data);
         $classSavePath = PROJECT_REAL_PATH . trim($data['namespace'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         Helper::createFolders($classSavePath);
-        return file_put_contents($classSavePath . "{$data['className']}.php", $content);
+        return file_put_contents($classSavePath . "{$data['name']}.php", $content);
     }
 
     /**
@@ -33,9 +33,9 @@ class PropertyView extends View
      * @param string $propertyFile
      * @return bool|int
      */
-    function makePropertyFile($propertyFile)
+    function makeModelFile($propertyFile)
     {
-        $content = $this->tpl('property/property.config', true, false);
+        $content = $this->tpl('model/model.config', true, false);
         return file_put_contents($propertyFile, $content);
     }
 
@@ -44,16 +44,16 @@ class PropertyView extends View
      *
      * @param array $data
      */
-    protected function makePropertyFields($data)
+    protected function makeModelFields($data)
     {
         $i = 0;
-        foreach($data as $mate_key => $mate_info) {
-            if($i != 0) {
-                echo '    public $' . $mate_key .' = null;'. PHP_EOL;
+        foreach ($data as $mate_key => $mate_info) {
+            if ($i != 0) {
+                echo '    public $' . $mate_key . ' = null;' . PHP_EOL;
             } else {
-                echo 'public $' . $mate_key .' = null;'. PHP_EOL;
+                echo 'public $' . $mate_key . ' = null;' . PHP_EOL;
             }
-            $i ++;
+            $i++;
         }
     }
 
@@ -63,7 +63,7 @@ class PropertyView extends View
      * @param $data
      * @throws CoreException
      */
-    protected function makePropertyInfo($data)
+    protected function makeModelInfo($data)
     {
         $i = 0;
         foreach ($data as $mate_key => $mate_info) {

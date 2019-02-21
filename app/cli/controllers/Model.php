@@ -13,7 +13,7 @@ use Exception;
  * Class Property
  * @package app\cli\controllers
  */
-class Property extends Cli
+class Model extends Cli
 {
     /**
      * 命名空间前缀
@@ -32,14 +32,14 @@ class Property extends Cli
     function index($name = '')
     {
         $fileName = &$this->params['file'];
-        $configName = "config::{$fileName}.property.php";
+        $configName = "config::{$fileName}.model.php";
         $propertyFile = $this->getFilePath($configName);
         if (!file_exists($propertyFile)) {
             $this->flushMessage("是否生成配置文件 {$configName} (y/n) - ", false);
             $response = trim(fgetc(STDIN));
             if (0 === strcasecmp($response, 'y')) {
                 //生成配置文件
-                $ret = $this->view->makePropertyFile($propertyFile);
+                $ret = $this->view->makeModelFile($propertyFile);
                 if (!$ret) {
                     $this->endFlushMessage('创建配置文件失败');
                 }
@@ -54,10 +54,10 @@ class Property extends Cli
                 $this->endFlushMessage("未发现指定的配置{$name}");
             }
 
-            $this->makeProperty($propertyConfig[$name]);
+            $this->makeModels($propertyConfig[$name]);
         } elseif (!empty($propertyConfig)) {
             foreach ($propertyConfig as $name => $config) {
-                $this->makeProperty($config);
+                $this->makeModels($config);
             }
         }
     }
@@ -81,7 +81,7 @@ class Property extends Cli
      * @param array $config
      * @throws CoreException
      */
-    private function makeProperty($config)
+    private function makeModels($config)
     {
         if (!empty($config)) {
             $db = &$config['db'];
@@ -94,9 +94,9 @@ class Property extends Cli
             }
 
             $this->namespacePrefix = &$config['namespace'];
-            if (!empty($config['property'])) {
-                foreach ($config['property'] as $propertyClass => $genConfig) {
-                    $this->genClass($genConfig, $propertyClass, $db, $config['type']);
+            if (!empty($config['models'])) {
+                foreach ($config['models'] as $modelName => $databaseTableName) {
+                    $this->genClass($databaseTableName, $modelName, $db, $config['type']);
                 }
             }
         }
@@ -105,14 +105,14 @@ class Property extends Cli
     /**
      * 生成类
      *
-     * @param string $tableName
-     * @param string $propertyClassName
+     * @param string $databaseTableName
+     * @param string $modelName
      * @param string $db
      * @param string $propertyType 生成类的类型
-     * @param array $table_config
+     * @param array $tableConfig
      * @throws CoreException
      */
-    private function genClass($tableName, $propertyClassName, $db = '', $propertyType = 'class', $table_config = array())
+    private function genClass($databaseTableName, $modelName, $db = '', $propertyType = 'class', $tableConfig = array())
     {
         if (empty($db)) {
             $key = ':';
@@ -131,60 +131,58 @@ class Property extends Cli
         }
 
         $M = $cache[$key];
-        $link_type = $M->getLinkType();
-        $link_name = $M->getLinkName();
+        $linkType = $M->getLinkType();
+        $linkName = $M->getLinkName();
 
-        $propertyClassName = str_replace('/', '\\', $propertyClassName);
-        $propertyClassName = trim($propertyClassName, '\\');
-        $pos = strrpos($propertyClassName, '\\');
+        $modelName = str_replace('/', '\\', $modelName);
+        $modelName = trim($modelName, '\\');
+        $pos = strrpos($modelName, '\\');
 
         if ($pos) {
-            $className = substr($propertyClassName, $pos + 1);
-            $namespace = substr($propertyClassName, 0, $pos);
+            $modelName = substr($modelName, $pos + 1);
+            $namespace = substr($modelName, 0, $pos);
             if ($this->namespacePrefix) {
                 $namespace = $this->namespacePrefix . '\\' . $namespace;
             }
         } else {
-            $className = $propertyClassName;
             $namespace = $this->namespacePrefix;
         }
 
         if (empty($namespace)) {
-            $this->endFlushMessage("请为 {$propertyType}::{$className} 指定命名空间");
+            $this->endFlushMessage("请为 {$propertyType}::{$modelName} 指定命名空间");
         }
 
         try {
 
-            $mate_data = $M->link->getMetaData($tableName);
-            $primary_key = &$table_config['primary_key'];
-            if (empty($primary_key)) {
-                foreach ($mate_data as $key => $value) {
-                    if ($value['primary'] && empty($primary_key)) {
-                        $primary_key = $key;
+            $mateData = $M->link->getMetaData($databaseTableName);
+            $primaryKey = &$tableConfig['primary_key'];
+            if (empty($primaryKey)) {
+                foreach ($mateData as $key => $value) {
+                    if ($value['primary'] && empty($primaryKey)) {
+                        $primaryKey = $key;
                         break;
                     }
                 }
             }
 
-            $data['table'] = $tableName;
-            $data['mate_data'] = $mate_data;
-            $data['link_name'] = $link_name;
-            $data['link_type'] = $link_type;
-            $data['table_config'] = $table_config;
-            $data['propertyType'] = $propertyType;
+            $data['link_name'] = $linkName;
+            $data['link_type'] = $linkType;
+            $data['mate_data'] = $mateData;
+            $data['primary_key'] = $primaryKey;
+            $data['database_table_name'] = $databaseTableName;
             $data['namespace'] = $namespace;
-            $data['className'] = $className;
-            $data['primary_key'] = $primary_key;
+            $data['type'] = $propertyType;
+            $data['name'] = $modelName;
 
             $ret = $this->view->genClass($data, 'makeOne');
             if (false === $ret) {
                 throw new CoreException("请检查目录权限");
             } else {
-                $this->flushMessage("{$propertyType}::{$namespace}\\{$className} [成功]");
+                $this->flushMessage("{$propertyType}::{$namespace}\\{$modelName} [成功]");
             }
 
         } catch (Exception $e) {
-            $this->flushMessage("{$propertyType}::{$namespace}\\{$className} [失败 : !! " . $e->getMessage() . ']');
+            $this->flushMessage("{$propertyType}::{$namespace}\\{$modelName} [失败 : !! " . $e->getMessage() . ']');
         }
     }
 }

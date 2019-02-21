@@ -7,9 +7,9 @@ use Cross\Exception\CoreException;
 use Cross\MVC\Module;
 use PDO;
 
-<?php echo $data['propertyType'] ?> <?php echo $data['className'] . PHP_EOL ?>
+<?php echo $data['type'] ?> <?php echo $data['name'] . PHP_EOL ?>
 {
-    <?php $this->makePropertyFields($data['mate_data']); ?>
+    <?php $this->makeModelFields($data['mate_data']); ?>
 
     /**
      * 表名
@@ -39,7 +39,7 @@ use PDO;
      */
     private $modelInfo = array(
         'mode' => '<?php echo $data['link_type'] ?>:<?php echo $data['link_name'] ?>',
-        'table' => '<?php echo $data['table'] ?>',
+        'table' => '<?php echo $data['database_table_name'] ?>',
         'link_type' => '<?php echo $data['link_type'] ?>',
         'link_name' => '<?php echo $data['link_name'] ?>',
         'primary_key' => '<?php echo $data['primary_key'] ?>'
@@ -51,7 +51,7 @@ use PDO;
      * @var array
      */
     private static $propertyInfo = array(
-        <?php $this->makePropertyInfo($data['mate_data']) ?>
+        <?php $this->makeModelInfo($data['mate_data']) ?>
     );
 
     /**
