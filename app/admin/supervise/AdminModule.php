@@ -45,6 +45,20 @@ class AdminModule extends Module
     protected $t_acl_menu = 'cpa_acl_menu';
 
     /**
+     * API文档
+     *
+     * @var string
+     */
+    protected $t_api_doc = 'cpa_doc';
+
+    /**
+     * API文档用户数据
+     *
+     * @var string
+     */
+    protected $t_api_doc_data = 'cpa_doc_data';
+
+    /**
      * 存储密保卡的表名
      *
      * @var string

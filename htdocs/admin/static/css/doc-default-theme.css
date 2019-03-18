@@ -1,0 +1,90 @@
+body {
+    background-color: #f7f8fa;
+}
+
+h3 {
+    margin: 0;
+}
+
+.panel-api-case {
+
+}
+
+.panel-api-case > .panel-body {
+    padding: 0 15px;
+}
+
+.panel.panel-api-case.current {
+    background-color: #fbfbfb;
+}
+
+.well {
+    margin: 10px 0;
+    padding: 10px 0;
+    background-color: transparent;
+}
+
+.none {
+    background: #fff;
+    padding: 30px 50px;
+    width: 680px;
+    margin: 0 auto;
+    box-shadow: 1px 1px 1px #eee;
+}
+
+.menu-list {
+    border-top: #efefef solid 1px;
+}
+
+.mainWrap {
+    margin: 30px 0 50px 0;
+}
+
+.mainContainer {
+    background: #f7f8fa;
+    min-height: 600px;
+    padding: 5px;
+    border-radius: 5px;
+    height: 100%;
+}
+
+.leftContainer {
+    padding: 10px;
+}
+
+.rightContainer {
+    background: #fff;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    box-shadow: 1px 2px 1px #eee;
+}
+
+.jsonview {
+    font-size: 14px !important;
+}
+
+#goTop, #fold {
+    display: none;
+    padding: 5px 0;
+    color: #fff;
+    text-align: center;
+    position: fixed;
+    _position: absolute;
+    right: 3%;
+    bottom: 80px;
+    _bottom: "auto";
+    cursor: pointer;
+    opacity: .6;
+    filter: Alpha(opacity=60);
+}
+
+#goTop > i, #fold > i {
+    color: #333;
+    font-size: 42px;
+}
+
+#fold {
+    display: block;
+    bottom: 130px;
+}

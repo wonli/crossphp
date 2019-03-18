@@ -8,5 +8,6 @@ return array(
         'panel' =>  'fa fa-dashboard',
         'security'  =>  'fa fa-shield',
         'acl'   =>  'fa fa-wrench',
+        'doc' => 'fa fa-file-text-o',
     )
 );

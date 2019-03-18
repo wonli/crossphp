@@ -11,11 +11,11 @@ CREATE TABLE IF NOT EXISTS `cpa_acl_menu` (
 
 DELETE FROM `cpa_acl_menu`;
 INSERT INTO `cpa_acl_menu` (`id`, `pid`, `type`, `name`, `link`, `display`, `order`) VALUES
-	(1, 0, 1, '权限', 'acl', 1, 990),
+	(1, 0, 1, '权限', 'acl', 1, 980),
 	(2, 0, 1, 'admin', 'admin', 0, 0),
 	(3, 0, 1, 'main', 'main', 0, 0),
 	(4, 0, 1, '面板', 'panel', 1, 0),
-	(5, 0, 1, '安全', 'security', 1, 980),
+	(5, 0, 1, '安全', 'security', 1, 970),
 	(6, 1, 1, '', 'index', 0, 0),
 	(7, 1, 1, '', 'editMenu', 0, 0),
 	(8, 1, 1, '导航菜单', 'navManager', 1, 0),
@@ -32,7 +32,17 @@ INSERT INTO `cpa_acl_menu` (`id`, `pid`, `type`, `name`, `link`, `display`, `ord
 	(19, 5, 1, '更改密码', 'changePassword', 1, 10),
 	(20, 5, 1, '', 'create', 0, 0),
 	(22, 1, 1, '', 'userSecurityCard', 0, 0),
-	(23, 5, 1, '个人信息', 'profile', 1, 5);
+	(23, 5, 1, '个人信息', 'profile', 1, 5),
+	(24, 0, 1, '文档', 'doc', 1, 990),
+	(25, 24, 1, '', 'index', 0, 0),
+	(26, 24, 1, '', 'codeSegment', 0, 0),
+	(27, 24, 1, '', 'changeApiServer', 0, 0),
+	(28, 24, 1, '', 'saveCommonParams', 0, 0),
+	(29, 24, 1, '', 'setting', 0, 0),
+	(30, 24, 1, '', 'action', 0, 0),
+	(31, 24, 1, '', 'makeDevServerNode', 0, 0),
+	(32, 24, 1, '', 'makeParamsNode', 0, 0),
+	(33, 24, 1, '', 'initApiData', 0, 0);
 
 CREATE TABLE IF NOT EXISTS `cpa_acl_role` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -95,3 +105,26 @@ CREATE TABLE IF NOT EXISTS `cpa_security_card` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DELETE FROM `cpa_security_card`;
+
+CREATE TABLE IF NOT EXISTS `cpa_doc` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `doc_token` varchar(255) NOT NULL DEFAULT '',
+  `servers` text NOT NULL,
+  `global_params` text NOT NULL,
+  `header_params` text NOT NULL,
+  `last_update_admin` varchar(255) NOT NULL DEFAULT '',
+  `last_update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `cpa_doc_data` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `u` varchar(255) NOT NULL DEFAULT '',
+  `doc_id` int(11) NOT NULL DEFAULT '0',
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `value` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `u` (`u`),
+  KEY `name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;

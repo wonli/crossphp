@@ -6,9 +6,14 @@
 
 namespace app\api\controllers;
 
+use ReflectionMethod;
+use ReflectionClass;
+
+use Cross\Exception\CoreException;
+use Cross\MVC\Controller;
+use Cross\Core\Annotate;
 
 use app\api\views\ApiView;
-use Cross\MVC\Controller;
 
 /**
  * @author wonli <wonli@live.com>
@@ -46,11 +51,11 @@ abstract class Api extends Controller
     protected $version;
 
     /**
-     * 通用数据结构
+     * 接口数据
      *
      * @var array
      */
-    protected $data = array('status' => 1, 'message' => 'ok', 'data' => array());
+    protected $data = array();
 
     /**
      * 默认请求类型
@@ -58,6 +63,13 @@ abstract class Api extends Controller
      * @var string
      */
     private $request_type = 'post';
+
+    /**
+     * 默认数据格式
+     *
+     * @var array
+     */
+    private $default_data = array('status' => 1, 'message' => '');
 
     /**
      * 数据容器
@@ -84,13 +96,23 @@ abstract class Api extends Controller
 
     /**
      * Api constructor.
-     *
-     * @throws \Cross\Exception\CoreException
      */
     function __construct()
     {
         parent::__construct();
         $this->view = new ApiView();
+        $this->data = $this->default_data;
+
+        //API文档数据
+        if (!empty($_REQUEST['doc_token']) && !empty($_REQUEST['t'])) {
+            $isVerify = $this->verifyDocApiToken($_REQUEST['doc_token'], $_REQUEST['t']);
+            if (!$isVerify) {
+                $this->display(200105);
+            }
+
+            $docData = $this->docApiData();
+            $this->display($docData);
+        }
 
         //验证请求类型
         $request_type = &$this->request_type;
@@ -140,13 +162,12 @@ abstract class Api extends Controller
      * @param bool $filter_data 是否使用过滤器
      * @param bool $is_force_params 是否强制验证
      * @return string
-     * @throws \Cross\Exception\CoreException
      */
     function getInputData($key, $filter_data = true, $is_force_params = false)
     {
         $value = '';
         $defaultValue = &$this->data_container[$key];
-        if ($defaultValue) {
+        if ($filter_data && $defaultValue) {
             $defaultValue = htmlentities(strip_tags(trim($defaultValue)), ENT_COMPAT, 'utf-8');
         }
 
@@ -177,7 +198,6 @@ abstract class Api extends Controller
      * @param string $key
      * @param string $value
      * @return int|string
-     * @throws \Cross\Exception\CoreException
      */
     protected function filterInputData($key, $value)
     {
@@ -235,7 +255,6 @@ abstract class Api extends Controller
      * @param string $filter_name
      * @param bool $is_multi 是否是多文件
      * @return array
-     * @throws \Cross\Exception\CoreException
      */
     function getFileData($key, $filter_name = 'images', &$is_multi = false)
     {
@@ -268,20 +287,32 @@ abstract class Api extends Controller
      * @param null $data
      * @param null $method
      * @param int $http_response_status
-     * @throws \Cross\Exception\CoreException
      */
     function display($data = null, $method = null, $http_response_status = 200)
     {
-        if ($data['status'] != 1 && $data['message'] == 'ok') {
-            $data['message'] = $this->getStatusMessage($data['status']);
+        $apiData = &$this->default_data;
+        if (is_numeric($data)) {
+            $apiData['status'] = $data;
+        } else if (is_array($data)) {
+            $manualMergeData = true;
+            if (isset($data['data'])) {
+                $manualMergeData = false;
+                $apiData['data'] = &$data['data'];
+            }
+
+            foreach ($data as $k => $v) {
+                if (isset($apiData[$k])) {
+                    $apiData[$k] = $v;
+                } elseif ($manualMergeData) {
+                    $apiData['data'][$k] = $v;
+                }
+            }
+        } else {
+            $apiData['message'] = $data;
         }
 
-        $apiData['status'] = $data['status'];
-        $apiData['message'] = $data['message'];
-        if (!isset($data['data'])) {
-            $apiData['data'] = array();
-        } else {
-            $apiData['data'] = $data['data'];
+        if ($apiData['status'] != 1 && empty($apiData['message'])) {
+            $apiData['message'] = $this->getStatusMessage($apiData['status']);
         }
 
         $this->response->setContentType('json')->display(json_encode($apiData));
@@ -303,18 +334,104 @@ abstract class Api extends Controller
                 break;
 
             case 'post':
-                $data_container = &$_POST;
-                break;
+                $data_container = &$_REQUEST;
+                if (empty($data_container)) {
+                    $input = file_get_contents("php://input");
+                    $content_type = &$_SERVER['CONTENT_TYPE'];
+                    if (0 == strcasecmp($content_type, 'application/json')) {
+                        $data_container = json_decode($input, true);
+                    } else {
+                        $input = trim($input);
+                        $input = trim($input, '"');
+                        parse_str($input, $data_container);
+                    }
 
-            case 'get':
-                $data_container = &$_GET;
+                    $_POST = $data_container;
+                }
                 break;
 
             default:
-                $data_container = &$_POST;
+                $data_container = &$_REQUEST;
         }
 
         return $data_container;
+    }
+
+    /**
+     * API 调试文档基础数据
+     *
+     * @return array
+     */
+    protected function docApiData()
+    {
+        $result = [];
+        $ANNOTATE = Annotate::getInstance($this->delegate);
+        $controllerList = glob(__DIR__ . '/*.php');
+        array_map(function ($f) use (&$result, $ANNOTATE) {
+            $fileName = pathinfo($f, PATHINFO_FILENAME);
+            $classNamespace = __NAMESPACE__ . '\\' . $fileName;
+            $rc = new ReflectionClass($classNamespace);
+            if ($rc->isAbstract()) {
+                return;
+            }
+
+            //跳过ignore
+            $classAnnotate = $ANNOTATE->parse($rc->getDocComment());
+            if (isset($classAnnotate['api_ignore'])) {
+                return;
+            }
+
+            //公共参数是否生效
+            $classAnnotate['global_params'] = true;
+            $enable = array('enable' => true, 'true' => true, 'yes' => true, '1' => true);
+            if (isset($classAnnotate['global_params'])) {
+                $classAnnotate['global_params'] = isset($enable[$classAnnotate['global_params']]) ? true : false;
+            }
+
+            $methodAnnotate = [];
+            $methodList = $rc->getMethods(ReflectionMethod::IS_PUBLIC);
+            if (!empty($methodList)) {
+                foreach ($methodList as $method) {
+                    if ($method->class != $classNamespace) {
+                        continue;
+                    }
+
+                    $ac = new ReflectionMethod($method->class, $method->name);
+                    $comment = $ac->getDocComment();
+                    if (!$comment) {
+                        continue;
+                    }
+
+                    $annotate = $ANNOTATE->parse($comment);
+                    $annotate['global_params'] = &$classAnnotate['global_params'];
+                    if (!empty($annotate['global_params'])) {
+                        $annotate['global_params'] = isset($enable[$annotate['global_params']]) ? true : false;
+                    }
+
+                    $methodAnnotate[$method->name] = $annotate;
+                }
+            }
+
+            $result[$fileName] = $classAnnotate;
+            $result[$fileName]['methods'] = $methodAnnotate;
+
+        }, $controllerList);
+
+        return $result;
+    }
+
+    /**
+     * 验证doc token
+     *
+     * @param string token
+     * @param string $t
+     * @return bool
+     */
+    private function verifyDocApiToken($token, $t)
+    {
+        $key = $this->config->get('encrypt', 'doc');
+        $localToken = md5(md5($key . $t) . $t);
+        return $localToken == $token;
     }
 
     /**
@@ -322,19 +439,22 @@ abstract class Api extends Controller
      *
      * @param int $status
      * @return string
-     * @throws \Cross\Exception\CoreException
      */
     private function getStatusMessage($status)
     {
         static $notice = null;
         if ($notice === null) {
-            $notice = $this->parseGetFile('config/notice.config.php');
+            try {
+                $notice = $this->parseGetFile('config/notice.config.php');
+            } catch (CoreException $e) {
+                $notice = [];
+            }
         }
 
         if (isset($notice[$status])) {
             $message = $notice[$status];
         } else {
-            $message = 'ok';
+            $message = '';
         }
 
         return $message;
@@ -347,7 +467,6 @@ abstract class Api extends Controller
      * @param string $tmp_file 临时文件路径
      * @param int $size
      * @return mixed
-     * @throws \Cross\Exception\CoreException
      */
     private function checkUploadImage($upload_file_name, $tmp_file, $size = 3000000)
     {

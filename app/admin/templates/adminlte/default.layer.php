@@ -10,8 +10,9 @@
     <link rel="stylesheet" href="<?php echo $this->res("adminlte/2.4.3/dist/css/AdminLTE.min.css") ?>">
     <link rel="stylesheet" href="<?php echo $this->res("adminlte/2.4.3/dist/css/skins/_all-skins.min.css") ?>">
     <link rel="stylesheet" href="<?php echo $this->res('libs/font-awesome/4.7.0/css/font-awesome.min.css') ?>">
-    <link rel="stylesheet" href="<?php echo $this->res("libs/toggle/2.2.2/css/bootstrap-toggle.min.css") ?>">
+    <link rel="stylesheet" href="<?php echo $this->res("libs/toggle/2.3.2/css/bootstrap-toggle.min.css") ?>">
     <link rel="stylesheet" href="<?php echo $this->res('libs/nprogress/0.2.0/nprogress.css') ?>">
+    <link rel="stylesheet" href="<?php echo $this->res('libs/layer/theme/default/layer.css') ?>">
     <link rel="stylesheet" href="<?php echo $this->res('libs/pop/pop.min.css') ?>">
     <link rel="stylesheet" href="<?php echo $this->res('css/style.css') ?>">
 
@@ -95,10 +96,11 @@
     </div>
 </div>
 <script src="<?php echo $this->res('libs/bootstrap/3.3.7/js/bootstrap.min.js') ?>"></script>
-<script src="<?php echo $this->res('libs/toggle/2.2.2/js/bootstrap-toggle.min.js') ?>"></script>
+<script src="<?php echo $this->res('libs/toggle/2.3.2/js/bootstrap-toggle.min.js') ?>"></script>
 <script src="<?php echo $this->res('libs/store.js/2.0.12/store.legacy.min.js') ?>"></script>
 <script src="<?php echo $this->res('libs/nprogress/0.2.0/nprogress.js') ?>"></script>
 <script src="<?php echo $this->res('libs/pop/pop.min.js') ?>"></script>
+<script src="<?php echo $this->res('libs/layer/layer.js') ?>"></script>
 <script src="<?php echo $this->res('adminlte/2.4.3/dist/js/adminlte.min.js') ?>"></script>
 <script src="<?php echo $this->res('adminlte/2.4.3/plugins/slimScroll/jquery.slimscroll.min.js') ?>"></script>
 <script src="<?php echo $this->res('adminlte/2.4.3/plugins/fastclick/fastclick.min.js') ?>"></script>

@@ -27,11 +27,15 @@ return array(
         'display' => 'JSON'
     ),
     /**
-     * uri和auth加解密key
+     * 系统中用到的各种密钥
+     * uri 加密URL
+     * auth 加密cookie
+     * doc 生成调试文档时
      */
     'encrypt' => array(
         'uri' => '*&9wru&!@#%#&',
-        'auth' => '!@#cr@!$!21p#$%^'
+        'auth' => '!@#cr@!$!21p#$%^',
+        'doc' => 'Qe@#$%&qfd1!23sa',
     ),
     /**
      * 关于url的配置
