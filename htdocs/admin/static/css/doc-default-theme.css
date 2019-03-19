@@ -6,6 +6,15 @@ h3 {
     margin: 0;
 }
 
+pre {
+    border: none;
+    background-color: transparent;
+}
+
+pre > code {
+    background-color: #ffffff !important;
+}
+
 .panel-api-case {
 
 }

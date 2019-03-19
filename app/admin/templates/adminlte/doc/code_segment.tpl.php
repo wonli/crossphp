@@ -4,23 +4,27 @@
  * code_segment.tpl.php
  */
 
-$data = &$data['data'];
-if (($curlData = json_encode($data['curl'])) === false || empty($data['curl'])) {
-    $curlData = array();
-}
+if(!empty($data['data'])) {
+    $data = &$data['data'];
+    if (($curlData = json_encode($data['curl'])) === false || empty($data['curl'])) {
+        $curlData = array();
+    }
 
-if (($structData = json_encode($data['struct'])) === false || empty($data['struct'])) {
-    $structData = array();
-}
+    if (($structData = json_encode($data['struct'])) === false || empty($data['struct'])) {
+        $structData = array();
+    }
 
-$tabs = [];
-if (!empty($data)) {
-    $tabs = array_keys($data);
-}
+    $tabs = [];
+    if (!empty($data)) {
+        $tabs = array_keys($data);
+    }
 
-$data['curl'] = '';
-$data['struct'] = '';
-$current_tab_name = '';
+    $data['curl'] = '';
+    $data['struct'] = '';
+    $current_tab_name = '';
+} else {
+    $data = array();
+}
 ?>
 <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
@@ -30,8 +34,8 @@ $current_tab_name = '';
             </button>
         </div>
         <div class="modal-body">
+            <?php if(!empty($data)) : ?>
             <ul id="paramsTab" class="nav nav-tabs">
-
                 <?php
                 foreach ($tabs as $i => $t) {
                     $attr = [];
@@ -69,6 +73,9 @@ $current_tab_name = '';
                 }
                 ?>
             </div>
+            <?php else : ?>
+            <div>服务器返回结果为空</div>
+            <?php endif ?>
         </div>
     </div>
 </div>

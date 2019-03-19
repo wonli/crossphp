@@ -74,25 +74,23 @@ class Generator
 
     function run()
     {
-        $RESULT = new Result();
         $curlResponse = $this->curlRequest();
         if (($data = json_decode($curlResponse, true)) === false) {
-            $RESULT->setReasone($curlResponse);
-            return $RESULT;
+            return [
+                'curl' => $curlResponse,
+            ];
+        } else if(is_array($data)) {
+            $struct = array();
+            $this->getStruct($data, $struct);
+            $f = (new Flutter($struct))->gen();
+            return [
+                'struct' => $struct,
+                'curl' => $curlResponse,
+                'flutter' => $f
+            ];
+        } else {
+            return [];
         }
-
-        $curlData = json_decode($curlResponse, true);
-        $RESULT->addData(Result::DATA_CURL, $curlData);
-
-        $struct = array();
-        $this->getStruct($curlData, $struct);
-
-        $f = (new Flutter($struct))->gen();
-        return [
-            'struct' => $struct,
-            'curl' => $curlResponse,
-            'flutter' => $f
-        ];
     }
 
     /**
