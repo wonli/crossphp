@@ -44,7 +44,7 @@ if(!empty($data['data'])) {
                         $current_tab_name = $t;
                     }
 
-                    echo $this->wrap('li', $attr)->a($t, "#{$t}", array(
+                    echo $this->wrap('li', $attr)->a(ucfirst($t), "#{$t}", array(
                         'data-toggle' => 'tab'
                     ));
                 }
@@ -53,7 +53,7 @@ if(!empty($data['data'])) {
             <div id="paramsTabContent" class="tab-content" style="margin-top:15px">
                 <?php
                 if (!empty($data)) {
-                    $lng_name_map = ['struct' => 'json', 'curl' => 'json', 'flutter' => 'dart'];
+                    $lng_name_map = ['struct' => 'json', 'curl' => 'json', 'flutter' => 'dart', 'go' => 'go'];
                     foreach ($data as $name => $d) {
                         $class = 'tab-pane fade';
                         if ($name == $current_tab_name) {

@@ -10,8 +10,20 @@ namespace app\admin\supervise\CodeSegment;
 
 abstract class Adapter
 {
+    /**
+     * @var array
+     */
+    protected $struct = array();
 
-    protected $struct;
+    /**
+     * @var array
+     */
+    protected $defaultTokens = array(
+        'float' => 'float',
+        'int' => 'int',
+        'bool' => 'bool',
+        'string' => 'string',
+    );
 
     /**
      * Adapter constructor.
@@ -41,9 +53,10 @@ abstract class Adapter
      *
      * @param string $propertiesName
      * @param string $name
+     * @param string $token
      * @return mixed
      */
-    abstract function propertieToJson($propertiesName, $name);
+    abstract function propertieToJson($propertiesName, $name, $token = '');
 
     /**
      * 类模版
@@ -55,6 +68,13 @@ abstract class Adapter
     abstract function genClass($className, $classBody);
 
     /**
+     * 字段类型
+     *
+     * @return array
+     */
+    abstract function getTokens();
+
+    /**
      * 生成中间树结构
      *
      * @param array $struct
@@ -62,12 +82,10 @@ abstract class Adapter
      */
     protected function gen1(array $struct, &$result)
     {
-        $tokens = array(
-            'float' => 'double',
-            'int' => 'int',
-            'bool' => 'bool',
-            'string' => 'String',
-        );
+        $tokens = $this->getTokens();
+        if (empty($tokens)) {
+            $tokens = $this->defaultTokens;
+        }
 
         foreach ($struct as $name => $data) {
             if (is_array($data)) {
@@ -94,7 +112,7 @@ abstract class Adapter
                 //属性使用小驼峰命名法
                 $camelName = $this->toCamelCase($name);
                 $properties = $this->makeProperties($token, $camelName);
-                $json = $this->propertieToJson($camelName, $name);
+                $json = $this->propertieToJson($camelName, $name, $token);
 
                 $result[$name] = array(
                     'type' => 'properties',

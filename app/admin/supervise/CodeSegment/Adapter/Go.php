@@ -8,10 +8,10 @@ namespace app\admin\supervise\CodeSegment\Adapter;
 
 use app\admin\supervise\CodeSegment\Adapter;
 
-class Flutter extends Adapter
+class Go extends Adapter
 {
     /**
-     * 单类容器
+     * 单结构容器
      *
      * @var array
      */
@@ -52,7 +52,6 @@ class Flutter extends Adapter
         $json = array();
         foreach ($data as $n => $tree) {
             if ($tree['type'] == 'properties') {
-                $code .= '    ' . $tree['segment']['properties'] . "\n";
                 $json[] = $tree['segment']['json'];
             } else {
                 $pName = $this->toCamelCase($n);
@@ -72,14 +71,12 @@ class Flutter extends Adapter
                     $this->usedClassName[$className] = 1;
                 }
 
+                $token = $className;
                 if ($tree['type'] == 'list') {
-                    $p = $this->makeProperties("List<{$className}>", $pName);
-                } else {
-                    $p = $this->makeProperties($className, $pName);
+                    $token = "[]{$className}";
                 }
 
-                $code .= '    ' . $p . "\n";
-                $json[] = $this->propertieToJson($pName, $n);
+                $json[] = $this->propertieToJson($pName, $n, $token);
 
                 $item = '';
                 $this->doGen($tree['segment'], $item, $className);
@@ -105,16 +102,15 @@ class Flutter extends Adapter
             $i = 0;
             array_map(function ($d) use (&$a, &$i) {
                 if ($i > 0) {
-                    $a .= '          ';
+                    $a .= '    ';
                 }
 
                 $a .= "{$d}\n";
                 $i++;
             }, $data);
 
-            $a = trim(trim($a, "\n"), ',');
-            return "\n    {$class}.fromJson(Map<String, dynamic> json) 
-        : {$a};";
+            $a = trim($a, "\n");
+            return "\n    {$a}";
         }
 
         return '';
@@ -127,7 +123,7 @@ class Flutter extends Adapter
      */
     function makeProperties($token, $propertiesName)
     {
-        return "final {$token} {$propertiesName};";
+        return;
     }
 
     /**
@@ -138,7 +134,8 @@ class Flutter extends Adapter
      */
     function propertieToJson($propertiesName, $name, $token = '')
     {
-        return "{$propertiesName} = json['{$name}'],";
+        $propertiesName = ucfirst($propertiesName);
+        return "{$propertiesName} {$token} `json:\"{$name}\"`";
     }
 
     /**
@@ -148,7 +145,7 @@ class Flutter extends Adapter
      */
     function genClass($className, $classBody)
     {
-        return "class {$className} {\n" . $classBody . "\n}\n";
+        return "type {$className} struct {" . $classBody . "\n}\n";
     }
 
     /**
@@ -159,10 +156,10 @@ class Flutter extends Adapter
     function getTokens()
     {
         return array(
-            'float' => 'double',
+            'float' => 'float64',
             'int' => 'int',
             'bool' => 'bool',
-            'string' => 'String',
+            'string' => 'string',
         );
     }
 }

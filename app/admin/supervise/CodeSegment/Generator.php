@@ -7,6 +7,7 @@
 namespace app\admin\supervise\CodeSegment;
 
 use app\admin\supervise\CodeSegment\Adapter\Flutter;
+use app\admin\supervise\CodeSegment\Adapter\Go;
 
 class Generator
 {
@@ -79,14 +80,14 @@ class Generator
             return [
                 'curl' => $curlResponse,
             ];
-        } else if(is_array($data)) {
+        } else if (is_array($data)) {
             $struct = array();
             $this->getStruct($data, $struct);
-            $f = (new Flutter($struct))->gen();
             return [
                 'struct' => $struct,
                 'curl' => $curlResponse,
-                'flutter' => $f
+                'flutter' => (new Flutter($struct))->gen(),
+                'go' => (new Go($struct))->gen(),
             ];
         } else {
             return [];
