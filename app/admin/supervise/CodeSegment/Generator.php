@@ -12,80 +12,17 @@ use app\admin\supervise\CodeSegment\Adapter\Go;
 class Generator
 {
     /**
-     * curl地址
-     *
-     * @var string
+     * @param array $data
+     * @return array
      */
-    protected $url;
-
-    /**
-     * curl方法
-     *
-     * @var string
-     */
-    protected $method;
-
-    /**
-     * curl参数
-     *
-     * @var array
-     */
-    protected $params = array();
-
-    /**
-     * 附加的header参数
-     *
-     * @var array
-     */
-    protected $headerParams = array();
-
-
-    /**
-     * @param mixed $params
-     */
-    public function setParams($params)
+    function run(array $data)
     {
-        $this->params = $params;
-    }
-
-    /**
-     * @param mixed $headerParams
-     */
-    public function setHeaderParams($headerParams)
-    {
-        $this->headerParams = $headerParams;
-    }
-
-
-    /**
-     * @param mixed $url
-     */
-    public function setUrl($url)
-    {
-        $this->url = $url;
-    }
-
-    /**
-     * @param mixed $method
-     */
-    public function setMethod($method)
-    {
-        $this->method = $method;
-    }
-
-    function run()
-    {
-        $curlResponse = $this->curlRequest();
-        if (($data = json_decode($curlResponse, true)) === false) {
-            return [
-                'curl' => $curlResponse,
-            ];
-        } else if (is_array($data)) {
+        if (is_array($data)) {
             $struct = array();
             $this->getStruct($data, $struct);
             return [
                 'struct' => $struct,
-                'curl' => $curlResponse,
+                'curl' => $data,
                 'flutter' => (new Flutter($struct))->gen(),
                 'go' => (new Go($struct))->gen(),
             ];
@@ -160,70 +97,5 @@ class Generator
     {
         if (array() === $data) return false;
         return array_keys($data) !== range(0, count($data) - 1);
-    }
-
-    /**
-     * 通过CURL获取接口数据
-     *
-     * @param bool $CA
-     * @param string $cacert
-     * @param int $timeout
-     * @return int|mixed|string
-     */
-    private function curlRequest($CA = false, $cacert = '', $timeout = 10)
-    {
-        $url = $this->url;
-        $addHeader = &$this->headerParams;
-        $method = strtoupper($this->method);
-        $SSL = substr($url, 0, 8) == "https://" ? true : false;
-        if ($method == 'GET' && !empty($vars)) {
-            $params = is_array($vars) ? http_build_query($vars) : $vars;
-            $url = rtrim($url, '?');
-            if (false === strpos($url . $params, '?')) {
-                $url = $url . '?' . ltrim($params, '&');
-            } else {
-                $url = $url . $params;
-            }
-        }
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout - 3);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-
-        if ($SSL && $CA && $cacert) {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-            curl_setopt($ch, CURLOPT_CAINFO, $cacert);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-        } else if ($SSL && !$CA) {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-        }
-
-        $header = array("X-HTTP-Method-Override: {$method}");
-        if (!empty($addHeader)) {
-            $header = array_merge($header, $addHeader);
-        }
-
-        if ($method == 'POST' || $method == 'PUT') {
-            $header[] = 'Expect:';
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $this->params);
-        }
-
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $header); //避免data数据过长
-        $result = curl_exec($ch);
-        $error_no = curl_errno($ch);
-        if (!$error_no) {
-            $result = trim($result);
-        } else {
-            $result = $error_no;
-        }
-
-        curl_close($ch);
-        return $result;
     }
 }

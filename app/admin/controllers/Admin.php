@@ -45,6 +45,11 @@ abstract class Admin extends Controller
     protected $ACL;
 
     /**
+     * @var bool
+     */
+    protected $saveActLog = true;
+
+    /**
      * @var AdminUserModule
      */
     protected $ADMIN;
@@ -72,19 +77,21 @@ abstract class Admin extends Controller
         $this->ADMIN = new AdminUserModule();
 
         //保存操作日志
-        if ($this->is_post()) {
-            $type = 'post';
-            $actParams = $_POST;
-        } else {
-            $type = 'get';
-            $actParams = $this->params;
-        }
+        if ($this->saveActLog) {
+            if ($this->is_post()) {
+                $type = 'post';
+                $actParams = $_POST;
+            } else {
+                $type = 'get';
+                $actParams = $this->params;
+            }
 
-        if ($this->is_ajax_request()) {
-            $type = $type . '|' . 'ajax';
-        }
+            if ($this->is_ajax_request()) {
+                $type = $type . '|' . 'ajax';
+            }
 
-        $this->ADMIN->updateActLog($this->u, $actParams, $type);
+            $this->ADMIN->updateActLog($this->u, $actParams, $type);
+        }
 
         //查询登录用户信息
         $user_info = $this->ADMIN->getAdminInfo(array('id' => $this->uid));

@@ -84,6 +84,23 @@ class DocView extends AdminView
     }
 
     /**
+     * @param array $data
+     */
+    function generator($data = array())
+    {
+        $this->set(array(
+            'layer'=>'generator',
+        ));
+
+        if($data['show_input']) {
+            $this->renderTpl('doc/generator_form');
+        } else {
+            $data['t'] = 'generator';
+            $this->renderTpl('doc/code_segment', $data);
+        }
+    }
+
+    /**
      * 保存调试数据
      *
      * @param array $data
@@ -161,6 +178,8 @@ class DocView extends AdminView
 
     /**
      * 文档头部
+     *
+     * @throws \Cross\Exception\CoreException
      */
     function docHeader()
     {
@@ -182,6 +201,11 @@ class DocView extends AdminView
             <div class="navbar-collapse collapse">
                 <?php $this->genCommonParams() ?>
                 <?php $this->genApiServerList() ?>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="<?php echo $this->url('doc:generator') ?>" target="_blank">代码生成</a>
+                    </li>
+                </ul>
             </div>
         </div>
         <?php

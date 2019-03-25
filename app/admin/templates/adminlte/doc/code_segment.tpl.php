@@ -4,6 +4,13 @@
  * code_segment.tpl.php
  */
 
+$isTransform = false;
+$emptyTip = '服务器返回结果为空';
+if(!empty($data['t']) && $data['t'] == 'generator') {
+    $isTransform = true;
+    $emptyTip = 'JSON格式不正确';
+}
+
 if(!empty($data['data'])) {
     $data = &$data['data'];
     if (($curlData = json_encode($data['curl'])) === false || empty($data['curl'])) {
@@ -29,9 +36,17 @@ if(!empty($data['data'])) {
 <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
         <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+            <?php if($isTransform): ?>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <a href="<?php echo $this->url('doc:generator') ?>">
+                        <span aria-hidden="true">&times;</span>
+                    </a>
+                </button>
+            <?php else : ?>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            <?php endif ?>
         </div>
         <div class="modal-body">
             <?php if(!empty($data)) : ?>
@@ -74,7 +89,7 @@ if(!empty($data['data'])) {
                 ?>
             </div>
             <?php else : ?>
-            <div>服务器返回结果为空</div>
+            <div><?php echo $emptyTip ?></div>
             <?php endif ?>
         </div>
     </div>

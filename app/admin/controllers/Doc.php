@@ -9,6 +9,7 @@ namespace app\admin\controllers;
 
 
 use app\admin\supervise\ApiDocModule;
+use app\admin\supervise\CodeSegment\CURL;
 use app\admin\supervise\CodeSegment\Generator;
 use Cross\Core\Helper;
 use lib\Spyc;
@@ -29,6 +30,19 @@ class Doc extends Admin
      */
     protected $yamlFileCachePath;
 
+    /**
+     * 禁用操作日志
+     *
+     * @var bool
+     */
+    protected $saveActLog = false;
+
+    /**
+     * Doc constructor.
+     *
+     * @throws \Cross\Exception\CoreException
+     * @throws \ReflectionException
+     */
     function __construct()
     {
         parent::__construct();
@@ -105,14 +119,43 @@ class Doc extends Admin
         $params = &$_POST['params'];
         $url = &$_POST['action'];
 
-        $DM = new Generator();
-        $DM->setUrl($url);
-        $DM->setParams($params);
-        $DM->setHeaderParams($headerParams);
-        $DM->setMethod($method);
+        $curlData = (new CURL())->setUrl($url)
+            ->setParams($params)
+            ->setHeaderParams($headerParams)
+            ->setMethod($method)
+            ->request();
 
-        $data = $DM->run();
+        $this->data['data'] = array();
+        $data = json_decode($curlData, true);
+        if (is_array($data)) {
+            $this->data['data'] = (new Generator())->run($data);
+        }
+
+        $this->display($this->data);
+    }
+
+    /**
+     * 代码生成
+     *
+     * @throws \Cross\Exception\CoreException
+     */
+    function generator()
+    {
+        $data = array();
+        $show_input = true;
+        if ($this->is_post()) {
+            $show_input = false;
+            $json = &$_POST['json'];
+            if (!empty($json)) {
+                $json = str_replace(["\r\n", "\r", "\n"], "", $json);
+                if (false !== ($inputData = json_decode($json, true)) && is_array($inputData)) {
+                    $data = (new Generator())->run($inputData);
+                }
+            }
+        }
+
         $this->data['data'] = $data;
+        $this->data['show_input'] = $show_input;
         $this->display($this->data);
     }
 

@@ -33,8 +33,10 @@ class Flutter extends Adapter
         $this->doGen($this->struct, $code);
 
         $f = '';
-        foreach ($this->singleClass as $s) {
-            $f .= "\n" . $s;
+        if(!empty($this->singleClass)) {
+            foreach ($this->singleClass as $s) {
+                $f .= "\n" . $s;
+            }
         }
 
         $d = $this->genClass('Result', $code);
