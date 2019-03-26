@@ -40,21 +40,30 @@ class Generator
     private function getStruct(array $data, &$struct = array())
     {
         if (!empty($data)) {
+            if (!$this->isAssoc($data)) {
+                $this->getArrayMaxMember($data, $object);
+                if (null === $object) {
+                    $object = $data;
+                }
+            } else {
+                $object = $data;
+            }
 
-            foreach ($data as $key => $value) {
+            foreach ($object as $key => $value) {
                 if (is_array($value) && !empty($value)) {
                     if ($this->isAssoc($value)) {
                         $is_list = false;
-                        $data = $value;
+                        $data2 = $value;
                     } else {
                         $is_list = true;
-                        $valueFields = array_map('count', $value);
-                        $index = array_search(max($valueFields), $valueFields);
-                        $data = $value[$index];
+                        $this->getArrayMaxMember($value, $data2);
+                        if ($data2 === null) {
+                            $data2 = $value;
+                        }
                     }
 
                     $child = array();
-                    $this->getStruct($data, $child);
+                    $this->getStruct($data2, $child);
 
                     if ($is_list) {
                         $struct[$key] = array(
@@ -82,6 +91,42 @@ class Generator
                     }
 
                     $struct[$key] = $type;
+                }
+            }
+        }
+    }
+
+    /**
+     * 获取二维数组中成员最多的那一条数据
+     *
+     * @param array $list
+     * @param array $data
+     */
+    private function getArrayMaxMember(array $list, &$data = array())
+    {
+        if (!empty($list)) {
+            foreach ($list as $a) {
+                if (!empty($a)) {
+                    if (is_array($a)) {
+                        foreach ($a as $k => $v) {
+                            if (!is_array($v)) {
+                                $data[$k] = $v;
+                            } else {
+                                if ($this->isAssoc($v)) {
+                                    $data[$k] = $v;
+                                } elseif (!empty($v)) {
+                                    $this->getArrayMaxMember($v, $child);
+                                    if (!empty($data[$k])) {
+                                        $data[$k] += $child;
+                                    } else {
+                                        $data[$k] = $child;
+                                    }
+                                } elseif (!isset($data[$k])) {
+                                    $data[$k] = $v;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
