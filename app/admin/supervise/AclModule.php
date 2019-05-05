@@ -75,7 +75,6 @@ class AclModule extends AdminModule
             '__construct',
             '__destruct',
             '__toString',
-            '__call',
             '__set',
             '__isset',
             '__unset',

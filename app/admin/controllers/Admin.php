@@ -172,7 +172,9 @@ abstract class Admin extends Controller
             }
 
             $accept_action = &$all_accept_action[$controller];
-            if (!isset($accept_action[$this->action])) {
+
+            //如果授权__call，所有方法均可访问
+            if (!isset($accept_action[$this->action]) && !isset($accept_action['__call'])) {
                 if ($this->is_ajax_request()) {
                     $this->dieJson($this->getStatus(100101));
                 } else {
