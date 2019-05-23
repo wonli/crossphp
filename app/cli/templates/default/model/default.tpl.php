@@ -135,13 +135,13 @@ use PDO;
      *
      * @param array $where
      * @param string $fields
-     * @param string $order
-     * @param string $group_by
+     * @param string|int $order
+     * @param string|int $group_by
      * @param int $limit
      * @return mixed
      * @throws CoreException
      */
-    function getAll($where = array(), $fields = '*', $order = '1', $group_by = '1', $limit = 0)
+    function getAll($where = array(), $fields = '*', $order = 1, $group_by = 1, $limit = 0)
     {
         return $this->db()->getAll($this->getTable(), $fields, $where, $order, $group_by, $limit);
     }
@@ -152,12 +152,12 @@ use PDO;
      * @param array $page
      * @param array $where
      * @param string $fields
-     * @param string $order
-     * @param string $group_by
+     * @param string|int $order
+     * @param string|int $group_by
      * @return mixed
      * @throws CoreException
      */
-    function find(&$page = array('p' => 1, 'limit' => 50), $where = array(), $fields = '*', $order = '1', $group_by = '1')
+    function find(&$page = array('p' => 1, 'limit' => 50), $where = array(), $fields = '*', $order = 1, $group_by = 1)
     {
         return $this->db()->find($this->getTable(), $fields, $where, $order, $page, $group_by);
     }
@@ -303,15 +303,20 @@ use PDO;
     }
 
     /**
-     * 获取属性数组
+     * 获取属性数据
      *
+     * @param bool $hasValue
      * @return array
      */
-    function getArrayData()
+    function getArrayData($hasValue = false)
     {
         $data = array();
         foreach (self::$propertyInfo as $p => $c) {
             if (0 === strcasecmp($c['default_value'], 'CURRENT_TIMESTAMP')) {
+                continue;
+            }
+
+            if ($hasValue && null === $this->{$p}) {
                 continue;
             }
 
@@ -381,14 +386,14 @@ use PDO;
         }
 
         if (empty($this->index)) {
-            throw new CoreException("请为表 {$this->modelInfo['table']} 指定索引");
+            throw new CoreException("请为表 {$this->modelInfo['table']} 创建索引");
         }
 
         $index = [];
         foreach ($this->index as $indexName) {
             $indexValue = $this->{$indexName};
-            if (null === $indexValue || '' === $indexValue) {
-                throw new CoreException("{$indexName} 的值不能为空");
+            if (null === $indexValue) {
+                throw new CoreException("索引 {$indexName} 的值不能为null");
             }
 
             $index[$indexName] = $indexValue;
