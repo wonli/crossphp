@@ -41,13 +41,13 @@ class ApiDocModule extends AdminModule
                 $s['cache_file'] = $this->getCacheFilePathFromCacheName($s['cache_name']);
             }
 
-            if(!empty($data['global_params'])) {
+            if (!empty($data['global_params'])) {
                 $data['global_params'] = json_decode($data['global_params'], true);
             } else {
                 $data['global_params'] = array();
             }
 
-            if(!empty($data['header_params'])) {
+            if (!empty($data['header_params'])) {
                 $data['header_params'] = json_decode($data['header_params'], true);
             } else {
                 $data['header_params'] = array();
@@ -100,13 +100,13 @@ class ApiDocModule extends AdminModule
                     array_walk($servers, function (&$dd) {
                         $dd['cache_file'] = $this->getCacheFilePathFromCacheName($dd['cache_name']);
 
-                        if(!empty($dd['global_params'])) {
+                        if (!empty($dd['global_params'])) {
                             $dd['global_params'] = json_decode($dd['global_params'], true);
                         } else {
                             $dd['global_params'] = array();
                         }
 
-                        if(!empty($dd['header_params'])) {
+                        if (!empty($dd['header_params'])) {
                             $dd['header_params'] = json_decode($dd['header_params'], true);
                         } else {
                             $dd['header_params'] = array();
@@ -132,6 +132,14 @@ class ApiDocModule extends AdminModule
         ));
 
         if (!empty($data)) {
+            $this->link->del($this->t_api_doc, array(
+                'id' => $id
+            ));
+
+            $this->link->del($this->t_api_doc_data, array(
+                'doc_id' => $id
+            ));
+
             $data = json_decode($data['servers'], true);
             foreach ($data as $d) {
                 @unlink($this->getCacheFilePathFromCacheName($d['cache_name']));
@@ -156,7 +164,7 @@ class ApiDocModule extends AdminModule
         ));
 
         if (!empty($data)) {
-            array_walk($data, function ($d) use(&$result) {
+            array_walk($data, function ($d) use (&$result) {
                 $d['value'] = json_decode($d['value'], true);
                 $result[$d['name']] = $d['value'];
             });

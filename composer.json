@@ -1,5 +1,6 @@
 {
-    "require": {
-        "ideaa/cross": "dev-dev"
-    }
+  "require": {
+    "ideaa/cross": "dev-dev",
+    "ext-json": "*"
+  }
 }

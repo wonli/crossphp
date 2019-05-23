@@ -1,171 +1,145 @@
-<form role="form" method="post">
+<form role="form" class="form-horizontal" method="post">
     <div class="row">
-        <div class="col-md-9">
-            <div class="box">
-                <div class="box-body">
+        <div class="col-md-12">
+            <div class="box box-info">
+                <div class="box-body" style="margin-top: 30px">
                     <div class="form-group">
-                        <label>名称</label>
-                        <input type="text" name="name" id="name" value="<?= $this->e($data, 'name', '') ?>"
-                               class="form-control" placeholder="请填写名称">
-                    </div>
-
-                    <div class="form-group">
-                        <label>DocToken</label>
-                        <input type="text" id="docToken" name="doc_token"
-                               value="<?= $this->e($data, 'doc_token', '') ?>"
-                               class="form-control" placeholder="请填写获取内容的Token">
-                    </div>
-
-                    <div class="form-group">
-                        <label>公共参数</label>
-                        <a href="javascript:void(0)" t="global" class="addParams" style="margin-left:20px">+ 增加参数</a>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <table class="table table-bordered">
-                                    <tbody id="globalParams">
-                                    <?php
-                                    if (!empty($data['global_params'])) {
-                                        foreach ($data['global_params'] as $key => $name) {
-                                            $this->makeParamsNode(array(
-                                                't' => 'global',
-                                                'key' => $key,
-                                                'name' => $name,
-                                            ));
-                                        }
-                                    } else {
-                                        ?>
-                                        <tr>
-                                            <td class="col-xs-1">
-                                                <input type="text" name="global[1][key]" class="form-control"
-                                                       placeholder="参数">
-                                            </td>
-                                            <td class="col-xs-3">
-                                                <input type="text" name="global[1][name]" class="form-control"
-                                                       placeholder="参数名">
-                                            </td>
-                                            <td class="col-xs-1">
-                                                <a class="btn btn-warning del-node-flag">删除</a>
-                                            </td>
-                                        </tr>
-                                        <?php
-                                    }
-                                    ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <label for="name" class="col-lg-3 col-sm-2 control-label">名称</label>
+                        <div class="col-lg-5 col-sm-8">
+                            <input type="text" name="name" id="name" value="<?= $this->e($data, 'name', '') ?>"
+                                   class="form-control" placeholder="请填写名称">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label>Header参数(CURL时生效)</label>
-                        <a href="javascript:void(0)" t="header" class="addParams" style="margin-left:20px">+ 增加参数</a>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <table class="table table-bordered">
-                                    <tbody id="headerParams">
-                                    <?php
-                                    if (!empty($data['header_params'])) {
-                                        foreach ($data['header_params'] as $key => $name) {
-                                            $this->makeParamsNode(array(
-                                                't' => 'header',
-                                                'key' => $key,
-                                                'name' => $name,
-                                            ));
-                                        }
-                                    } else {
-                                        ?>
-                                        <tr>
-                                            <td class="col-xs-1">
-                                                <input type="text" name="header[1][key]" class="form-control"
-                                                       placeholder="参数">
-                                            </td>
-                                            <td class="col-xs-3">
-                                                <input type="text" name="header[1][name]" class="form-control"
-                                                       placeholder="参数名">
-                                            </td>
-                                            <td class="col-xs-1">
-                                                <a class="btn btn-warning del-node-flag">删除</a>
-                                            </td>
-                                        </tr>
-                                        <?php
-                                    }
-                                    ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <label for="docToken" class="col-lg-3 col-sm-2 control-label">接口签名</label>
+                        <div class="col-lg-5 col-sm-8">
+                            <input type="text" id="docToken" name="doc_token"
+                                   value="<?= $this->e($data, 'doc_token', '') ?>"
+                                   class="form-control" placeholder="请填写获取内容的Token">
+                            <p class="help-block">在获取接口列表时的签名，请在对应app的init配置文件中查看</p>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label>服务器地址</label>
-                        <a href="javascript:void(0)" id="addDevServer" style="margin-left:20px">+ 增加调试服务器</a>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <table class="table table-bordered">
-                                    <thead>
-                                    <tr>
-                                        <th class="col-xs-1">默认</th>
-                                        <th class="col-xs-2">名称</th>
-                                        <th class="col-xs-6">服务器地址</th>
-                                        <th class="col-xs-3">获取数据</th>
-                                    </tr>
-                                    </thead>
-
-                                    <tbody id="devServer">
-
-                                    <?php
-                                    if (!empty($data['servers'])) {
-                                        foreach ($data['servers'] as $s) {
-                                            $this->makeDevServerNode($s);
-                                        }
-                                    } else {
-                                        ?>
-                                        <tr>
-                                            <td>
-                                                <label>
-                                                    <input data-on="是" data-off="否" type="checkbox"
-                                                           data-toggle="toggle" data-onstyle="success"
-                                                           data-offset="danger"
-                                                           name="dev[1][is_default]">
-                                                </label>
-                                            </td>
-                                            <td>
-                                                <input type="text" name="dev[1][server_name]"
-                                                       class="server_name form-control"
-                                                       placeholder="名称">
-                                            </td>
-                                            <td>
-                                                <input type="text" name="dev[1][api_addr]" class="api_addr form-control"
-                                                       placeholder="请填写服务器地址">
-                                            </td>
-                                            <td>
-                                                <input type="hidden" name="dev[1][cache_name]" class="cache_name"
-                                                       value="">
-                                                <input type="hidden" name="dev[1][cache_at]" class="cache_at" value="">
-                                                <input type="hidden" name="dev[1][user]" class="user" value="">
-                                                <a class="btn btn-primary get-data-flag">获取数据</a>
-                                            </td>
-                                        </tr>
-                                        <?php
+                        <label class="col-lg-3 col-sm-2 control-label">公共参数</label>
+                        <div class="col-lg-6 col-sm-8">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th class="col-xs-2">参数</th>
+                                    <th class="col-xs-4">参数名</th>
+                                    <th style="min-width: 105px">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody id="globalParams">
+                                <?php
+                                if (!empty($data['global_params'])) {
+                                    $i = 0;
+                                    foreach ($data['global_params'] as $key => $name) {
+                                        $this->makeParamsNode([
+                                            't' => 'global',
+                                            'key' => $key,
+                                            'name' => $name,
+                                            'i' => $i++
+                                        ]);
                                     }
-                                    ?>
-                                    </tbody>
-                                </table>
+                                } else {
+                                    $this->makeParamsNode(['t' => 'global', 'i' => 0]);
+                                }
+                                ?>
+                                </tbody>
+                            </table>
+                            <p class="help-block">每个请求必传的公共参数，参数名用于页面显示</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-lg-3 col-sm-2 control-label">Header参数</label>
+                        <div class="col-lg-6 col-sm-8">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th class="col-xs-2">参数</th>
+                                    <th class="col-xs-4">参数名</th>
+                                    <th style="min-width: 105px">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody id="headerParams">
+                                <?php
+                                if (!empty($data['header_params'])) {
+                                    $i = 0;
+                                    foreach ($data['header_params'] as $key => $name) {
+                                        $this->makeParamsNode([
+                                            't' => 'header',
+                                            'key' => $key,
+                                            'name' => $name,
+                                            'i' => $i++
+                                        ]);
+                                    }
+                                } else {
+                                    $this->makeParamsNode(['t' => 'header', 'i' => 0]);
+                                }
+                                ?>
+                                </tbody>
+                            </table>
+                            <p class="help-block">需要通过HTTP请求的header来传参时指定，CURL时生效</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-lg-3 col-sm-2 control-label">部署服务器列表</label>
+                        <div class="col-lg-7 col-sm-9">
+                            <div class="row">
+                                <div class="col-md-12" style="margin-bottom: 10px;">
+                                    <a href="javascript:void(0)" id="addDevServer" class="btn btn-success">
+                                        <i class="fa fa-plus"></i>
+                                        增加部署服务器
+                                    </a>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th class="col-xs-1">默认</th>
+                                            <th class="col-xs-3">名称</th>
+                                            <th class="col-xs-6">服务器地址</th>
+                                            <th style="min-width: 170px">操作</th>
+                                        </tr>
+                                        </thead>
+
+                                        <tbody id="devServer">
+                                        <?php
+                                        if (!empty($data['servers'])) {
+                                            foreach ($data['servers'] as $s) {
+                                                $this->makeDevServerNode($s);
+                                            }
+                                        } else {
+                                            $this->makeDevServerNode();
+                                        }
+                                        ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="box-footer">
-                    <button class="btn btn-primary">提交</button>
+                    <div class="form-group">
+                        <label for="submit" class="col-lg-3 col-sm-2"></label>
+                        <div class="col-sm-6">
+                            <button id="submit" class="btn btn-primary">保存</button>
+                            <a href="<?= $this->url('doc') ?>" class="reload btn btn-danger">取消</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
-
 </form>
 <script>
-
     $(function () {
         var name = $('#name'), docToken = $('#docToken');
         $("form").submit(function () {
@@ -228,7 +202,7 @@
             $(this).closest('tr').remove();
         });
 
-        $('.addParams').on('click', function () {
+        $(document).on('click', '.addParams', function () {
             var t = $(this).attr('t'), container = '#' + t + 'Params';
             $.get('<?= $this->url('doc:makeParamsNode') ?>', {t: t}, function (d) {
                 $(container).append(d);

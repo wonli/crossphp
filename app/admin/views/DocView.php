@@ -28,8 +28,6 @@ class DocView extends AdminView
         $this->set(array(
             'layer' => 'doc',
         ));
-
-        $this->renderTpl('doc/index', $data['data']);
     }
 
     /**
@@ -128,6 +126,24 @@ class DocView extends AdminView
     function makeParamsNode($data = array())
     {
         $this->renderTpl('doc/params_node', $data);
+    }
+
+    /**
+     * 生成增加按钮
+     *
+     * @param string $t
+     * @return string
+     */
+    function makeAddButton($t = 'global')
+    {
+        $a = self::htmlTag('a', [
+                't' => $t,
+                'href' => 'javascript:void(0)',
+                'class' => 'addParams btn btn-default',
+                '@content' => self::htmlTag('i', ['class' => 'fa fa-plus'])
+            ]);
+
+        return $a;
     }
 
     /**

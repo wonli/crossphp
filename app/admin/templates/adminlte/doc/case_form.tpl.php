@@ -59,7 +59,8 @@ $formFields = &$data['params'];
                                 if (!empty($formFields)) {
                                     foreach ($formFields as $name => $field) {
                                         if (false !== strpos($name, ':')) {
-                                            @list($field_name, $input_type, $options) = explode(':', $name);
+                                            @list($field_name, $input_type) = explode(':', $name);
+                                            $options = $field['label'];
                                         } else {
                                             $field_name = $name;
                                             $input_type = 'text';
@@ -88,17 +89,20 @@ $formFields = &$data['params'];
                                                 break;
 
                                             case 'select':
-                                                $input_ele_type = 'select';
-                                                $options = explode(' ', trim($options));
-                                                $selectOptions = array();
                                                 if (!empty($options)) {
+                                                    $selectOptions = array();
+                                                    $options = explode(' ', trim($options));
                                                     foreach ($options as $op) {
                                                         list($opValue, $opTxt) = explode('-', $op);
                                                         $selectOptions[$opValue] = $opTxt;
                                                     }
+                                                    $input = $this->select($selectOptions, null, $input_tag_data);
+                                                } else {
+                                                    $input_ele_type = 'input';
+                                                    $input_tag_data['placeholder'] = $field_name;
+                                                    $input = $this->htmlTag($input_ele_type, $input_tag_data);
                                                 }
 
-                                                $input = $this->select($selectOptions, null, $input_tag_data);
                                                 break;
 
                                             case 'multi_file':

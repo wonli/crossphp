@@ -58,6 +58,13 @@ abstract class Api extends Controller
     protected $data = array();
 
     /**
+     * 接口所需参数
+     *
+     * @var array
+     */
+    protected $api_request_params = array();
+
+    /**
      * 默认请求类型
      *
      * @var string
@@ -107,7 +114,7 @@ abstract class Api extends Controller
         if (!empty($_REQUEST['doc_token']) && !empty($_REQUEST['t'])) {
             $isVerify = $this->verifyDocApiToken($_REQUEST['doc_token'], $_REQUEST['t']);
             if (!$isVerify) {
-                $this->display(200105);
+                $this->display(100700);
             }
 
             $docData = $this->docApiData();
@@ -134,19 +141,20 @@ abstract class Api extends Controller
             if (!empty($request)) {
                 foreach ($request as $p) {
                     list($params, $message, $require) = explode('|', trim($p));
+                    if (strpos($params, ':') !== false) {
+                        list($params, $input_type) = explode(':', $params);
+                    }
+
+                    $this->api_request_params[] = $params;
                     if ($require) {
-                        $param_name = $params;
                         $data_container = $this->data_container;
-                        if (strpos($params, ':') !== false) {
-                            list($param_name, $input_type) = explode(':', $params);
-                            if (isset($this->input_data_container[$input_type])) {
-                                $data_container = $this->getDataContainer($input_type);
-                            }
+                        if (isset($input_type) && isset($this->input_data_container[$input_type])) {
+                            $data_container = $this->getDataContainer($input_type);
                         }
 
-                        if (!isset($data_container[$param_name])) {
+                        if (!isset($data_container[$params])) {
                             $this->data['status'] = 0;
-                            $this->data['message'] = "缺少参数{$param_name}($message)";
+                            $this->data['message'] = "缺少参数{$params}($message)";
                             $this->display($this->data);
                         }
                     }
@@ -182,7 +190,7 @@ abstract class Api extends Controller
                 $value = $defaultValue;
             }
         } elseif (isset($this->data_container[$key])) {
-            if ($filter_data && '' != $value) {
+            if ($filter_data && '' != $defaultValue) {
                 $value = $this->filterInputData($key, $defaultValue);
             } else {
                 $value = $defaultValue;

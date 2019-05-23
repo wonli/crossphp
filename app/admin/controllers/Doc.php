@@ -70,34 +70,43 @@ class Doc extends Admin
             $this->to('doc:setting');
         }
 
+        $servers = &$data['servers'];
         $userData = $this->ADM->getAllUserData($this->u, $doc_id);
         $userServerID = &$userData['host']['sid'];
-
         $currentServerID = 0;
-        $servers = &$data['servers'];
-        if (isset($servers[$userServerID])) {
-            $currentServerID = $userServerID;
-        } else {
-            foreach ($servers as $sid => $s) {
-                if (isset($s['is_default'])) {
-                    $currentServerID = $sid;
-                    break;
-                }
-            }
-        }
 
         $this->data['doc'] = $data;
         $this->data['data'] = array();
         $this->data['doc_id'] = $doc_id;
         $this->data['user_data'] = $userData;
-        $this->data['api_host'] = $servers[$currentServerID]['api_addr'];
         $this->data['current_sid'] = $currentServerID;
-        $docData = Spyc::YAMLLoad($servers[$currentServerID]['cache_file']);
-        if (!empty($docData)) {
-            $this->data['data'] = $docData;
-        }
 
-        $this->display($this->data, 'index');
+        if (empty($servers)) {
+            $this->display($this->data, 'index');
+        } else {
+            if (isset($servers[$userServerID])) {
+                $currentServerID = $userServerID;
+            } else {
+                foreach ($servers as $sid => $s) {
+                    if (isset($s['is_default'])) {
+                        $currentServerID = $sid;
+                        break;
+                    }
+                }
+            }
+
+            $apiServer = &$servers[$currentServerID];
+            $this->initApiData($apiServer['server_name'], $apiServer['api_addr'], $data['doc_token'], false);
+
+            $this->data['api_host'] = $apiServer['api_addr'];
+            $this->data['current_sid'] = $currentServerID;
+            $docData = Spyc::YAMLLoad($apiServer['cache_file']);
+            if (!empty($docData)) {
+                $this->data['data'] = $docData;
+            }
+
+            $this->display($this->data, 'index');
+        }
     }
 
     /**
@@ -351,48 +360,60 @@ class Doc extends Admin
     /**
      * 获取接口文档数据
      *
+     * @param string $serverName
+     * @param string $apiAddr
+     * @param string $docToken
+     * @param bool $display
      * @throws \Cross\Exception\CoreException
      */
-    function initApiData()
+    function initApiData($serverName = '', $apiAddr = '', $docToken = '', $display = true)
     {
-        $data = [];
-        $cache_file_name = 'default';
-        if ($this->is_post()) {
-            $serverName = &$_POST['server_name'];
-            $apiAddr = &$_POST['api_addr'];
-            $docToken = &$_POST['doc_token'];
-
-            if (!$docToken) {
-                $this->dieJson($this->getStatus(100701));
-            }
-
-            if (!$serverName) {
-                $this->dieJson($this->getStatus(100710));
-            }
-
-            if (!$apiAddr) {
-                $this->dieJson($this->getStatus(100711));
-            }
-
-            $requestParams = http_build_query([
-                'doc_token' => md5(md5($docToken . TIME) . TIME),
-                't' => TIME,
-            ]);
-
-            $apiAddr = rtrim($apiAddr, '/');
-            $url = $apiAddr . '/?' . $requestParams;
-            $response = Helper::curlRequest($url);
-            if (($responseData = json_decode($response, true)) === false) {
-                $this->dieJson($this->getStatus(100705));
-            }
-
-            if (empty($responseData['data'])) {
-                $this->dieJson($this->getStatus(100706));
-            }
-
-            $data = &$responseData['data'];
-            $cache_file_name = md5($apiAddr);
+        if (empty($serverName)) {
+            $serverName = &$_REQUEST['server_name'];
         }
+
+        if (empty($apiAddr)) {
+            $apiAddr = &$_REQUEST['api_addr'];
+        }
+
+        if (empty($docToken)) {
+            $docToken = &$_REQUEST['doc_token'];
+        }
+
+        if (!$docToken) {
+            $this->dieJson($this->getStatus(100701));
+        }
+
+        if (!$serverName) {
+            $this->dieJson($this->getStatus(100710));
+        }
+
+        if (!$apiAddr) {
+            $this->dieJson($this->getStatus(100711));
+        }
+
+        $requestParams = http_build_query([
+            'doc_token' => md5(md5($docToken . TIME) . TIME),
+            't' => TIME,
+        ]);
+
+        $apiAddr = rtrim($apiAddr, '/');
+        $url = $apiAddr . '/?' . $requestParams;
+        $response = Helper::curlRequest($url);
+        if (($responseData = json_decode($response, true)) === false) {
+            $this->dieJson($this->getStatus(100705));
+        }
+
+        if ($responseData['status'] != 1) {
+            $this->dieJson($responseData);
+        }
+
+        if (empty($responseData['data'])) {
+            $this->dieJson($this->getStatus(100706));
+        }
+
+        $data = &$responseData['data'];
+        $cache_file_name = md5($apiAddr);
 
         $result = [];
         foreach ($data as $k => $d) {
@@ -442,16 +463,19 @@ class Doc extends Admin
         $a = Spyc::YAMLDump($result);
         $cache_file = $this->yamlFileCachePath . "/{$cache_file_name}.yaml";
         $ret = file_put_contents($cache_file, $a);
-        if (!$ret) {
-            $this->dieJson($this->getStatus(100720));
-        } else {
-            $this->data['data'] = array(
-                'cache_name' => $cache_file_name,
-                'cache_at' => TIME,
-                'user' => $this->u,
-            );
 
-            $this->dieJson($this->data);
+        if ($display) {
+            if (!$ret) {
+                $this->dieJson($this->getStatus(100720));
+            } else {
+                $this->data['data'] = array(
+                    'cache_name' => $cache_file_name,
+                    'cache_at' => TIME,
+                    'user' => $this->u,
+                );
+
+                $this->dieJson($this->data);
+            }
         }
     }
 }
