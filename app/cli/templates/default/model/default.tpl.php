@@ -284,6 +284,29 @@ use PDO;
     }
 
     /**
+     * 获取数据库表字段
+     *
+     * @param string $alias 别名
+     * @param bool $as 是否把别名加在字段名之前
+     * @return string
+     */
+    function getFields($alias = '', $as = false)
+    {
+        $fieldsList = array_keys(self::$propertyInfo);
+        if (!empty($alias)) {
+            array_walk($fieldsList, function (&$d) use ($alias, $as) {
+                if ($as) {
+                    $d = "{$alias}.{$d} {$alias}_{$d}";
+                } else {
+                    $d = "{$alias}.{$d}";
+                }
+            });
+        }
+
+        return implode(', ', $fieldsList);
+    }
+
+    /**
      * 获取默认值
      *
      * @return array
