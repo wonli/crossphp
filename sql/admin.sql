@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `cpa_admin` (
   `theme` varchar(32) NOT NULL DEFAULT '' COMMENT '主题风格名称',
   `salt` char(16) NOT NULL,
   `usc` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '是否允许解绑密保卡',
-  `last_login_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_login_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_login_ip` varchar(128) NOT NULL,
   `rid` int(11) unsigned NOT NULL DEFAULT '1' COMMENT '角色ID',
   `t` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '0,禁用 1,正常',
