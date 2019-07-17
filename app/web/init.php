@@ -52,7 +52,7 @@ return array(
          *  4 友好的参数形式: /index.php/controller/action/foo/bar...
          *  5 PATH_INFO 下的简短形式
          */
-        'type' => 3,
+        'type' => 4,
         /**
          * 服务器是否已经开启rewrite支持
          */
