@@ -20,7 +20,6 @@ class Main extends Api
      *
      * @cp_api get, /main/index, 获取框架当前版本号
      * @cp_request t|当前时间|1
-     * @throws \Cross\Exception\CoreException
      */
     function index()
     {
