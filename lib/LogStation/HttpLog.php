@@ -19,7 +19,6 @@ class HttpLog extends LogBase
     protected $app_id;
     protected $app_key;
 
-    protected $station_server = '118.24.73.121';
     protected $port = 9090;
     protected $timeout = null;
 

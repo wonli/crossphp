@@ -35,6 +35,13 @@ abstract class LogBase
     protected $defaultLogData = 'GPCS';
 
     /**
+     * 日志中转服务器地址
+     *
+     * @var string
+     */
+    protected $station_server = '212.129.138.182';
+
+    /**
      * stack
      *
      * @var array
