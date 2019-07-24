@@ -16,6 +16,16 @@
         <input type="text" class="form-control" name="vv" placeholder="密保卡坐标对应的值">
     </div>
 </div>
-
+<script>
+    try {
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+        if (index) {
+            parent.layer.close(index);
+            parent.window.location.href = '<?= $this->url() ?>';
+        }
+    } catch (e) {
+        //console.log(e)
+    }
+</script>
 
 
