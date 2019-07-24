@@ -1,6 +1,12 @@
 {
   "require": {
     "ideaa/cross": "dev-dev",
-    "ext-json": "*"
+    "ext-gd": "*",
+    "ext-pdo": "*",
+    "ext-dom": "*",
+    "ext-json": "*",
+    "ext-curl": "*",
+    "ext-openssl": "*",
+    "ext-mbstring": "*"
   }
 }
