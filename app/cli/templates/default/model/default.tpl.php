@@ -1,5 +1,5 @@
 <?php echo '<?php' . PHP_EOL . PHP_EOL ?>
-<?php if(!empty($data['namespace'])) : ?>
+<?php if (!empty($data['namespace'])) : ?>
 namespace <?php echo $data['namespace'] ?>;
 <?php endif ?>
 
@@ -90,7 +90,15 @@ use PDO;
      */
     function add()
     {
-        return $this->db()->add($this->getTable(), $this->makeInsertData());
+        $insertId = $this->db()->add($this->getTable(), $this->makeInsertData());
+        if (false !== $insertId) {
+            $primaryKey = &$this->modelInfo['primary_key'];
+            if ($primaryKey) {
+                $this->{$primaryKey} = $insertId;
+            }
+        }
+
+        return $insertId;
     }
 
     /**
@@ -175,9 +183,12 @@ use PDO;
             $where = $this->getDefaultCondition();
         }
 
-        $stmt = $this->db()->select('*')->from($this->getTable())->where($where)->stmt();
-        $stmt->setFetchMode(PDO::FETCH_CLASS, self::class);
-        return $stmt->fetch();
+        $data = $this->db()->select('*')->from($this->getTable())->where($where)->stmt()->fetch(PDO::FETCH_ASSOC);
+        if (!empty($data)) {
+            $this->updateProperty($data);
+        }
+
+        return $this;
     }
 
     /**
