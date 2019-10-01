@@ -314,7 +314,7 @@ class Table extends UI
                     }
 
                     $a = array();
-                    $content = $this->makeWidgetContent($key, $value, $d, $inputName, $a, $b);
+                    $content = $this->makeWidgetContent($key, $value, $token, $d, $inputName, $a, $b);
                     $a['@content'] = $content;
 
                     $td .= HTML::td($a);

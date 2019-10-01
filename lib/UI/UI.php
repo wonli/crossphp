@@ -170,6 +170,7 @@ abstract class UI
      *
      * @param string $key
      * @param string $value
+     * @param mixed $token 数据分组标识（主键）
      * @param array $rowData
      * @param string $inputName
      * @param array $a
@@ -177,7 +178,7 @@ abstract class UI
      * @return mixed
      * @throws CoreException
      */
-    protected function makeWidgetContent($key, $value, $rowData, $inputName = '', &$a = array(), &$b = array())
+    protected function makeWidgetContent($key, $value, $token, $rowData, $inputName = '', &$a = array(), &$b = array())
     {
         $widgetConfig = &$this->widgetRuntimeConfig[$key];
         if (!empty($widgetConfig['name'])) {
@@ -203,6 +204,8 @@ abstract class UI
             }
 
             $attributes['name'] = $inputName;
+            $attributes['data-id'] = $token;
+            $attributes['data-field'] = $key;
             switch ($widgetName) {
                 case 'input':
                     $attributes['value'] = $value;
