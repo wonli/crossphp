@@ -8,5 +8,5 @@ RewriteRule ^.*$ - [NC,L]
 
 RewriteCond %{REQUEST_URI}::$1 ^(/.+)(.+)::\2$
 RewriteRule ^(.*) - [E=BASE:%1]
-RewriteRule ^(.*)$ %{ENV:BASE}index.php?$1 [NC,L]
+RewriteRule ^(.*)$ %{ENV:BASE}index.php/$1 [NC,L]
 </IfModule>
