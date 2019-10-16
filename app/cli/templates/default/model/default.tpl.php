@@ -1,8 +1,9 @@
 <?php echo '<?php' . PHP_EOL . PHP_EOL ?>
-<?php if (!empty($data['namespace'])) : ?>
+<?php if(!empty($data['namespace'])) : ?>
 namespace <?php echo $data['namespace'] ?>;
 <?php endif ?>
 
+use Cross\DB\Drivers\PDOSqlDriver;
 use Cross\Exception\CoreException;
 use Cross\MVC\Module;
 use PDO;
@@ -19,11 +20,25 @@ use PDO;
     private $table;
 
     /**
+     * 连表数组
+     *
+     * @var array
+     */
+    private $joinTables = array();
+
+    /**
      * 自定义索引
      *
      * @var array
      */
-    private $index;
+    private $index = array();
+
+    /**
+     * 在事务中获取单条数据时是否加锁
+     *
+     * @var bool
+     */
+    private $useLock = false;
 
     /**
      * 数据库模型配置名称
@@ -80,7 +95,16 @@ use PDO;
             $where = $this->getDefaultCondition();
         }
 
-        return $this->db()->get($this->getTable(), $fields, $where);
+        $query = $data = $this->db()->select($fields)->from($this->getTable());
+        if ($this->useLock) {
+            $params = [];
+            $where = $this->db()->getSQLAssembler()->parseWhere($where, $params);
+            $query->where([$where . ' for UPDATE', $params]);
+        } else {
+            $query->where($where);
+        }
+
+        return $query->stmt()->fetch(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -179,11 +203,7 @@ use PDO;
      */
     function property($where = array())
     {
-        if (empty($where)) {
-            $where = $this->getDefaultCondition();
-        }
-
-        $data = $this->db()->select('*')->from($this->getTable())->where($where)->stmt()->fetch(PDO::FETCH_ASSOC);
+        $data = $this->get($where);
         if (!empty($data)) {
             $this->updateProperty($data);
         }
@@ -194,7 +214,7 @@ use PDO;
     /**
      * 获取数据库链接
      *
-     * @return \Cross\Cache\Driver\RedisDriver|\Cross\DB\Drivers\CouchDriver|\Cross\DB\Drivers\MongoDriver|\Cross\DB\Drivers\PDOSqlDriver
+     * @return PDOSqlDriver
      * @throws CoreException
      */
     function db()
@@ -210,6 +230,25 @@ use PDO;
     function setTable($table)
     {
         $this->table = $table;
+    }
+
+    /**
+     * 连表查询
+     *
+     * @param string $table 表名
+     * @param string $on 当前类表别名为a, 依次为b,c,d,e...
+     * @param string $type 默认左联
+     * @return $this
+     */
+    function join($table, $on, $type = 'left')
+    {
+        $this->joinTables[] = [
+            'name' => $table,
+            'on' => $on,
+            't' => strtoupper($type),
+        ];
+
+        return $this;
     }
 
     /**
@@ -230,15 +269,38 @@ use PDO;
     }
 
     /**
+     * 仅在事务中调用get方法时生效
+     *
+     * @return $this
+     */
+    function useLock()
+    {
+        $this->useLock = true;
+        return $this;
+    }
+
+    /**
      * 获取表名
      *
-     * @return array|mixed
+     * @return string
      * @throws CoreException
      */
     function getTable()
     {
         if (!$this->table) {
-            $this->table = $this->getModuleInstance()->getPrefix($this->modelInfo['table']);
+            $table = $this->getModuleInstance()->getPrefix($this->modelInfo['table']);
+            if (!empty($this->joinTables)) {
+                $i = 98;
+                $joinTables[] = "{$table} a";
+                array_map(function ($d) use (&$joinTables, &$i) {
+                    $joinTables[] = sprintf("%s JOIN %s %s ON %s", $d['t'], $d['name'], chr($i), $d['on']);
+                    $i++;
+                }, $this->joinTables);
+
+                $table = implode(' ', $joinTables);
+            }
+
+            $this->table = $table;
         }
 
         return $this->table;
@@ -298,15 +360,15 @@ use PDO;
      * 获取数据库表字段
      *
      * @param string $alias 别名
-     * @param bool $as 是否把别名加在字段名之前
+     * @param bool $asPrefix 是否把别名加在字段名之前
      * @return string
      */
-    function getFields($alias = '', $as = false)
+    function getFields($alias = '', $asPrefix = false)
     {
         $fieldsList = array_keys(self::$propertyInfo);
         if (!empty($alias)) {
-            array_walk($fieldsList, function (&$d) use ($alias, $as) {
-                if ($as) {
+            array_walk($fieldsList, function (&$d) use ($alias, $asPrefix) {
+                if ($asPrefix) {
                     $d = "{$alias}.{$d} {$alias}_{$d}";
                 } else {
                     $d = "{$alias}.{$d}";

@@ -21,7 +21,8 @@ class ModelView extends View
     function genClass($data = array())
     {
         $content = $this->obRenderTpl('model/default', $data);
-        $classSavePath = PROJECT_REAL_PATH . trim($data['namespace'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $data['namespace']);
+        $classSavePath = PROJECT_REAL_PATH . trim($namespacePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         Helper::createFolders($classSavePath);
         return file_put_contents($classSavePath . "{$data['name']}.php", $content);
