@@ -5,149 +5,386 @@
  * @link        http://www.crossphp.com
  * @license     MIT License
  */
+
 namespace lib\Upload;
 
-use Cross\Exception\CoreException;
+use Cross\Core\Helper;
+use Exception;
+use Closure;
 
 /**
+ * 多文件上传类
+ *
  * @author wonli <wonli@live.com>
  * Class Uploader
  */
 class Uploader
 {
     /**
-     * 文件名
-     *
-     * @var string
-     */
-    protected $file;
-
-    /**
-     * 允许的文件类型
+     * 待上传文件
      *
      * @var array
      */
-    protected $allowed_file_type;
+    protected $files;
 
     /**
-     * 允许的文件大小
+     * 目录权限
      *
      * @var int
      */
-    protected $allowed_file_size;
+    protected $mode = 0755;
+
+    /**
+     * 使用文件原名
+     *
+     * @var bool
+     */
+    protected $useOriginalName = false;
+
+    /**
+     * 失败文件数
+     *
+     * @var int
+     */
+    protected $failCount = 0;
+
+    /**
+     * 校验没通过和上传失败的文件
+     *
+     * @var array
+     */
+    protected $failFiles = [];
+
+    /**
+     * 自定义校验过滤方法
+     *
+     * @var Closure
+     */
+    protected $filterHandle;
+
+    /**
+     * 过滤数组
+     *
+     * @var IFilter[]
+     */
+    protected $filters;
+
+    /**
+     * 允许的文件扩展名
+     *
+     * @var array
+     */
+    protected $allowExtension = [];
+
+    /**
+     * 允许的文件大小(默认19.22mb)
+     *
+     * @var int
+     */
+    protected $allowSize = 20150627;
 
     /**
      * 文件储存路径
      *
      * @var string
      */
-    protected $save_dir;
+    protected $savePath;
 
     /**
-     * 添加post上来的文件
+     * 是否返回已上传文件真实地址
      *
-     * @param string $file 文件名
-     * @throws CoreException
+     * @var bool
      */
-    function addFile($file)
+    protected $withFilePath = false;
+
+    /**
+     * 文件cdn服务器地址
+     *
+     * @var string
+     */
+    protected $fileCdn = '';
+
+    /**
+     * 表单文件数组
+     *
+     * @param array $file 表单上传文件数组
+     */
+    function addFile(array $file)
     {
-        if (!is_uploaded_file($file['tmp_name'])) {
-            throw new CoreException('无法识别的文件');
+        if (empty($file['tmp_name'])) {
+            return;
         }
-        $this->file = $this->getUploadedInfo($file);
+
+        if (is_array($file['tmp_name'])) {
+            $tempFiles = &$this->files;
+            array_walk($file, function ($f, $k) use (&$tempFiles) {
+                $i = 0;
+                while (null !== ($value = array_shift($f))) {
+                    $tempFiles[$i][$k] = $value;
+                    $i++;
+                }
+            });
+        } else {
+            $this->files[] = $file;
+        }
     }
 
     /**
-     * 设定允许上传的文件类型
+     * 获取通过验证待上传待文件列表
      *
-     * @param string $type （小写）示例：gif|jpg|jpeg|png
+     * @return array
      */
-    function setAllowedType($type)
+    function getFiles()
     {
-        $this->allowed_file_type = explode('|', $type);
+        return $this->verifyUploadFile();
     }
 
     /**
-     * 允许的大小
+     * 指定目录权限
+     *
+     * @param int $mode
+     */
+    function setMode($mode)
+    {
+        $this->mode = $mode;
+    }
+
+    /**
+     * 设定允许上传的文件扩展名
+     *
+     * @param string $extension 竖线分隔，如：gif|jpg|jpeg|png|doc
+     */
+    function setAllowExtension($extension)
+    {
+        $this->allowExtension = explode('|', strtolower($extension));
+    }
+
+    /**
+     * 设定上传文件最大byte
      *
      * @param int $size
      */
-    function setAllowedSize($size)
+    function setAllowSize($size)
     {
-        $this->allowed_file_size = $size;
+        $this->allowSize = $size;
     }
 
     /**
-     * 若没有指定root，则将会按照所指定的path来保存
+     * 自定义过滤函数
      *
-     * @param string $dir
+     * @param Closure $handle 验证通过返回true，失败false
      */
-    function setSaveDir($dir)
+    function setFilterHandle(Closure $handle)
     {
-        $this->save_dir = $dir;
+        $this->filterHandle = $handle;
     }
 
     /**
-     * 保存文件
+     * 添加文件过滤类
      *
-     * @param string $dir 文件路径
-     * @param string $name 文件名
+     * @param IFilter $filter
+     */
+    function addFilter(IFilter $filter)
+    {
+        $this->filters[] = $filter;
+    }
+
+    /**
+     * 保存文件时使用原名
+     */
+    function useOriginalName()
+    {
+        $this->useOriginalName = true;
+    }
+
+    /**
+     * 返回上传文件真实地址
+     */
+    function withFilePath()
+    {
+        $this->withFilePath = true;
+    }
+
+    /**
+     * 文件CDN服务器地址
+     *
+     * @param string $server
+     */
+    function withFileCdn($server)
+    {
+        $this->fileCdn = rtrim($server, '/');
+    }
+
+    /**
+     * 设定存储文件路径（基础路径）
+     *
+     * @param string $path
+     * @throws Exception
+     */
+    function setSavePath($path)
+    {
+        $this->savePath = rtrim($path, '/') . '/';
+        if (!is_dir($this->savePath)) {
+            if (!mkdir($this->savePath, $this->mode, true)) {
+                throw new Exception('Create path fail');
+            }
+        }
+    }
+
+    /**
+     * 获取文件存储路径
+     *
+     * @return string
+     */
+    function getSavePath()
+    {
+        return $this->savePath;
+    }
+
+    /**
+     * 保存上传文件
+     *
+     * @param string $dir 存储路径（可访问路径）
+     * @param string $namePrefix 文件名前缀
+     * @return array
+     * @throws Exception
+     */
+    function save($dir = '', $namePrefix = '')
+    {
+        $dir = trim(trim($dir, '\\'), '/');
+        if (!empty($dir)) {
+            $this->setSavePath($this->savePath . $dir);
+            $dir = '/' . $dir . '/';
+        }
+
+        $data = array(
+            'files' => [],
+            'uploadedCount' => 0,
+        );
+
+        $files = $this->verifyUploadFile();
+        if (!empty($files)) {
+            foreach ($files as $f) {
+                if ($this->useOriginalName) {
+                    $fileName = &$f['name'];
+                } else {
+                    $fileName = Helper::random(16) . '.' . $f['extension'];
+                }
+
+                if ($namePrefix) {
+                    $fileName = $namePrefix . '_' . $fileName;
+                }
+
+                $fileUrl = $dir . $fileName;
+                $destination = $this->savePath . $fileName;
+                $isUpload = move_uploaded_file($f['tmp_name'], $destination);
+                if ($isUpload) {
+                    $data['uploadedCount']++;
+                    $data['files'][] = $fileUrl;
+
+                    if ('' !== $this->fileCdn) {
+                        $data['cdnUrl'][] = $this->fileCdn . $fileUrl;
+                    }
+
+                    if ($this->withFilePath) {
+                        $data['uploadedFilePath'][] = $destination;
+                    }
+                } else {
+                    $this->addFailFile($f['name'], '移动文件至目录失败: ' . $fileUrl);
+                }
+            }
+        }
+
+        if ($this->failCount > 0) {
+            $data['failFiles'] = $this->failFiles;
+            $data['failCount'] = $this->failCount;
+        }
+
+        return $data;
+    }
+
+    /**
+     * 验证上传文件
+     *
+     * @return array
+     */
+    private function verifyUploadFile()
+    {
+        $verifyFiles = [];
+        if (empty($this->files)) {
+            return $verifyFiles;
+        }
+
+        foreach ($this->files as &$f) {
+            //无法识别的文件
+            if (!is_uploaded_file($f['tmp_name'])) {
+                continue;
+            }
+
+            if ($f['error'] != 0) {
+                $this->addFailFile($f['name'], 'upload error: ' . $f['error']);
+                continue;
+            }
+
+            $f['extension'] = substr($f['name'], strrpos($f['name'], '.') + 1);
+            if (!$this->isAllowExtension($f['extension'])) {
+                $this->addFailFile($f['name'], '不支持的文件扩展名: ' . $f['extension']);
+                continue;
+            }
+
+            if (!$this->isAllowSize($f['size'])) {
+                $this->addFailFile($f['name'], '超出允许上传大小: ' . Helper::convert($this->allowSize));
+                continue;
+            }
+
+            if ($this->filterHandle) {
+                $msg = '';
+                $v = call_user_func_array($this->filterHandle, [&$f, &$msg]);
+                if (!$v) {
+                    $this->addFailFile($f['name'], 'filterHandle: ' . ($msg ? $msg : '-'));
+                    continue;
+                }
+            }
+
+            if (!empty($this->filters)) {
+                $allFilterMsg = [];
+                $passFilterVerify = false;
+                foreach ($this->filters as $filter) {
+                    $msg = '';
+                    $v = call_user_func_array([$filter, 'filter'], [&$f, &$msg]);
+                    if ($v) {
+                        $passFilterVerify = true;
+                        break;
+                    } else {
+                        $allFilterMsg[] = get_class($filter) . ': ' . ($msg ? $msg : '-');
+                    }
+                }
+
+                if (!$passFilterVerify) {
+                    $this->addFailFile($f['name'], implode(" && ", $allFilterMsg));
+                    continue;
+                }
+            }
+
+            $verifyFiles[] = $f;
+        }
+
+        return $verifyFiles;
+    }
+
+    /**
+     * 检测文件扩展名
+     *
+     * @param string $type
      * @return bool
-     * @throws CoreException
      */
-    function save($dir, &$name = null)
+    private function isAllowExtension($type)
     {
-        if (!$this->file) {
-            return false;
-        }
-
-        if (!$name) {
-            $name = $this->file['filename'];
-        } else {
-            $name .= '.' . $this->file['extension'];
-        }
-
-        $path = rtrim($dir, '/') . '/' . $name;
-        return $this->moveUploadedFile($this->file['tmp_name'], $path);
-    }
-
-    /**
-     * 获取上传的文件的大小
-     *
-     * @param string $file
-     * @throws CoreException
-     * @return bool
-     */
-    private function getUploadedInfo($file)
-    {
-        $path_info = pathinfo($file['name']);
-        $file['extension'] = $path_info['extension'];
-        $file['filename'] = $path_info['basename'];
-
-        if (!$path_info || !$this->isAllowedType($file['extension'])) {
-            throw new CoreException('不支持的类型');
-        }
-
-        if (!$this->isAllowedSize($file['size'])) {
-            throw new CoreException("文件大小超出限制 {$file['size']}");
-        }
-
-        return $file;
-    }
-
-    /**
-     * 检查上传文件类型
-     *
-     * @param int $type
-     * @return bool
-     */
-    private function isAllowedType($type)
-    {
-        if (!$this->allowed_file_type) {
+        if (empty($this->allowExtension)) {
             return true;
         }
 
-        return in_array(strtolower($type), $this->allowed_file_type);
+        return in_array(strtolower($type), $this->allowExtension);
     }
 
     /**
@@ -156,42 +393,28 @@ class Uploader
      * @param int $size
      * @return bool
      */
-    private function isAllowedSize($size)
+    private function isAllowSize($size)
     {
-        if (!$this->allowed_file_size) {
+        if (!$this->allowSize) {
             return true;
         }
 
-        return is_numeric($this->allowed_file_size) ?
-            ($size <= $this->allowed_file_size) :
-            ($size >= $this->allowed_file_size[0] && $size <= $this->allowed_file_size[1]);
+        return $size < $this->allowSize;
     }
 
     /**
-     * 将上传的文件移动到指定的位置
+     * 添加上传失败的文件
      *
-     * @param string $src
-     * @param string $target
-     * @throws CoreException
-     * @return bool
+     * @param string $filename
+     * @param string $error
      */
-    private function moveUploadedFile($src, $target)
+    private function addFailFile($filename, $error)
     {
-        $abs_path = $this->save_dir ? rtrim($this->save_dir . '/') . '/' . $target : $target;
-        $dir_name = dirname($abs_path);
-
-        if (!file_exists($dir_name)) {
-            if (!mkdir($dir_name, 0755, true)) {
-                throw new CoreException('保存文件的目录不存在');
-            }
-        }
-
-        if (move_uploaded_file($src, $abs_path)) {
-            @chmod($abs_path, 0755);
-            return $target;
-        } else {
-            return false;
-        }
+        $this->failCount++;
+        $this->failFiles[] = array(
+            'filename' => $filename,
+            'error' => $error,
+        );
     }
 }
 
