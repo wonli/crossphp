@@ -44,7 +44,7 @@ class UdpLog extends LogBase
      * @param string $tag
      * @return mixed|void
      */
-    function write($tag, $log)
+    function write($tag, $log = '')
     {
         $this->addToLog($tag, $log);
         $this->send($tag);

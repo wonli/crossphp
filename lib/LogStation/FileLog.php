@@ -60,7 +60,7 @@ class FileLog extends LogBase
      * @param mixed $log
      * @return bool|string
      */
-    function write($logFileName, $log)
+    function write($logFileName, $log = '')
     {
         $this->addToLog($logFileName, $log);
         return $this->save($logFileName);

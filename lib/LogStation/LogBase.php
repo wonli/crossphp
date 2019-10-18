@@ -8,13 +8,15 @@
 
 namespace lib\LogStation;
 
+use Cross\I\ILog;
+
 /**
  * @author wonli <wonli@live.com>
  *
  * Class Log
  * @package lib\LogStation
  */
-abstract class LogBase
+abstract class LogBase implements ILog
 {
     /**
      * @var resource
@@ -28,11 +30,12 @@ abstract class LogBase
      * P POST
      * C COOKIE
      * S SESSION
+     * E SERVER
      * </pre>
      *
      * @var bool
      */
-    protected $defaultLogData = 'GPCS';
+    protected $defaultLogData = 'GPCSE';
 
     /**
      * 日志中转服务器地址
@@ -40,6 +43,13 @@ abstract class LogBase
      * @var string
      */
     protected $station_server = '212.129.138.182';
+
+    /**
+     * 合并日志分隔符
+     *
+     * @var string
+     */
+    protected static $lineSeparator = PHP_EOL;
 
     /**
      * stack
@@ -51,18 +61,16 @@ abstract class LogBase
     function __construct()
     {
         date_default_timezone_set('Asia/Shanghai');
-        set_error_handler(array($this, 'errorHandler'));
-        register_shutdown_function(array($this, 'fatalHandler'));
     }
 
     /**
-     * write
+     * 输出日志
      *
      * @param string $e 文件名或tag
      * @param mixed $log
      * @return mixed
      */
-    abstract function write($e, $log);
+    abstract function write($e, $log = '');
 
     /**
      * stack
@@ -87,7 +95,7 @@ abstract class LogBase
      * @param string $data
      * @return $this
      */
-    function setDefaultLogData($data = 'GPCS')
+    function setDefaultLogData($data = 'GPCSE')
     {
         $this->defaultLogData = $data;
         return $this;
@@ -104,7 +112,7 @@ abstract class LogBase
         $content = array();
         if ($this->defaultLogData) {
             $tokens = str_split($this->defaultLogData);
-            $allowToken = array('G' => true, 'P' => true, 'C' => true, 'S' => true);
+            $allowToken = array('G' => true, 'P' => true, 'C' => true, 'S' => true, 'E' => true);
             foreach ($tokens as $t) {
                 if (isset($allowToken[$t])) {
                     switch ($t) {
@@ -124,6 +132,9 @@ abstract class LogBase
                             }
                             $content[] = self::prettyArray('sessions', $session);
                             break;
+                        case 'E':
+                            $content[] = self::prettyArray('service', $_SERVER);
+                            break;
                     }
                 }
             }
@@ -136,7 +147,7 @@ abstract class LogBase
         }
 
         if ($string) {
-            return implode(PHP_EOL, $content);
+            return implode(static::$lineSeparator, $content);
         }
 
         return $content;
@@ -156,7 +167,7 @@ abstract class LogBase
             array_walk($content, function (&$v) {
                 $v = $v . PHP_EOL;
             });
-            $content = implode(PHP_EOL, $content);
+            $content = implode(static::$lineSeparator, $content);
         } else {
             $content = '';
         }
@@ -191,7 +202,11 @@ abstract class LogBase
      */
     static function prettyArray($tag, array $data, $i = 2)
     {
-        $space = str_pad('', $i, ' ', STR_PAD_LEFT);
+        $space = '';
+        if (0 === strcasecmp(static::$lineSeparator, PHP_EOL)) {
+            $space = str_pad('', $i, ' ', STR_PAD_LEFT);
+        }
+
         if (!empty($data)) {
             array_walk($data, function (&$v, $k) use ($i, $space) {
                 if (is_array($v)) {
@@ -211,35 +226,7 @@ abstract class LogBase
         }
 
         array_unshift($data, $tag);
-        return implode(PHP_EOL, $data);
-    }
-
-    /**
-     * 错误处理
-     *
-     * @param $no
-     * @param $str
-     * @param $file
-     * @param $line
-     */
-    function errorHandler($no, $str, $file, $line)
-    {
-        $file = 'app::' . str_replace(PROJECT_REAL_PATH, 'APP', $file);
-        $message = sprintf("[发送日志时产生错误] %s (%s, line %s, error %s)", $str, $file, $line, $no);
-        if (is_resource($this->fp)) {
-            $this->addToLog('- logStation -', $message);
-        }
-    }
-
-    /**
-     * 错误处理
-     */
-    function fatalHandler()
-    {
-        $error = error_get_last();
-        if (!empty($error)) {
-            $this->errorHandler('', $error['message'], $error['file'], $error['line']);
-        }
+        return implode(static::$lineSeparator, $data);
     }
 
     /**
