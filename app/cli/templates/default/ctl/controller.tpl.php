@@ -16,7 +16,7 @@ class <?php echo $data['name'] ?> extends <?php echo $data['extends'] . PHP_EOL 
      */
     function index()
     {
-        $this->display($this->data);
+        return $this->display($this->data);
     }
 
 }

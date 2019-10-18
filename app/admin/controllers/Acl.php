@@ -6,6 +6,8 @@
 
 namespace app\admin\controllers;
 
+use Cross\Exception\CoreException;
+
 use app\admin\supervise\SecurityModule;
 use app\admin\supervise\AclModule;
 
@@ -28,7 +30,7 @@ class Acl extends Admin
     /**
      * Acl constructor.
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      * @throws \ReflectionException
      */
     function __construct()
@@ -38,18 +40,18 @@ class Acl extends Admin
     }
 
     /**
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function index()
     {
-        $this->to("acl:navManager");
+        return $this->to("acl:navManager");
     }
 
     /**
      * 子菜单管理
      *
      * @cp_params id
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function editMenu()
     {
@@ -67,19 +69,19 @@ class Acl extends Admin
         } else {
             $menu_list = $this->ACL->getMenuAllDate($id);
             if (false === $menu_list) {
-                $this->to('acl');
+                return $this->to('acl');
             }
 
             $this->data['menu_list'] = $menu_list;
         }
 
-        $this->display($this->data);
+        return $this->display($this->data);
     }
 
     /**
      * 导航菜单管理
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      * @throws \ReflectionException
      */
     function navManager()
@@ -93,7 +95,7 @@ class Acl extends Admin
                 $this->ACL->saveNav($_POST['nav']);
             }
 
-            $this->to('acl:navManager');
+            return $this->to('acl:navManager');
         }
 
         $un_save_menu = array();
@@ -102,14 +104,14 @@ class Acl extends Admin
         $this->data['menu'] = $this->ACL->getNavList($un_save_menu);
         $this->data['un_save_menu'] = $un_save_menu;
 
-        $this->display($this->data);
+        return $this->display($this->data);
     }
 
     /**
      * 删除
      *
      * @cp_params id, e
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function del()
     {
@@ -118,16 +120,16 @@ class Acl extends Admin
         }
 
         if (!empty($this->params['e'])) {
-            $this->to('acl:editMenu', array('id' => (int)$this->params['e']));
+            return $this->to('acl:editMenu', array('id' => (int)$this->params['e']));
         }
 
-        $this->to('acl:navManager');
+        return $this->to('acl:navManager');
     }
 
     /**
      * 添加管理角色
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      * @throws \ReflectionException
      */
     function addRole()
@@ -140,7 +142,7 @@ class Acl extends Admin
                 $ret = $this->ACL->saveRoleMenu($_POST['name'], $menu_set);
 
                 if ($ret['status'] == 1) {
-                    $this->to('acl:roleList');
+                    return $this->to('acl:roleList');
                 } else {
                     $data ['status'] = $ret['status'];
                 }
@@ -150,13 +152,13 @@ class Acl extends Admin
         }
 
         $this->data ['menu_list'] = $menu_list;
-        $this->display($this->data);
+        return $this->display($this->data);
     }
 
     /**
      * 角色列表
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function roleList()
     {
@@ -164,49 +166,49 @@ class Acl extends Admin
         if ($this->is_post()) {
             $ret = $this->ACL->editRoleMenu($_POST['rid'], $_POST['name'], $_POST['menu_id']);
             if ($ret['status'] == 1) {
-                $this->to("acl:roleList");
+                return $this->to("acl:roleList");
             }
         }
 
-        $this->display($this->data);
+        return $this->display($this->data);
     }
 
     /**
      * 编辑角色
      *
      * @cp_params rid
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      * @throws \ReflectionException
      */
     function editRole()
     {
         if (empty($this->params['rid'])) {
-            $this->to('acl');
+            return $this->to('acl');
         }
 
         $rid = (int)$this->params['rid'];
         $role_info = $this->ACL->getRoleInfo(array('id' => $rid));
         if (empty($role_info)) {
-            $this->to('acl');
+            return $this->to('acl');
         }
 
         if ($this->is_post()) {
             $this->ACL->editRoleMenu($rid, $_POST['name'], $_POST['menu_id']);
-            $this->to('acl:editRole', array('rid' => $this->params['rid']));
+            return $this->to('acl:editRole', array('rid' => $this->params['rid']));
         }
 
         $menu_list = $this->ACL->initMenuList();
         $this->data['role_info'] = $role_info;
         $this->data['menu_list'] = $menu_list;
 
-        $this->display($this->data);
+        return $this->display($this->data);
     }
 
     /**
      * 删除角色
      *
      * @cp_params rid
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function delRole()
     {
@@ -215,16 +217,16 @@ class Acl extends Admin
 
         $ret = $this->ACL->delRole($rid);
         if ($is_ajax) {
-            echo (int)$ret;
+            return (int)$ret;
         } else {
-            $this->to('acl:roleList');
+            return $this->to('acl:roleList');
         }
     }
 
     /**
      * 管理员列表
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function user()
     {
@@ -269,17 +271,17 @@ class Acl extends Admin
             }
 
             if ($error == 0) {
-                $this->to('acl:user');
+                return $this->to('acl:user');
             }
         }
 
-        $this->display($this->data);
+        return $this->display($this->data);
     }
 
     /**
      * 操作密保卡
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function userSecurityCard()
     {
@@ -296,19 +298,19 @@ class Acl extends Admin
             $SEC->unBind($user, false);
         }
 
-        $this->to('acl:user');
+        return $this->to('acl:user');
     }
 
     /**
      * 删除管理员
      *
      * @cp_params uid
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function delUser()
     {
         $uid = (int)$this->params['uid'];
         $this->ADMIN->del(array('id' => $uid));
-        $this->to('acl:user');
+        return $this->to('acl:user');
     }
 }

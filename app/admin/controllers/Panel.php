@@ -3,6 +3,7 @@
  * @author wonli <wonli@live.com>
  * Panel.php
  */
+
 namespace app\admin\controllers;
 
 /**

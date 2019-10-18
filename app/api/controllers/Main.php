@@ -27,6 +27,6 @@ class Main extends Api
         $data['t'] = $this->getInputData('t');
 
         $this->data['data'] = $data;
-        $this->display($this->data);
+        return $this->display($this->data);
     }
 }

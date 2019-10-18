@@ -11,9 +11,15 @@ namespace app\admin\controllers;
 use app\admin\supervise\ApiDocModule;
 use app\admin\supervise\CodeSegment\CURL;
 use app\admin\supervise\CodeSegment\Generator;
+use app\api\views\ApiView;
 use Cross\Core\Helper;
 use lib\Spyc;
 
+/**
+ * Class Doc
+ * @package app\admin\controllers
+ * @property ApiView $view
+ */
 class Doc extends Admin
 {
     /**
@@ -67,7 +73,7 @@ class Doc extends Admin
     {
         $data = $this->ADM->get((int)$doc_id);
         if (empty($data)) {
-            $this->to('doc:setting');
+            return $this->to('doc:setting');
         }
 
         $servers = &$data['servers'];
@@ -82,7 +88,7 @@ class Doc extends Admin
         $this->data['current_sid'] = $currentServerID;
 
         if (empty($servers)) {
-            $this->display($this->data, 'index');
+            return $this->display($this->data, 'index');
         } else {
             if (isset($servers[$userServerID])) {
                 $currentServerID = $userServerID;
@@ -105,7 +111,7 @@ class Doc extends Admin
                 $this->data['data'] = $docData;
             }
 
-            $this->display($this->data, 'index');
+            return $this->display($this->data, 'index');
         }
     }
 
@@ -178,14 +184,14 @@ class Doc extends Admin
     {
         $doc_id = (int)$this->params['doc_id'];
         if (!$doc_id) {
-            $this->to('doc:setting');
+            return $this->to('doc:setting');
         }
 
         $sid = (int)$this->params['sid'];
         $docInfo = $this->ADM->get($doc_id);
         $servers = &$docInfo['servers'];
         if (!isset($servers[$sid])) {
-            $this->to('doc:setting');
+            return $this->to('doc:setting');
         }
 
         $valueData = array('sid' => $sid);
@@ -198,7 +204,7 @@ class Doc extends Admin
             ));
         }
 
-        $this->dieJson($this->data);
+        return $this->dieJson($this->data);
     }
 
     /**
@@ -211,7 +217,7 @@ class Doc extends Admin
     {
         $doc_id = (int)$this->params['doc_id'];
         if (!$doc_id) {
-            $this->to('doc:setting');
+            return $this->to('doc:setting');
         }
 
         if ($this->is_post()) {
@@ -240,7 +246,7 @@ class Doc extends Admin
             $url .= '#!' . $hash;
         }
 
-        $this->redirect($url);
+        return $this->redirect($url);
     }
 
     /**
@@ -262,11 +268,11 @@ class Doc extends Admin
             $siteName = &$_POST['name'];
             $docToken = &$_POST['doc_token'];
             if (!$siteName) {
-                $this->dieJson($this->getStatus(100703));
+                return $this->dieJson($this->getStatus(100703));
             }
 
             if (!$docToken) {
-                $this->dieJson($this->getStatus(100701));
+                return $this->dieJson($this->getStatus(100701));
             }
 
             $servers = array();
@@ -319,7 +325,7 @@ class Doc extends Admin
             } else {
                 $this->ADM->add($saveData);
             }
-            $this->to('doc:setting');
+            return $this->to('doc:setting');
         } else {
             switch ($this->params['action']) {
                 case 'edit':
@@ -328,7 +334,7 @@ class Doc extends Admin
 
                 case 'del':
                     $this->ADM->del($this->params['id']);
-                    $this->to('doc:setting');
+                    return $this->to('doc:setting');
                     break;
 
                 default:
@@ -336,7 +342,7 @@ class Doc extends Admin
             }
         }
 
-        $this->display($this->data);
+        return $this->display($this->data);
     }
 
     /**
@@ -382,14 +388,17 @@ class Doc extends Admin
 
         if (!$docToken) {
             $this->dieJson($this->getStatus(100701));
+            return;
         }
 
         if (!$serverName) {
             $this->dieJson($this->getStatus(100710));
+            return;
         }
 
         if (!$apiAddr) {
             $this->dieJson($this->getStatus(100711));
+            return;
         }
 
         $requestParams = http_build_query([
@@ -402,14 +411,17 @@ class Doc extends Admin
         $response = Helper::curlRequest($url);
         if (($responseData = json_decode($response, true)) === false) {
             $this->dieJson($this->getStatus(100705));
+            return;
         }
 
         if ($responseData['status'] != 1) {
             $this->dieJson($responseData);
+            return;
         }
 
         if (empty($responseData['data'])) {
             $this->dieJson($this->getStatus(100706));
+            return;
         }
 
         $data = &$responseData['data'];

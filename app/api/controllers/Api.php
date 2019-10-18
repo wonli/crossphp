@@ -99,6 +99,9 @@ abstract class Api extends Controller
      */
     private $force_params = array();
 
+    /**
+     * @return mixed
+     */
     abstract function index();
 
     /**
@@ -115,10 +118,12 @@ abstract class Api extends Controller
             $isVerify = $this->verifyDocApiToken($_REQUEST['doc_token'], $_REQUEST['t']);
             if (!$isVerify) {
                 $this->display(100700);
+                return;
             }
 
             $docData = $this->docApiData();
             $this->display($docData);
+            return;
         }
 
         //验证请求类型
@@ -130,6 +135,7 @@ abstract class Api extends Controller
             if (strcasecmp($request_method, trim($request_type)) !== 0) {
                 $this->data['status'] = 200000;
                 $this->display($this->data);
+                return;
             }
         }
 
@@ -156,6 +162,7 @@ abstract class Api extends Controller
                             $this->data['status'] = 0;
                             $this->data['message'] = "缺少参数{$params}($message)";
                             $this->display($this->data);
+                            return;
                         }
                     }
                 }
@@ -183,7 +190,7 @@ abstract class Api extends Controller
             if (!isset($this->data_container[$key]) || '' == $defaultValue) {
                 $this->data['status'] = 200100;
                 $this->data['data']['need_params'] = $key;
-                $this->display($this->data);
+                return $this->display($this->data);
             } elseif ($filter_data) {
                 $value = $this->filterInputData($key, $defaultValue);
             } else {
@@ -210,25 +217,24 @@ abstract class Api extends Controller
     protected function filterInputData($key, $value)
     {
         switch ($key) {
-
             case 'channel':
                 if (empty($value)) {
                     $this->data['status'] = 200210;
-                    $this->display($this->data);
+                    return $this->display($this->data);
                 }
                 break;
 
             case 'platform':
                 if (empty($value)) {
                     $this->data['status'] = 200220;
-                    $this->display($this->data);
+                    return $this->display($this->data);
                 }
                 break;
 
             case 'version':
                 if (empty($value)) {
                     $this->data['status'] = 200230;
-                    $this->display($this->data);
+                    return $this->display($this->data);
                 }
                 break;
 
@@ -324,7 +330,6 @@ abstract class Api extends Controller
         }
 
         $this->response->setContentType('json')->display(json_encode($apiData));
-        exit(0);
     }
 
     /**
@@ -484,7 +489,7 @@ abstract class Api extends Controller
 
         if (!isset($allow_image_type[$origin_name_ext])) {
             $this->data['status'] = 200052;
-            $this->display($this->data);
+            return $this->display($this->data);
         }
 
         $image_info = @getimagesize($tmp_file);
@@ -496,17 +501,17 @@ abstract class Api extends Controller
             //验证图片类型
             if (!isset($allow_image_type[$image_type])) {
                 $this->data['status'] = 200052;
-                $this->display($this->data);
+                return $this->display($this->data);
             }
 
             //验证图片大小
             if ($image_size > $size) {
                 $this->data['status'] = 200051;
-                $this->display($this->data);
+                return $this->display($this->data);
             }
         } else {
             $this->data['status'] = 200050;
-            $this->display($this->data);
+            return $this->display($this->data);
         }
 
         return $origin_name_ext;

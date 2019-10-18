@@ -5,9 +5,11 @@
 
 namespace app\admin\controllers;
 
+use Cross\MVC\Controller;
+
 use app\admin\supervise\AdminUserModule;
 use app\admin\supervise\AclModule;
-use Cross\MVC\Controller;
+use app\admin\views\AdminView;
 
 /**
  * 管理模块控制器基类(导航菜单及权限验证)
@@ -15,6 +17,7 @@ use Cross\MVC\Controller;
  *
  * Class Admin
  * @package app\admin\controllers
+ * @property AdminView $view
  */
 abstract class Admin extends Controller
 {
@@ -97,6 +100,7 @@ abstract class Admin extends Controller
         $user_info = $this->ADMIN->getAdminInfo(array('id' => $this->uid));
         if (empty($user_info)) {
             $this->to();
+            return;
         }
 
         //用户主题
@@ -168,6 +172,7 @@ abstract class Admin extends Controller
             if (!isset($nav_menu_data[$controller])) {
                 if (!empty($allow_menu)) {
                     $this->to(key($allow_menu) . ':' . current($allow_menu));
+                    return;
                 }
             }
 
@@ -177,9 +182,9 @@ abstract class Admin extends Controller
             if (!isset($accept_action[$this->action]) && !isset($accept_action['__call'])) {
                 if ($this->is_ajax_request()) {
                     $this->dieJson($this->getStatus(100101));
+                    return;
                 } else {
                     $this->view->notice(100101);
-                    exit(0);
                 }
             }
 
@@ -229,6 +234,5 @@ abstract class Admin extends Controller
     protected function dieJson($data)
     {
         $this->response->setContentType('json')->displayOver(json_encode($data));
-        exit(0);
     }
 }

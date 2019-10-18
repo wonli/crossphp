@@ -41,7 +41,7 @@ class Security extends Admin
      */
     function index()
     {
-        $this->to('security:changePassword');
+        return $this->to('security:changePassword');
     }
 
     /**
@@ -75,7 +75,7 @@ class Security extends Admin
             if ($actRet['status'] != 1) {
                 $this->data['status'] = $actRet['status'];
             } else {
-                $this->to('security:securityCard');
+                return $this->to('security:securityCard');
             }
         }
 
@@ -84,7 +84,7 @@ class Security extends Admin
             $this->data['card'] = $data[1];
         }
 
-        $this->display($this->data);
+        return $this->display($this->data);
     }
 
     /**
@@ -120,7 +120,7 @@ class Security extends Admin
         $adminInfo = $this->ADMIN->getAdminInfo(array('id' => $this->uid));
         if ($this->is_post()) {
             $this->ADMIN->update($this->uid, $_POST);
-            $this->to('security:profile');
+            return $this->to('security:profile');
         }
 
         //判断是否有主题配置
@@ -145,18 +145,18 @@ class Security extends Admin
                         }
                     }
 
-                    $this->to('security:profile');
+                    return $this->to('security:profile');
                     break;
 
                 default:
-                    $this->to('security:profile');
+                    return $this->to('security:profile');
             }
         }
 
         $this->data['themeList'] = $tplThemeList;
         $this->data['hasTheme'] = $hasTheme;
         $this->data['admin'] = $adminInfo;
-        $this->display($this->data);
+        return $this->display($this->data);
     }
 
     /**
@@ -167,6 +167,6 @@ class Security extends Admin
     function create()
     {
         $data = $this->SEC->createTable();
-        $this->display($data);
+        return $this->display($data);
     }
 }

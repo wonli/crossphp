@@ -58,7 +58,7 @@ class Main extends Controller
                 $check_ret = $this->ADMIN->checkAdmin($_POST['user'], $_POST['pwd'], $_POST['v'], $_POST['vv']);
                 if ($check_ret['status'] == 1) {
                     $_SESSION['u'] = $check_ret['message'];
-                    $this->to('panel');
+                    return $this->to('panel');
                 } else {
                     $data['status'] = $check_ret['status'];
                 }
@@ -69,7 +69,7 @@ class Main extends Controller
 
         //随机安全码坐标
         $data['v'] = $this->SEC->shuffleLocation();
-        $this->display($data);
+        return $this->display($data);
     }
 
     /**

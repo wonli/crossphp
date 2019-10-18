@@ -16,5 +16,8 @@ abstract class Web extends Controller
      */
     protected $data = array('status' => 0);
 
+    /**
+     * @return mixed
+     */
     abstract function index();
 }

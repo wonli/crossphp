@@ -18,6 +18,6 @@ class Main extends Web
         $this->data ['action'] = __FUNCTION__;
         $this->data ['version'] = Delegate::getVersion();
 
-        $this->display($this->data);
+        return $this->display($this->data);
     }
 }
