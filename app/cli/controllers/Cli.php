@@ -7,6 +7,10 @@
 namespace app\cli\controllers;
 
 use Cross\MVC\Controller;
+use Cross\I\ILog;
+
+use lib\LogStation\CliLog;
+
 
 /**
  * @author wonli <wonli@live.com>
@@ -24,6 +28,11 @@ abstract class Cli extends Controller
      * @var array
      */
     protected $oriParams;
+
+    /**
+     * @var ILog
+     */
+    protected $logger;
 
     function __construct()
     {
@@ -55,39 +64,22 @@ abstract class Cli extends Controller
             $i++;
         }
 
+        $commandName = strtolower("{$this->controller}:{$this->action}");
+        if (isset($_SERVER['argv']) && !empty($_SERVER['argv'][1])) {
+            $commandName = &$_SERVER['argv'][1];
+        }
+
+        $this->logger = new CliLog($commandName);
         $this->params = $params;
     }
 
     /**
-     * 输出消息并刷新输入输出缓存
+     * 自定义logger
      *
-     * @param string $message
-     * @param bool $newLine
+     * @param ILog $logger
      */
-    function flushMessage($message, $newLine = true)
+    function setLogger(ILog $logger)
     {
-        $tip = strtolower("{$this->controller}.{$this->action}");
-        if (isset($_SERVER['argv']) && !empty($_SERVER['argv'][1])) {
-            $tip = &$_SERVER['argv'][1];
-        }
-
-        if ($newLine) {
-            $msg = '(' . $tip . ') ' . $message . PHP_EOL;
-        } else {
-            $msg = $message;
-        }
-
-        fputs(STDOUT, $msg);
-    }
-
-    /**
-     * @see flushMessage
-     *
-     * @param string $message
-     */
-    function endFlushMessage($message)
-    {
-        $this->flushMessage($message);
-        exit(0);
+        $this->logger = $logger;
     }
 }
