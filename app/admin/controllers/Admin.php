@@ -121,18 +121,10 @@ abstract class Admin extends Controller
         }
 
         //权限判断, 超级管理员rid=0
-        $child_menu = array();
-        $role_id = $user_info['rid'];
+        $role_id = &$user_info['rid'];
         if ($role_id == 0) {
-            $this->view->setNavMenu($nav_menu_data);
-            $all_menu = $this->ACL->getNavChildMenu($nav_menu_data);
-
-            if (isset($nav_menu_data [$controller])) {
-                $child_menu = $all_menu[$controller]['child_menu'];
-            }
-
-            $this->view->setMenu($child_menu);
-            $this->view->setAllMenu($all_menu, $icon_config);
+            $menus = $this->ACL->getNavChildMenu($nav_menu_data);
+            $this->view->setMenuData($menus, $icon_config);
         } else {
             //所属角色信息
             $role_info = $this->ACL->getRoleInfo(array('id' => $role_id));
@@ -176,9 +168,8 @@ abstract class Admin extends Controller
                 }
             }
 
-            $accept_action = &$all_accept_action[$controller];
-
             //如果授权__call，所有方法均可访问
+            $accept_action = &$all_accept_action[$controller];
             if (!isset($accept_action[$this->action]) && !isset($accept_action['__call'])) {
                 if ($this->is_ajax_request()) {
                     $this->dieJson($this->getStatus(100101));
@@ -189,9 +180,7 @@ abstract class Admin extends Controller
             }
 
             //设置导航数据
-            $this->view->setNavMenu($nav_menu_data);
-            $this->view->setMenu($child_menu);
-            $this->view->setAllMenu($nav_menu_data, $icon_config);
+            $this->view->setMenuData($nav_menu_data, $icon_config);
         }
     }
 

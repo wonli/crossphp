@@ -19,17 +19,7 @@ class AdminView extends View
     /**
      * @var array
      */
-    private $nav_menu;
-
-    /**
-     * @var array
-     */
-    private $menu_data;
-
-    /**
-     * @var array
-     */
-    private $all_menu;
+    private $menus;
 
     /**
      * @var array
@@ -77,53 +67,13 @@ class AdminView extends View
     }
 
     /**
-     * 返回菜单
-     *
-     * @return array
-     */
-    function getMenu()
-    {
-        return $this->menu_data;
-    }
-
-    /**
-     * 导航菜单数据
-     *
-     * @return array
-     */
-    function getNavMenu()
-    {
-        return $this->nav_menu;
-    }
-
-    /**
-     * 获取所有菜单数据
+     * 获取菜单数据
      *
      * @return mixed
      */
-    function getAllMenu()
+    function getMenuData()
     {
-        return $this->all_menu;
-    }
-
-    /**
-     * 设置导航菜单
-     *
-     * @param $nav_data
-     */
-    function setNavMenu($nav_data)
-    {
-        $this->nav_menu = $nav_data;
-    }
-
-    /**
-     * 设置菜单
-     *
-     * @param $data
-     */
-    function setMenu(array $data = array())
-    {
-        $this->menu_data = $data;
+        return $this->menus;
     }
 
     /**
@@ -132,7 +82,7 @@ class AdminView extends View
      * @param array $menu
      * @param array $menu_icon
      */
-    function setAllMenu($menu, $menu_icon = array())
+    function setMenuData($menu, $menu_icon = array())
     {
         $action_name = &$this->action_name;
         foreach ($menu as $name => &$m) {
@@ -147,29 +97,33 @@ class AdminView extends View
 
             $m['icon'] = $icon;
             $m['child_menu_num'] = 0;
-            foreach ($m['child_menu'] as $id => &$mc) {
-                $ca = strtolower($m['link'] . ':' . $mc['link']);
-                $action_name[$ca] = $mc['link'];
-                if ($mc['name']) {
-                    $action_name[$ca] = $mc['name'];
-                }
+            if (!empty($m['child_menu'])) {
+                foreach ($m['child_menu'] as $id => &$mc) {
+                    $ca = strtolower($m['link'] . ':' . $mc['link']);
+                    $action_name[$ca] = $mc['link'];
+                    if ($mc['name']) {
+                        $action_name[$ca] = $mc['name'];
+                    }
 
-                if (is_array($child_menu_icon_config)) {
-                    $mc_icon = &$child_menu_icon_config[$mc['link']];
-                } else {
-                    $mc_icon = &$child_menu_icon_config;
-                }
+                    if (is_array($child_menu_icon_config)) {
+                        $mc_icon = &$child_menu_icon_config[$mc['link']];
+                    } else {
+                        $mc_icon = &$child_menu_icon_config;
+                    }
 
-                $mc['icon'] = $mc_icon;
-                if ($mc['display'] == 1) {
-                    $m['child_menu_num']++;
-                } else {
-                    unset($m['child_menu'][$id]);
+                    $mc['icon'] = $mc_icon;
+                    if ($mc['display'] == 1) {
+                        $m['child_menu_num']++;
+                    } else {
+                        unset($m['child_menu'][$id]);
+                    }
                 }
+            } else {
+                $m['child_menu'] = array();
             }
         }
 
-        $this->all_menu = $menu;
+        $this->menus = $menu;
     }
 
     /**
@@ -187,8 +141,8 @@ class AdminView extends View
             $action_menu_name = $this->action_name[$ca];
         }
 
-        if (!empty($this->all_menu)) {
-            foreach ($this->all_menu as $m) {
+        if (!empty($this->menus)) {
+            foreach ($this->menus as $m) {
                 if ($m['display'] != 1) {
                     continue;
                 }

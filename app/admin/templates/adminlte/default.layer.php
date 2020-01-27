@@ -24,10 +24,10 @@
     <header class="main-header">
         <a href="" class="logo">
             <span class="logo-mini">
-                <img src="<?php echo $this->res("images/mini_logo.png") ?>"/>
+                <img src="<?php echo $this->res("images/mini_logo.png") ?>" alt="logo" />
             </span>
             <span class="logo-lg">
-                <img src="<?php echo $this->res("images/logo.png") ?>"/>
+                <img src="<?php echo $this->res("images/logo.png") ?>" alt="logo" />
                 <b>CP</b>Admin
             </span>
         </a>
@@ -53,7 +53,7 @@
     <aside class="main-sidebar">
         <section class="sidebar">
             <ul class="sidebar-menu" data-widget="tree">
-                <li class="header"></li>
+                <li class="header">工作台</li>
                 <?php
                 $action_menu_name = $this->action;
                 $controller_menu_name = $this->controller;
