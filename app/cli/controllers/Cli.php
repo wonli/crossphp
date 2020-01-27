@@ -160,4 +160,22 @@ abstract class Cli extends Controller
 
         fputs(STDOUT, $msg);
     }
+
+    /**
+     * 转换字符串形式的bool值
+     *
+     * @param string $value
+     * @return bool|mixed
+     */
+    function getBooleanValueFromString($value)
+    {
+        $value = strtolower((string)$value);
+        $a = ['false' => false, '0' => false, 'disable' => false];
+
+        if (isset($a[$value])) {
+            return $a[$value];
+        }
+
+        return true;
+    }
 }

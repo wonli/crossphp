@@ -76,6 +76,12 @@ class Ctl extends Cli
         $config['author'] = sprintf('%s <%s>', $this->dev['name'], $this->dev['email']);
         if (!empty($this->oriParams)) {
             $config = array_merge($config, $this->oriParams);
+            $checkValue = ['updateNavMenu' => 1, 'makeViewController' => 1, 'makeTpl' => 1];
+            foreach ($config as $k => &$v) {
+                if (isset($checkValue[$k])) {
+                    $v = $this->getBooleanValueFromString($v);
+                }
+            }
         }
 
         $this->genClass($this->command, $ctlConfig[$name]);
