@@ -6,13 +6,16 @@
 
 namespace app\cli\controllers;
 
-use Cross\Core\Helper;
+use app\cli\views\CtlView;
+
 use Cross\Exception\CoreException;
 use Cross\Core\Loader;
+use Cross\Core\Helper;
 
 /**
  * Class Ctl
  * @package app\cli\controllers
+ * @property CtlView $view
  */
 class Ctl extends Cli
 {
@@ -30,22 +33,28 @@ class Ctl extends Cli
         $configName = &$this->ctlConfigName;
         $propertyFile = $this->getFilePath($configName);
         if (!file_exists($propertyFile)) {
-            $this->flushMessage("Create config file {$configName}? (y/n) - ", false);
-            $response = trim(fgetc(STDIN));
-            if (0 === strcasecmp($response, 'y')) {
+            $this->consoleMsg("Create config file {$configName}? (y/n) - ", false);
+            $a = trim(fgetc(STDIN));
+            if (0 === strcasecmp($a, 'y')) {
                 //生成配置文件
                 $ret = $this->view->makeModelFile($propertyFile);
-                if (!$ret) {
-                    $this->endFlushMessage('done!');
+                if ($ret) {
+                    $this->consoleMsg('Done!');
+                    return;
+                } else {
+                    $this->consoleMsg('Create config file fail!');
+                    return;
                 }
             } else {
-                $this->endFlushMessage('Please make ctl config file!');
+                $this->consoleMsg('Please make ctl config file!');
+                return;
             }
         }
 
         $ctlConfig = Loader::read($propertyFile);
         if (empty($ctlConfig)) {
-            $this->endFlushMessage('Empty config file!');
+            $this->consoleMsg('Empty config file!');
+            return;
         }
 
         if (empty($name)) {
@@ -53,11 +62,19 @@ class Ctl extends Cli
         }
 
         if (!isset($ctlConfig[$name])) {
-            $this->endFlushMessage("Config name:{$name} not defined!");
+            $this->consoleMsg("Config name:{$name} not defined!");
+            return;
         }
 
         if (empty($this->command)) {
-            $this->endFlushMessage("Please specified class name!");
+            $this->consoleMsg("Please specified class name!");
+            return;
+        }
+
+        $config = &$ctlConfig[$name];
+        $config['author'] = sprintf('%s <%s>', $this->dev['name'], $this->dev['email']);
+        if (!empty($this->oriParams)) {
+            $config = array_merge($config, $this->oriParams);
         }
 
         $this->genClass($this->command, $ctlConfig[$name]);
@@ -85,11 +102,8 @@ class Ctl extends Cli
     protected function genClass($className, $config)
     {
         if (empty($config['app'])) {
-            $this->endFlushMessage('Please specified app name!!');
-        }
-
-        if (empty($config['author'])) {
-            $this->endFlushMessage('Please specified author!!');
+            $this->consoleMsg('Please specified app name!!');
+            return;
         }
 
         //创建控制器
@@ -97,7 +111,7 @@ class Ctl extends Cli
         $appDir = APP_PATH_DIR . $config['app'] . DIRECTORY_SEPARATOR;
         $controllerFile = $appDir . 'controllers' . DIRECTORY_SEPARATOR . $controllerName . '.php';
         if (file_exists($controllerFile)) {
-            $this->flushMessage("Controller {$controllerName} already exists!");
+            $this->consoleMsg("Controller {$controllerName} already exists!");
         } else {
             $config['controllerUse'] = '';
             if (empty($config['extends'])) {
@@ -109,9 +123,10 @@ class Ctl extends Cli
             $config['controllerNamespace'] = 'app\\' . $config['app'] . '\\controllers';
             $ret = $this->view->makeController($controllerFile, $config);
             if ($ret) {
-                $this->flushMessage("Make class {$controllerName} done!");
+                $this->consoleMsg("Make class {$controllerName} done!");
             } else {
-                $this->endFlushMessage("Make class {$controllerName} fail!");
+                $this->consoleMsg("Make class {$controllerName} fail!");
+                return;
             }
         }
 
@@ -124,7 +139,7 @@ class Ctl extends Cli
             $viewControllerFile = $appDir . 'views' . DIRECTORY_SEPARATOR . $viewControllerName . '.php';
 
             if (file_exists($viewControllerFile)) {
-                $this->flushMessage("ViewController {$viewControllerName} already exists!");
+                $this->consoleMsg("ViewController {$viewControllerName} already exists!");
             } else {
 
                 $config['tplName'] = '';
@@ -142,9 +157,9 @@ class Ctl extends Cli
 
                 $ret = $this->view->makeViewController($viewControllerFile, $config);
                 if ($ret) {
-                    $this->flushMessage("Make class {$viewControllerName} done!");
+                    $this->consoleMsg("Make class {$viewControllerName} done!");
                 } else {
-                    $this->flushMessage("Make class {$viewControllerName} fail!");
+                    $this->consoleMsg("Make class {$viewControllerName} fail!");
                 }
             }
         }
@@ -160,9 +175,9 @@ class Ctl extends Cli
             Helper::mkfile($tplFile);
             $ret = $this->view->makeTpl($tplFile, $config);
             if ($ret) {
-                $this->flushMessage("Make template {$tplName} done!");
+                $this->consoleMsg("Make template {$tplName} done!");
             } else {
-                $this->flushMessage("Make template {$tplName} fail!");
+                $this->consoleMsg("Make template {$tplName} fail!");
             }
         }
     }

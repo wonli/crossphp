@@ -3,6 +3,7 @@
 namespace <?php echo $data['namespace'] ?>;
 <?php endif ?>
 
+use Closure;
 use Cross\DB\Drivers\PDOSqlDriver;
 use Cross\Exception\CoreException;
 use Cross\MVC\Module;
@@ -108,13 +109,42 @@ use PDO;
     }
 
     /**
+     * 最新
+     *
+     * @param array $where
+     * @param string $fields
+     * @return mixed
+     * @throws CoreException
+     */
+    function latest($where = array(), $fields = '*')
+    {
+        if (empty($where)) {
+            $where = $this->getDefaultCondition();
+        }
+
+        $query = $this->db()->select($fields)->from($this->getTable());
+        if ($this->useLock) {
+            $params = [];
+            $where = $this->db()->getSQLAssembler()->parseWhere($where, $params);
+            $query->where([$where . ' for UPDATE', $params]);
+        } else {
+            $query->where($where);
+        }
+
+        $pk = empty($this->modelInfo['primary_key']) ? '1' : $this->modelInfo['primary_key'];
+        $query->orderBy("{$pk} DESC")->limit(1);
+
+        return $query->stmt()->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
      * 添加
      *
      * @throws CoreException
      */
     function add()
     {
-        $insertId = $this->db()->add($this->getTable(), $this->makeInsertData());
+        $insertId = $this->db()->add($this->getTable(false), $this->makeInsertData());
         if (false !== $insertId) {
             $primaryKey = &$this->modelInfo['primary_key'];
             if ($primaryKey) {
@@ -140,10 +170,10 @@ use PDO;
         }
 
         if (empty($condition)) {
-            $condition = $this->getDefaultCondition();
+            $condition = $this->getDefaultCondition(true);
         }
 
-        return $this->db()->update($this->getTable(), $data, $condition);
+        return $this->db()->update($this->getTable(false), $data, $condition);
     }
 
     /**
@@ -156,10 +186,10 @@ use PDO;
     function del($condition = array())
     {
         if (empty($condition)) {
-            $condition = $this->getDefaultCondition();
+            $condition = $this->getDefaultCondition(true);
         }
 
-        return $this->db()->del($this->getTable(), $condition);
+        return $this->db()->del($this->getTable(false), $condition);
     }
 
     /**
@@ -173,7 +203,7 @@ use PDO;
      * @return mixed
      * @throws CoreException
      */
-    function getAll($where = array(), $fields = '*', $order = 1, $group_by = 1, $limit = 0)
+    function getAll($where = array(), $fields = '*', $order = null, $group_by = null, $limit = null)
     {
         return $this->db()->getAll($this->getTable(), $fields, $where, $order, $group_by, $limit);
     }
@@ -189,7 +219,7 @@ use PDO;
      * @return mixed
      * @throws CoreException
      */
-    function find(&$page = array('p' => 1, 'limit' => 50), $where = array(), $fields = '*', $order = 1, $group_by = 1)
+    function find(&$page = array('p' => 1, 'limit' => 50), $where = array(), $fields = '*', $order = null, $group_by = null)
     {
         return $this->db()->find($this->getTable(), $fields, $where, $order, $page, $group_by);
     }
@@ -252,20 +282,36 @@ use PDO;
     }
 
     /**
+     * 将已赋值字段设为索引
+     *
+     * @return $this
+     */
+    function asIndex()
+    {
+        foreach (self::$propertyInfo as $property => $value) {
+            if (null !== $this->{$property}) {
+                $this->index[$property] = $this->{$property};
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * 指定索引
      *
      * @param string $indexName
      * @param $indexValue
      * @throws CoreException
      */
-    function useIndex($indexName, $indexValue = '')
+    function useIndex($indexName, $indexValue)
     {
         if (!property_exists($this, $indexName)) {
             throw new CoreException('不支持的索引名称');
         }
 
         $this->{$indexName} = $indexValue;
-        $this->index[$indexName] = $indexName;
+        $this->index[$indexName] = $indexValue;
     }
 
     /**
@@ -282,14 +328,19 @@ use PDO;
     /**
      * 获取表名
      *
+     * @param bool $userJoinTable 更新，修改，删除时使用默认表名
      * @return string
      * @throws CoreException
      */
-    function getTable()
+    function getTable($userJoinTable = true)
     {
+        $table = $this->getModuleInstance()->getPrefix($this->modelInfo['table']);
+        if (!$userJoinTable) {
+            return $table;
+        }
+
         if (!$this->table) {
-            $table = $this->getModuleInstance()->getPrefix($this->modelInfo['table']);
-            if (!empty($this->joinTables)) {
+            if ($userJoinTable && !empty($this->joinTables)) {
                 $i = 98;
                 $joinTables[] = "{$table} a";
                 array_map(function ($d) use (&$joinTables, &$i) {
@@ -344,13 +395,18 @@ use PDO;
      * 更新属性值
      *
      * @param array $data
+     * @param Closure|null $callback
      */
-    function updateProperty(array $data)
+    function updateProperty(array $data, Closure $callback = null)
     {
         if (!empty($data)) {
             foreach ($data as $property => $value) {
                 if (property_exists($this, $property)) {
-                    $this->{$property} = $value;
+                    if (null !== $callback) {
+                        $this->{$property} = $callback($property, $value);
+                    } else {
+                        $this->{$property} = $value;
+                    }
                 }
             }
         }
@@ -377,6 +433,32 @@ use PDO;
         }
 
         return implode(', ', $fieldsList);
+    }
+
+    /**
+     * 获取查询条件
+     *
+     * @param string $tableAlias 表别名
+     * @return array|mixed
+     * @throws CoreException
+     */
+    function getCondition($tableAlias = '')
+    {
+        $defaultCondition = $this->getDefaultCondition();
+        if (empty($defaultCondition)) {
+            return [];
+        }
+
+        if (empty($tableAlias)) {
+            return $defaultCondition;
+        }
+
+        $condition = [];
+        foreach ($defaultCondition as $k => $v) {
+            $condition["{$tableAlias}.{$k}"] = $v;
+        }
+
+        return $condition;
     }
 
     /**
@@ -471,31 +553,24 @@ use PDO;
     /**
      * 获取默认条件
      *
+     * @param bool $strictModel 严格模式下索引不能为空
      * @return mixed
      * @throws CoreException
      */
-    private function getDefaultCondition()
+    private function getDefaultCondition($strictModel = false)
     {
-        if (empty($this->index)) {
-            $indexName = &$this->modelInfo['primary_key'];
-            $this->index[$indexName] = $indexName;
+        $pkName = &$this->modelInfo['primary_key'];
+        if (null !== $this->{$pkName}) {
+            $this->index = [$pkName => $this->{$pkName}];
+        } else if (empty($this->index)) {
+            $this->asIndex();
         }
 
-        if (empty($this->index)) {
-            throw new CoreException("请为表 {$this->modelInfo['table']} 创建索引");
+        if ($strictModel && empty($this->index)) {
+            throw new CoreException('请指定索引');
         }
 
-        $index = [];
-        foreach ($this->index as $indexName) {
-            $indexValue = $this->{$indexName};
-            if (null === $indexValue) {
-                throw new CoreException("索引 {$indexName} 的值不能为null");
-            }
-
-            $index[$indexName] = $indexValue;
-        }
-
-        return $index;
+        return $this->index;
     }
 
     /**

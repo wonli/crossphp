@@ -51,23 +51,26 @@ class Model extends Cli
         $configName = "config::{$fileName}.model.php";
         $propertyFile = $this->getFilePath($configName);
         if (!file_exists($propertyFile)) {
-            $this->flushMessage("是否生成配置文件 {$configName} (y/n) - ", false);
+            $this->consoleMsg("是否生成配置文件 {$configName} (y/n) - ", false);
             $response = trim(fgetc(STDIN));
             if (0 === strcasecmp($response, 'y')) {
                 //生成配置文件
                 $ret = $this->view->makeModelFile($propertyFile);
                 if (!$ret) {
-                    $this->endFlushMessage('创建配置文件失败');
+                    $this->consoleMsg('创建配置文件失败');
+                    return;
                 }
             } else {
-                $this->endFlushMessage('请先创建配置文件');
+                $this->consoleMsg('请先创建配置文件');
+                return;
             }
         }
 
         $propertyConfig = Loader::read($propertyFile);
         if (!empty($name)) {
             if (!isset($propertyConfig[$name])) {
-                $this->endFlushMessage("未发现指定的配置{$name}");
+                $this->consoleMsg("未发现指定的配置{$name}");
+                return;
             }
 
             $this->makeModels($propertyConfig[$name]);
@@ -102,11 +105,18 @@ class Model extends Cli
         if (!empty($config)) {
             $db = &$config['db'];
             if (empty($db)) {
-                $this->endFlushMessage('请指定数据库链接配置');
+                $this->consoleMsg('请指定数据库链接配置');
+                return;
             }
 
             if (empty($config['type'])) {
-                $this->endFlushMessage('请指定生成类型 class或trait');
+                $this->consoleMsg('请指定生成类型 class或trait');
+                return;
+            }
+
+            if(empty($config['namespace'])) {
+                $this->consoleMsg('请指定类的命名空间');
+                return;
             }
 
             $this->namespacePrefix = str_replace('/', '\\', $config['namespace']);
@@ -166,7 +176,8 @@ class Model extends Cli
         }
 
         if (empty($namespace)) {
-            $this->endFlushMessage("请为 {$propertyType}::{$modelName} 指定命名空间");
+            $this->consoleMsg("请为 {$propertyType}::{$modelName} 指定命名空间");
+            return;
         }
 
         try {
@@ -195,11 +206,11 @@ class Model extends Cli
             if (false === $ret) {
                 throw new CoreException("请检查目录权限");
             } else {
-                $this->flushMessage("{$propertyType}::{$namespace}\\{$modelName} [成功]");
+                $this->consoleMsg("{$propertyType}::{$namespace}\\{$modelName} [成功]");
             }
 
         } catch (Exception $e) {
-            $this->flushMessage("{$propertyType}::{$namespace}\\{$modelName} [失败 : !! " . $e->getMessage() . ']');
+            $this->consoleMsg("{$propertyType}::{$namespace}\\{$modelName} [失败 : !! " . $e->getMessage() . ']');
         }
     }
 }

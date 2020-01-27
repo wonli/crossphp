@@ -1,13 +1,16 @@
 <?php
-namespace app\cli\views;
+/**
+ * @author wonli <wonli@live.com>
+ * MainView.php
+ */
 
-use Cross\MVC\View;
+namespace app\cli\views;
 
 /**
  * @author wonli <wonli@live.com>
  * MainView.php
  */
-class MainView extends View
+class MainView extends CliView
 {
 
 }

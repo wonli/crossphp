@@ -7,13 +7,11 @@
 namespace app\cli\views;
 
 
-use Cross\MVC\View;
-
 /**
  * Class CtlView
  * @package app\cli\views
  */
-class CtlView extends View
+class CtlView extends CliView
 {
 
     /**
