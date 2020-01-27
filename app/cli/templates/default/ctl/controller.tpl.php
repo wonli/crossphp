@@ -12,11 +12,12 @@ class <?php echo $data['name'] ?> extends <?php echo $data['extends'] . PHP_EOL 
 {
     /**
      * 默认方法
+     *
      * @throws CoreException
      */
     function index()
     {
-        return $this->display($this->data);
+        $this->display($this->data);
     }
 
 }

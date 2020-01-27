@@ -3,3 +3,4 @@ composer.lock
 /.idea/*
 /.svn/*
 .DS_Store
+config/.dev.php

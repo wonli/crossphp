@@ -9,7 +9,7 @@
  *
  * 基本配置
  * app app名称
- * author 作者联系方式，建议每个开发人员都按照默认格式添加一个配置
+ * updateNavMenu 是否更新导航菜单
  *
  * 控制器配置
  * extends 指定父类名称，留空从Cross\MVC\Controller继承
@@ -18,11 +18,14 @@
  * makeViewController 是否创建试图控制器
  * viewExtends 视图控制器从哪里继承，留空从Cross\MVC\View继承
  * makeTpl 是否创建默认模板
+ *
+ * 命令行控制
+ * 可以通过命令行临时覆盖配置，比如变更父类：extends=className
  */
 return array(
     'admin' => array(
         'app' => 'admin',
-        'author' => 'you@email.com',
+        'updateNavMenu' => true,
 
         'extends' => 'Admin',
 
@@ -32,7 +35,6 @@ return array(
     ),
     'api' => array(
         'app' => 'api',
-        'author' => 'you@email.com',
 
         'extends' => 'Api',
 
@@ -42,7 +44,6 @@ return array(
     ),
     'web' => array(
         'app' => 'web',
-        'author' => 'you@email.com',
 
         'extends' => 'Web',
 

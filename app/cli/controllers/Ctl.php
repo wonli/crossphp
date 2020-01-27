@@ -11,6 +11,7 @@ use app\cli\views\CtlView;
 use Cross\Exception\CoreException;
 use Cross\Core\Loader;
 use Cross\Core\Helper;
+use ReflectionClass;
 
 /**
  * Class Ctl
@@ -178,6 +179,25 @@ class Ctl extends Cli
                 $this->consoleMsg("Make template {$tplName} done!");
             } else {
                 $this->consoleMsg("Make template {$tplName} fail!");
+            }
+        }
+
+        if (!empty($config['updateNavMenu'])) {
+            //添加导航菜单
+            $menuData = array(
+                'pid' => 0,
+                'name' => $controllerName,
+                'link' => $className,
+                'display' => 1,
+            );
+
+            try {
+                $menuClass = 'app\\' . $config['app'] . '\supervise\AclModule';
+                $rc = new ReflectionClass($menuClass);
+                $model = $rc->newInstance();
+                $model->saveNavData($menuData);
+            } catch (\Exception $e) {
+                $this->consoleMsg("Update nav menu fail!");
             }
         }
     }

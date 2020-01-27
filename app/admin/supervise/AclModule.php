@@ -231,6 +231,41 @@ class AclModule extends AdminModule
     }
 
     /**
+     * 保存导航菜单数据
+     *
+     * @param array $data
+     * @return bool|mixed
+     * @throws \Cross\Exception\CoreException
+     */
+    function saveNavData(array $data)
+    {
+        if (empty($data['name']) || empty($data['link'])) {
+            return false;
+        }
+
+        $data = array(
+            'name' => $data['name'],
+            'link' => $data['link'],
+            'pid' => !empty($data['pid']) ? (int)$data['pid'] : 0,
+            'type' => !empty($data['type']) ? (int)$data['type'] : 1,
+            '`order`' => !empty($data['order']) ? (int)$data['order'] : 0,
+            'display' => !empty($data['display']) ? (int)$data['display'] : 0
+        );
+
+        $has = $this->link->get($this->t_acl_menu, 'id', array(
+            'name' => $data['name']
+        ));
+
+        if ($has) {
+            return $this->link->update($this->t_acl_menu, $data, array(
+                'id' => $has['id']
+            ));
+        } else {
+            return $this->link->add($this->t_acl_menu, $data);
+        }
+    }
+
+    /**
      * 返回菜单列表
      *
      * @return array
