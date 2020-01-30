@@ -1,6 +1,7 @@
-composer.lock
-/vendor/
-/.idea/*
-/.svn/*
 .DS_Store
+.idea/
+.svn/
+vendor/
+cache/
 config/.dev.php
+composer.lock
