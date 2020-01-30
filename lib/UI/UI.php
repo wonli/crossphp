@@ -49,16 +49,14 @@ abstract class UI
      *
      * @var array
      */
-    protected $widgetAttributes = array(
-        'ip' => array('class' => 'form-control-static'),
-        'txt' => array('class' => 'form-control-static'),
-        'date' => array('class' => 'form-control-static'),
-        'label' => array('class' => 'form-control-static'),
-        'dictionary' => array('class' => 'form-control-static'),
-        'select' => array('class' => 'form-control'),
-        'input' => array('class' => 'form-control'),
-        'map' => array('class' => 'form-control-static'),
-    );
+    protected $widgetAttributes = array();
+
+    /**
+     * 空间默认class
+     *
+     * @var string
+     */
+    protected $widgetDefaultClass = 'form-control-static form-control-plaintext';
 
     /**
      * @var string
@@ -192,6 +190,12 @@ abstract class UI
             if (empty($content)) {
                 throw new CoreException('回调函数不能返回空');
             }
+
+            //回调函数返回结果自动包一层div
+            $content = HTML::div(array(
+                '@content' => $content,
+                'class' => $this->widgetDefaultClass
+            ));
         } else {
             $params = array();
             if (!empty($widgetConfig['params'])) {
@@ -199,8 +203,12 @@ abstract class UI
             }
 
             $attributes = array();
-            if (!empty($this->widgetAttributes[$widgetName])) {
+            if (isset($this->widgetAttributes[$widgetName])) {
                 $attributes = $this->widgetAttributes[$widgetName];
+            }
+
+            if (!isset($attributes['class'])) {
+                $attributes['class'] = $this->widgetDefaultClass;
             }
 
             $attributes['name'] = $inputName;
@@ -234,11 +242,16 @@ abstract class UI
                         }
                     }
 
-                    if ($widgetName == 'date') {
-                        $value = strtotime($value);
+                    if (!empty($value)) {
+                        if ($widgetName == 'date') {
+                            $value = strtotime($value);
+                        }
+
+                        $attributes['@content'] = date($format, $value);
+                    } else {
+                        $attributes['@content'] = '';
                     }
 
-                    $attributes['@content'] = date($format, $value);
                     if (!empty($custom_params)) {
                         $attributes = array_merge($attributes, $custom_params);
                     }

@@ -53,6 +53,11 @@ class Table extends UI
     protected $tableClass = 'table table-bordered table-hover table-striped';
 
     /**
+     * @var string
+     */
+    protected $tableHeadClass = '';
+
+    /**
      * 是否在表格前加选择框
      *
      * @var bool
@@ -252,6 +257,16 @@ class Table extends UI
     }
 
     /**
+     * 设置表头CSS类名
+     *
+     * @param string $name
+     */
+    function setTableHeadClass($name)
+    {
+        $this->tableHeadClass = $name;
+    }
+
+    /**
      * 设置包裹操作菜单的action的CSS类名
      *
      * @param string $class
@@ -288,7 +303,10 @@ class Table extends UI
             }
         }
 
-        return HTML::tr($ths);
+        return HTML::thead(array(
+            '@content' => HTML::tr($ths),
+            'class' => $this->tableHeadClass
+        ));
     }
 
     /**
@@ -355,7 +373,7 @@ class Table extends UI
             $trs = "<tr><td colspan='{$cols}'>暂无数据</td></tr>";
         }
 
-        return $trs;
+        return HTML::tbody($trs);
     }
 
     /**
