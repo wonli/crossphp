@@ -32,6 +32,13 @@ abstract class Cli extends Controller
     protected $command;
 
     /**
+     * 是否解析命令行参数(params1=value1 params2=value2)
+     *
+     * @var bool
+     */
+    protected $initCliParams = true;
+
+    /**
      * @var array
      */
     protected $oriParams;
@@ -53,6 +60,11 @@ abstract class Cli extends Controller
      */
     protected $devConfig = 'config::.dev.php';
 
+    /**
+     * @var bool
+     */
+    protected $initDevConfig = true;
+
     function __construct()
     {
         parent::__construct();
@@ -66,21 +78,66 @@ abstract class Cli extends Controller
         }
 
         //处理$argv传递过来的参数
-        //params1=value1 params2=value2 ... paramsN=valueN
-        $i = 0;
-        foreach ($this->params as $p) {
-            if ((false === strpos($p, '=')) && $i == 0) {
-                $this->command = trim($p);
-            } elseif (!empty($p) && false !== strpos($p, '=')) {
-                list($key, $value) = explode('=', $p);
-                if ($key && $value) {
-                    $params[trim(trim($key, '-'))] = trim($value);
+        if ($this->initCliParams) {
+            $i = 0;
+            foreach ($this->params as $p) {
+                if ((false === strpos($p, '=')) && $i == 0) {
+                    $this->command = trim($p);
+                } elseif (!empty($p) && false !== strpos($p, '=')) {
+                    list($key, $value) = explode('=', $p);
+                    if ($key && $value) {
+                        $params[trim(trim($key, '-'))] = trim($value);
+                    }
+                } else {
+                    $params[] = trim($p);
                 }
-            } else {
-                $params[] = trim($p);
+
+                $i++;
             }
 
-            $i++;
+            $this->params = $params;
+        }
+
+        //处理开发者信息
+        if ($this->initDevConfig) {
+            $devFile = $this->getFilePath($this->devConfig);
+            if (!file_exists($devFile)) {
+                $this->consoleMsg('Developer name: ', false);
+                $name = trim(fgets(STDIN, 32));
+                if (empty($name)) {
+                    $this->consoleMsg('Please specified developer name!');
+                    exit(0);
+                }
+
+                $this->consoleMsg('Developer email: ', false);
+                $email = trim(fgets(STDIN, 128));
+                $isValidEmail = Helper::validEmail($email);
+                if (!$isValidEmail) {
+                    $this->consoleMsg('Please specified developer email!');
+                    exit(0);
+                }
+
+                $dev['name'] = $name;
+                $dev['email'] = $email;
+                $result = $this->view->genConfigFile($devFile, $dev);
+                if (!$result) {
+                    $this->consoleMsg('Save developer info fail!');
+                    exit(0);
+                } else {
+                    $this->dev = $dev;
+                }
+            } else {
+                try {
+                    $this->dev = Loader::read($devFile);
+                } catch (CoreException $e) {
+                }
+            }
+
+            if (empty($this->dev['name']) || empty($this->dev['email'])) {
+                @unlink($devFile);
+                $this->consoleMsg('Please specified developer name or email!');
+                exit(0);
+            }
         }
 
         $commandName = strtolower("{$this->controller}:{$this->action}");
@@ -88,45 +145,7 @@ abstract class Cli extends Controller
             $commandName = &$_SERVER['argv'][1];
         }
 
-        //处理开发者信息
-        $devFile = $this->getFilePath($this->devConfig);
-        if (!file_exists($devFile)) {
-            $this->consoleMsg('Developer name: ', false);
-            $name = trim(fgets(STDIN, 32));
-            if (empty($name)) {
-                $this->consoleMsg('Please specified developer name!');
-                exit(0);
-            }
-
-            $this->consoleMsg('Developer email: ', false);
-            $email = trim(fgets(STDIN, 128));
-            $isValidEmail = Helper::validEmail($email);
-            if (!$isValidEmail) {
-                $this->consoleMsg('Please specified developer email!');
-                exit(0);
-            }
-
-            $dev['name'] = $name;
-            $dev['email'] = $email;
-            $result = $this->view->genConfigFile($devFile, $dev);
-            if (!$result) {
-                $this->consoleMsg('Save developer info fail!');
-                exit(0);
-            } else {
-                $this->dev = $dev;
-            }
-        } else {
-            $this->dev = Loader::read($devFile);;
-        }
-
-        if (empty($this->dev['name']) || empty($this->dev['email'])) {
-            @unlink($devFile);
-            $this->consoleMsg('Please specified developer name or email!');
-            exit(0);
-        }
-
         $this->logger = new CliLog($commandName);
-        $this->params = $params;
     }
 
     /**

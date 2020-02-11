@@ -119,7 +119,6 @@ class AdminUserModule extends AdminModule
         }
 
         $data['last_login_ip'] = '';
-        $data['last_login_date'] = date('Y-m-d H:i:s', 0);
         $data['password'] = self::genPassword($data['password'], $data['salt']);
         $id = $this->link->add($this->t_admin, $data);
         if ($id) {
