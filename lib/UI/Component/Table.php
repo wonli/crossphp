@@ -62,14 +62,35 @@ class Table extends UI
      *
      * @var bool
      */
-    protected $useCheckBox = false;
+    protected $useCheckbox = false;
+
+    /**
+     * checkbox值回调方法
+     *
+     * @var Closure
+     */
+    protected $checkboxValueAction = null;
+
+    /**
+     * 选中状态数据
+     *
+     * @var array
+     */
+    protected $checkStatus = [];
+
+    /**
+     * 选中数据条数
+     *
+     * @var int
+     */
+    protected $checkedCount = 0;
 
     /**
      * 多选框配置
      *
      * @var array
      */
-    protected $checkBoxConfig = array('type' => 'checkbox');
+    protected $checkboxConfig = array('type' => 'checkbox');
 
     /**
      * 多选框包裹器属性配置
@@ -84,6 +105,13 @@ class Table extends UI
      * @var array
      */
     protected $data = array();
+
+    /**
+     * 数据总条数
+     *
+     * @var int
+     */
+    protected $dataCount = 0;
 
     /**
      * 操作相关菜单的类名称
@@ -189,15 +217,17 @@ class Table extends UI
     /**
      * 添加多选框
      *
+     * @param Closure|null $action
      * @param string $flag 多选标识
      * @param array $attr checkbox 属性
      * @param array $wrapAttr checkbox 外层label属性
      */
-    function addSelectAll($flag = 'select-all', $attr = array(), $wrapAttr = array())
+    function addSelectAll(Closure $action = null, $flag = 'select-all', $attr = array(), $wrapAttr = array())
     {
-        $this->useCheckBox = $flag;
+        $this->useCheckbox = $flag;
+        $this->checkboxValueAction = $action;
         if (!empty($attr)) {
-            $this->checkBoxConfig = array_merge($this->checkBoxConfig, $attr);
+            $this->checkboxConfig = array_merge($this->checkboxConfig, $attr);
         }
 
         if (!empty($wrapAttr)) {
@@ -229,11 +259,12 @@ class Table extends UI
     /**
      * 设置表格数据
      *
-     * @param $data
+     * @param array $data
      */
-    function setData($data)
+    function setData(array $data)
     {
         $this->data = $data;
+        $this->dataCount = count($data);
     }
 
     /**
@@ -285,8 +316,8 @@ class Table extends UI
     {
         $ths = '';
         if (!empty($this->head)) {
-            if ($this->useCheckBox) {
-                $ths .= $this->makeCheckBoxSwitch();
+            if ($this->useCheckbox) {
+                $ths .= $this->makeCheckboxSwitch();
             }
 
             foreach ($this->head as $d) {
@@ -361,8 +392,8 @@ class Table extends UI
                     }
                 }
 
-                if ($this->useCheckBox) {
-                    $td = $this->makeCheckBox($token) . $td;
+                if ($this->useCheckbox) {
+                    $td = $this->makeCheckbox($token, $d) . $td;
                 }
 
                 $b['@content'] = $td;
@@ -380,21 +411,34 @@ class Table extends UI
      * 生成选择框
      *
      * @param string $token
+     * @param array $data
      * @return mixed
      */
-    private function makeCheckBox($token)
+    private function makeCheckbox($token, $data)
     {
         $id = "token-{$token}";
-        $flagClass = "{$this->useCheckBox}-flag";
+        $flagClass = "{$this->useCheckbox}-flag";
 
-        $attr = $this->checkBoxConfig;
+        $attr = $this->checkboxConfig;
         $attr['id'] = $id;
         $attr['token'] = $token;
+        $attr['data-token'] = $token;
 
         $inputName = '.selected';
         if (isset($attr['input_name'])) {
             $inputName = $attr['input_name'];
             unset($attr['input_name']);
+        }
+
+        if (null !== $this->checkboxValueAction) {
+            $isChecked = call_user_func_array($this->checkboxValueAction, array($data));
+            if ($isChecked) {
+                $attr['checked'] = true;
+                $this->checkedCount++;
+                $this->checkStatus[$token] = 1;
+            } else {
+                $this->checkStatus[$token] = 0;
+            }
         }
 
         if ($this->postDataName) {
@@ -421,13 +465,13 @@ class Table extends UI
      *
      * @return mixed
      */
-    private function makeCheckBoxSwitch()
+    private function makeCheckboxSwitch()
     {
         return HTML::th(array(
             'style' => 'width:20px;min-width:20px;max-width:20px',
             '@content' => HTML::input(array(
                 'type' => 'checkbox',
-                'class' => "{$this->useCheckBox}-switch-flag"
+                'class' => "{$this->useCheckbox}-switch-flag"
             ))
         ));
     }
@@ -437,21 +481,42 @@ class Table extends UI
      */
     private function makeTableJS()
     {
-        if ($this->useCheckBox) {
+        if ($this->useCheckbox) {
             ob_start();
             $config = array(
-                'switch' => ".{$this->useCheckBox}-switch-flag",
-                'class' => ".{$this->useCheckBox}-flag"
+                's' => ($this->dataCount == $this->checkedCount),
+
+                'checkStatus' => $this->checkStatus,
+
+                'switch' => ".{$this->useCheckbox}-switch-flag",
+                'checkboxClass' => ".{$this->useCheckbox}-flag"
             );
             ?>
             <script>
-                var config = <?= json_encode($config) ?>;
+                var CPUITable = <?= json_encode($config) ?>;
                 $(function () {
-                    $(config.switch).bind('click', function () {
-                        var click = $(this).is(':checked');
-                        $(config.class).each(function () {
-                            $(this).prop("checked", click);
+                    $(CPUITable.switch).prop('checked', CPUITable.s).bind('click', function () {
+                        CPUITable.s = !CPUITable.s;
+                        $(CPUITable.switch).prop('checked', CPUITable.s);
+                        //更新选中状态
+                        $(CPUITable.checkboxClass).each(function () {
+                            $(this).prop('checked', CPUITable.s);
+                            var token = $(this).attr('data-token');
+                            if (CPUITable.s) {
+                                CPUITable.checkStatus[token] = 1;
+                            } else {
+                                CPUITable.checkStatus[token] = 0;
+                            }
                         })
+                    });
+
+                    $(CPUITable.checkboxClass).bind('click', function () {
+                        var token = $(this).attr('data-token');
+                        if ($(this).is(':checked')) {
+                            CPUITable.checkStatus[token] = 1;
+                        } else {
+                            CPUITable.checkStatus[token] = 0;
+                        }
                     })
                 })
             </script>
