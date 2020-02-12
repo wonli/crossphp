@@ -468,7 +468,8 @@ class Doc extends Admin
             }
 
             if (!empty($actions)) {
-                $result[$d['api_spec']] = $actions;
+                $spec = empty($d['api_spec']) ? $k : $d['api_spec'];
+                $result[$spec] = $actions;
             }
         }
 
