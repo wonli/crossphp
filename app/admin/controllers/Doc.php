@@ -117,6 +117,8 @@ class Doc extends Admin
 
     /**
      * 代码片段
+     *
+     * @cp_display codeSegment
      * @throws \Cross\Exception\CoreException
      */
     function codeSegment()
@@ -468,8 +470,8 @@ class Doc extends Admin
             }
 
             if (!empty($actions)) {
-                $spec = empty($d['api_spec']) ? $k : $d['api_spec'];
-                $result[$spec] = $actions;
+                $apiSpec = !empty($d['api_spec']) ? $d['api_spec'] : $k;
+                $result[$apiSpec] = $actions;
             }
         }
 
