@@ -56,7 +56,7 @@ return array(
         /**
          * 服务器是否已经开启rewrite支持
          */
-        'rewrite' => false,
+        'rewrite' => true,
         /**
          * url控制器,方法,参数之间的连接字符(controller/action/params)
          */
