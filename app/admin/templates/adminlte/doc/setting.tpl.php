@@ -3,7 +3,7 @@
         <a class="btn btn-primary" href="<?= $this->url('doc:action') ?>">添加文档</a>
     </div>
 
-    <div class="box-body">
+    <div class="box-body table-responsive">
         <?= $data->render() ?>
     </div>
 

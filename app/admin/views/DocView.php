@@ -41,7 +41,7 @@ class DocView extends AdminView
         $table->addHead('name', '名称', '100px');
         $table->addHead('last_update_admin', '最后操作人', '200px');
         $table->addHead('last_update_time', '最后更新时间', '300px');
-        $table->setActionMenu('操作', '100px');
+        $table->setActionMenu('操作', '139px');
         $table->addAction(function ($d) {
             $del = $this->a('删除', 'javascript:void(0)', array(
                 'class' => 'confirm-href-flag',
