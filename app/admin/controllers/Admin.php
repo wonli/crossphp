@@ -137,10 +137,11 @@ abstract class Admin extends Controller
             $allow_menu = array();
             $all_accept_action = array();
             foreach ($nav_menu_data as $k => &$nav) {
-                $nav_id = $nav['id'];
+                $nav_id = &$nav['id'];
                 if (!isset($accept_behavior[$nav_id])) {
                     unset($nav_menu_data[$k]);
                 } else {
+                    $allow_menu[$nav['link']] = $nav['link'];
                     $child_menu = $this->ACL->getMenuByCondition(array('pid' => $nav_id));
                     if (!empty($child_menu)) {
                         foreach ($child_menu as $ck => $m) {
