@@ -46,6 +46,21 @@
     margin-right: 10px;
 }
 
+.login-page {
+    position: relative;
+    z-index: 9;
+}
+
+.login-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #ecf0f5 url('../images/bg.png') repeat-x bottom;
+    z-index: 0;
+}
+
 .security-card {
     width: 100%;
     min-width: 550px;

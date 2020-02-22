@@ -36,6 +36,7 @@
         </form>
     </div>
 </div>
+<div class="bg"></div>
 </body>
 </html>
 
