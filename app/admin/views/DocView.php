@@ -84,6 +84,18 @@ class DocView extends AdminView
     /**
      * @param array $data
      */
+    function curlRequest($data = array())
+    {
+        $this->set(array(
+            'load_layer'=>false,
+        ));
+
+        $this->renderTpl('doc/curl_response', $data);
+    }
+
+    /**
+     * @param array $data
+     */
     function generator($data = array())
     {
         $this->set(array(
@@ -355,5 +367,32 @@ class DocView extends AdminView
                 <?php
             }
         }
+    }
+
+    /**
+     * 获取接口请求地址
+     *
+     * @param array $data
+     * @return string
+     * @throws \Cross\Exception\CoreException
+     */
+    function getApiActionUrl($data)
+    {
+        if(empty($data)) {
+            return '';
+        }
+
+        $apiUrl =  $this->data['api_host']  .'/' . ltrim($data['requestPath'], '/');
+        $headerParams = &$this->data['doc']['header_params'];
+        if(empty($headerParams)) {
+           return $apiUrl;
+        }
+
+        return $this->url('doc:curlRequest', [
+            'ugp' => $data['useGlobalParams'],
+            'method' => $data['method'],
+            'doc_id'=> $this->data['doc']['id'],
+            'api' => urlencode($apiUrl)
+        ]);
     }
 }

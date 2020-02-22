@@ -11,6 +11,8 @@ if(!empty($data['t']) && $data['t'] == 'generator') {
     $emptyTip = 'JSON格式不正确';
 }
 
+$curlData = array();
+$structData = array();
 if(!empty($data['data'])) {
     $data = &$data['data'];
     if (($curlData = json_encode($data['curl'])) === false || empty($data['curl'])) {

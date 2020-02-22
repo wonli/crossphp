@@ -183,7 +183,7 @@
         });
 
         $('.gen-code-flag').on('click', function () {
-            var f = $(this).closest('form'), action = f[0].action, method = f[0].method,
+            var f = $(this).closest('form'), action = f.attr('data-ori-action'), method = f[0].method,
                 fParams = f.serializeArray(),
                 params = {};
             if (fParams.length > 0) {

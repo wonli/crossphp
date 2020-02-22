@@ -11,23 +11,24 @@ $formAction = $this->data['api_host'] . $action;
 $list_container_id = $data['class'] . '_' . $data['action'];
 $formFields = &$data['params'];
 ?>
-<div class="action-list-container" id="<?php echo $list_container_id; ?>">
+<div class="action-list-container" id="<?= $list_container_id; ?>">
     <form class="form-inline" data-toggle="validator" role="form" target="_blank"
-          method="<?php echo $data['method'] ?>"
-          action="<?php echo $formAction ?>" enctype="multipart/form-data">
+          method="<?= $data['method'] ?>"
+          data-ori-action="<?= $formAction ?>"
+          action="<?= $this->getApiActionUrl($data) ?>" enctype="multipart/form-data">
         <div class="row">
             <div class="col-md-12" style="margin:10px 0">
-                <span class="badge"><?php echo $data['method'] ?></span>
-                <a href="javascript:void(0)" onclick="apiActionList('<?php echo $list_container_id; ?>')">
-                    <?php echo $action ?>
+                <span class="badge"><?= $data['method'] ?></span>
+                <a href="javascript:void(0)" onclick="apiActionList('<?= $list_container_id; ?>')">
+                    <?= $action ?>
                 </a>
                 <span class="hidden-xs">
-                    (<?php echo $data['name'] ?>)
+                    (<?= $data['name'] ?>)
                 </span>
             </div>
         </div>
 
-        <div class="action-form" id="<?php echo $list_container_id ?>_action_list" style="display: none">
+        <div class="action-form" id="<?= $list_container_id ?>_action_list" style="display: none">
             <div class="row" style="margin-top:10px;">
                 <div class="col-md-12">
                     <div class="panel panel-default">
@@ -36,11 +37,11 @@ $formFields = &$data['params'];
                             <div class="form-group" style="width:100%">
                                 <div class="input-group input-group-lg" style="width:100%">
                                     <span class="input-group-addon" style="width:1%">
-                                        <?php echo strtoupper($data['method']) ?>
+                                        <?= strtoupper($data['method']) ?>
                                     </span>
                                     <input type="text" class="form-control request-action"
-                                           value="<?php echo $action ?>"
-                                           placeholder="<?php echo $action ?>">
+                                           value="<?= $action ?>"
+                                           placeholder="<?= $action ?>">
                                 </div>
                             </div>
                         </div>
@@ -124,24 +125,24 @@ $formFields = &$data['params'];
                                         <tr>
                                             <td>
                                                 <div class="form-control-static">
-                                                    <?php echo $field_name ?>
+                                                    <?= $field_name ?>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="form-group col-lg-12">
-                                                    <?php echo $input ?>
+                                                    <?= $input ?>
                                                     <span class="hidden-xs">
-                                                    <?php echo $input_addition_html ?>
+                                                    <?= $input_addition_html ?>
                                                 </span>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="form-control-static">
                                                 <span class="visible-xs">
-                                                    <?php echo $input_addition_html ?>
+                                                    <?= $input_addition_html ?>
                                                 </span>
                                                     <span class="hidden-xs">
-                                                    <?php echo $field['label'] ?>
+                                                    <?= $field['label'] ?>
                                                 </span>
                                                 </div>
                                             </td>

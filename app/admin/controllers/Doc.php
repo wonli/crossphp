@@ -123,32 +123,91 @@ class Doc extends Admin
      */
     function codeSegment()
     {
-        $headerParams = array();
         $docId = &$_POST['doc_id'];
-        if (!empty($docId)) {
-            $doc = $this->ADM->get($docId);
-            if (!empty($doc['header_params'])) {
-                $headerParams = &$doc['header_params'];
-            }
-        }
-
         $method = &$_POST['method'];
         $params = &$_POST['params'];
         $url = &$_POST['action'];
 
-        $curlData = (new CURL())->setUrl($url)
+        $data = $this->getApiCurlData($docId, $url, $method, $params);
+        if (!empty($data)) {
+            $this->data['data'] = (new Generator())->run($data);
+        }
+
+        $this->display($this->data);
+    }
+
+    /**
+     * @cp_params api, doc_id, method=post
+     * @throws \Cross\Exception\CoreException
+     */
+    function curlRequest()
+    {
+        $api = $this->params['api'];
+        if (empty($api)) {
+            $this->to('doc');
+            return;
+        }
+
+        $docId = $this->params['doc_id'];
+        if (empty($docId)) {
+            $this->to('doc');
+            return;
+        }
+
+        $params = [];
+        foreach ($_REQUEST as $k => $v) {
+            if (!isset($this->params[$k])) {
+                $params[$k] = $v;
+            }
+        }
+
+        $curlData = $this->getApiCurlData($docId, urldecode($api), $this->params['method'], $params);
+        $this->data['data'] = $curlData;
+        $this->display($this->data);
+    }
+
+    /**
+     * 发起curl请求
+     *
+     * @param string $docId
+     * @param string $apiUrl
+     * @param string $method
+     * @param array $params
+     * @return array|mixed
+     * @throws \Cross\Exception\CoreException
+     */
+    function getApiCurlData($docId, $apiUrl, $method, $params = array())
+    {
+        $headerParams = array();
+        if (!empty($docId)) {
+            $doc = $this->ADM->get($docId);
+            if (!empty($doc['header_params'])) {
+                $Api = new ApiDocModule();
+                $userData = $Api->getAllUserData($this->u, $docId);
+                if (!empty($userData['header_params'])) {
+                    foreach ($userData['header_params'] as $k => $v) {
+                        $headerParams[] = sprintf("%s: %s", $k, $v);
+                    }
+                }
+
+                if (!empty($userData['global_params'])) {
+                    $params = array_merge($params, $userData['global_params']);
+                }
+            }
+        }
+
+        $curlData = (new CURL())->setUrl($apiUrl)
             ->setParams($params)
             ->setHeaderParams($headerParams)
             ->setMethod($method)
             ->request();
 
-        $this->data['data'] = array();
         $data = json_decode($curlData, true);
-        if (is_array($data)) {
-            $this->data['data'] = (new Generator())->run($data);
+        if (!is_array($data)) {
+            return [];
         }
 
-        $this->display($this->data);
+        return $data;
     }
 
     /**
