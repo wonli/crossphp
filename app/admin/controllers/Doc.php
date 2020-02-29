@@ -475,7 +475,7 @@ class Doc extends Admin
             return;
         }
 
-        if ($responseData['status'] != 1) {
+        if (empty($responseData['status']) || $responseData['status'] != 1) {
             $this->dieJson($responseData);
             return;
         }
