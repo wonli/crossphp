@@ -87,7 +87,7 @@ class DocView extends AdminView
     function curlRequest($data = array())
     {
         $this->set(array(
-            'load_layer'=>false,
+            'layer'=>'doc_response',
         ));
 
         $this->renderTpl('doc/curl_response', $data);

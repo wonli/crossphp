@@ -5,22 +5,22 @@
  */
 
 $isTransform = false;
-$emptyTip = '服务器返回结果为空';
+$emptyTip = '获取API数据失败';
 if(!empty($data['t']) && $data['t'] == 'generator') {
     $isTransform = true;
     $emptyTip = 'JSON格式不正确';
 }
 
-$curlData = array();
-$structData = array();
+$curlData = '{}';
+$structData = '{}';
 if(!empty($data['data'])) {
     $data = &$data['data'];
     if (($curlData = json_encode($data['curl'])) === false || empty($data['curl'])) {
-        $curlData = array();
+        $curlData = '{}';
     }
 
     if (($structData = json_encode($data['struct'])) === false || empty($data['struct'])) {
-        $structData = array();
+        $structData = '{}';
     }
 
     $tabs = [];

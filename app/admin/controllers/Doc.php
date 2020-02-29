@@ -129,9 +129,16 @@ class Doc extends Admin
         $url = &$_POST['action'];
 
         $data = $this->getApiCurlData($docId, $url, $method, $params);
-        if (!empty($data)) {
+        if (!empty($data) && is_array($data)) {
             $this->data['data'] = (new Generator())->run($data);
+        } else {
+            $this->data['data'] = [];
         }
+        $this->data['curl_params'] = [
+            'url' => $url,
+            'method' => $method,
+            'params' => $params
+        ];
 
         $this->display($this->data);
     }
@@ -161,8 +168,15 @@ class Doc extends Admin
             }
         }
 
-        $curlData = $this->getApiCurlData($docId, urldecode($api), $this->params['method'], $params);
+        $apiUrl = urldecode($api);
+        $curlData = $this->getApiCurlData($docId, urldecode($apiUrl), $this->params['method'], $params);
         $this->data['data'] = $curlData;
+        $this->data['curl_params'] = [
+            'url' => $apiUrl,
+            'method' => $this->params['method'],
+            'params' => $params
+        ];
+
         $this->display($this->data);
     }
 
@@ -176,7 +190,7 @@ class Doc extends Admin
      * @return array|mixed
      * @throws \Cross\Exception\CoreException
      */
-    function getApiCurlData($docId, $apiUrl, $method, $params = array())
+    function getApiCurlData($docId, $apiUrl, $method, &$params = array())
     {
         $headerParams = array();
         if (!empty($docId)) {
@@ -204,7 +218,7 @@ class Doc extends Admin
 
         $data = json_decode($curlData, true);
         if (!is_array($data)) {
-            return [];
+            return $curlData;
         }
 
         return $data;
@@ -467,8 +481,7 @@ class Doc extends Admin
             't' => TIME,
         ]);
 
-        $apiAddr = rtrim($apiAddr, '/');
-        $url = $apiAddr . '/?' . $requestParams;
+        $url = $apiAddr . '?' . $requestParams;
         $response = Helper::curlRequest($url);
         if (($responseData = json_decode($response, true)) === false) {
             $this->dieJson($this->getStatus(100705, $url));
@@ -476,6 +489,7 @@ class Doc extends Admin
         }
 
         if (empty($responseData['status']) || $responseData['status'] != 1) {
+            $responseData['api_url'] = $url;
             $this->dieJson($responseData);
             return;
         }
