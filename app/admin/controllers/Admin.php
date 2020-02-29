@@ -189,12 +189,16 @@ abstract class Admin extends Controller
      * 返回错误码和错误消息数组
      *
      * @param int $code
+     * @param string $msg
      * @return array|string
      * @throws \Cross\Exception\CoreException
      */
-    protected function getStatus($code)
+    protected function getStatus($code, $msg = '')
     {
-        return $this->result($code, $this->getStatusMessage($code));
+        if (empty($msg)) {
+            $msg = $this->getStatusMessage($code);
+        }
+        return $this->result($code, $msg);
     }
 
     /**

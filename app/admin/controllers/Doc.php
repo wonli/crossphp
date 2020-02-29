@@ -471,7 +471,7 @@ class Doc extends Admin
         $url = $apiAddr . '/?' . $requestParams;
         $response = Helper::curlRequest($url);
         if (($responseData = json_decode($response, true)) === false) {
-            $this->dieJson($this->getStatus(100705));
+            $this->dieJson($this->getStatus(100705, $url));
             return;
         }
 
@@ -481,7 +481,7 @@ class Doc extends Admin
         }
 
         if (empty($responseData['data'])) {
-            $this->dieJson($this->getStatus(100706));
+            $this->dieJson($this->getStatus(100706, $url));
             return;
         }
 
