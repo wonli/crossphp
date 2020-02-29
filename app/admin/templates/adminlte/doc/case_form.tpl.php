@@ -17,7 +17,7 @@ $formFields = &$data['params'];
           data-ori-action="<?= $formAction ?>"
           action="<?= $this->getApiActionUrl($data) ?>" enctype="multipart/form-data">
         <div class="row">
-            <div class="col-md-12" style="margin:10px 0">
+            <div class="col-md-12 case-title" style="margin:10px 0">
                 <span class="badge"><?= $data['method'] ?></span>
                 <a href="javascript:void(0)" onclick="apiActionList('<?= $list_container_id; ?>')">
                     <?= $action ?>

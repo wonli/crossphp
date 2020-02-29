@@ -1,5 +1,5 @@
 body {
-    background-color: #f7f8fa;
+    background-color: #fff;
 }
 
 h3 {
@@ -15,8 +15,15 @@ pre > code {
     background-color: #ffffff !important;
 }
 
-.panel-api-case {
+.navbar {
+    margin-bottom: 0;
+}
 
+.panel-api-case {
+    margin: 0;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 .panel-api-case > .panel-body {
@@ -25,6 +32,28 @@ pre > code {
 
 .panel.panel-api-case.current {
     background-color: #fbfbfb;
+}
+
+.panel.panel-nav-case {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.panel-nav-case:nth-last-child(1) {
+    border-bottom: none;
+}
+
+.case-title {
+    font-size: 18px;
+}
+
+.case-title > .badge {
+    padding: 8px;
+}
+
+.menu-list > div {
+    padding: 5px 0;
 }
 
 .well {
@@ -42,31 +71,41 @@ pre > code {
 }
 
 .menu-list {
-    border-top: #efefef solid 1px;
+    border-top: #efefef dashed 1px;
+}
+
+.menu-list.current {
+    /*background: #fff;*/
 }
 
 .mainWrap {
-    margin: 30px 0 50px 0;
+    min-height: 100%;
 }
 
 .mainContainer {
-    background: #f7f8fa;
-    min-height: 600px;
-    padding: 5px;
-    border-radius: 5px;
-    height: 100%;
+    min-height: 100%;
+}
+
+.leftWrap {
+    width: 25%;
+    min-height: 100%;
+    min-width: 300px;
+    background: #f0f8ff;
+}
+
+.rightWrap {
+    flex: 1;
+    display: flex;
+    justify-content: center;
 }
 
 .leftContainer {
-    padding: 10px;
+    padding: 20px 5px;
 }
 
 .rightContainer {
-    background: #fff;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 5px;
-    box-shadow: 1px 2px 1px #eee;
+    margin-top: 50px;
+    min-height: 100%;
 }
 
 .jsonview {

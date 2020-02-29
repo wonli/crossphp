@@ -24,28 +24,20 @@
 </head>
 <body>
 
-<div class="navbar navbar-default navbar-inverse navbar-static-top" role="navigation">
-    <?php $this->docHeader() ?>
+<div class="navbar navbar-inverse navbar-static-top" role="navigation">
+    <div class="container-fluid">
+
+        <?php $this->docHeader() ?>
+    </div>
+
 </div>
 
-<div class="mainWrap">
-    <div class="container mainContainer">
-        <div class="row">
-            <?php $this->docData() ?>
-        </div>
-    </div>
+<div class="mainContainer">
+    <?php $this->docData() ?>
 </div>
 
-<div class="footWrap">
-    <div class="container">
-        <div class="row">
-        </div>
-        <div class="row" style="position:relative">
-            <div id="goTop"><i class="glyphicon glyphicon-circle-arrow-up"></i></div>
-            <div id="fold" status="0"><i class="glyphicon glyphicon-info-sign"></i></div>
-        </div>
-    </div>
-</div>
+<div id="goTop"><i class="glyphicon glyphicon-circle-arrow-up"></i></div>
+<div id="fold" status="0"><i class="glyphicon glyphicon-info-sign"></i></div>
 
 <div class="modal fade" id="commonModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
@@ -132,8 +124,10 @@
         var classID = className + 'MenuList', target = $('#' + classID);
         target.toggle();
         if (target.is(':visible')) {
+            target.addClass('current');
             window.location.hash = '!' + className;
         } else {
+            target.removeClass('current');
             window.location.hash = '';
         }
 
@@ -141,7 +135,7 @@
         $('.menu-list').each(function () {
             var id = $(this).attr('id');
             if (id != classID) {
-                $('#' + id).hide();
+                $('#' + id).removeClass('.current').hide();
             }
         });
     }

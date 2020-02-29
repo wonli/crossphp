@@ -166,7 +166,7 @@ class DocView extends AdminView
         $data = $this->data['data'];
         if (!empty($data)) {
             ?>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="leftContainer navbar-collapse collapse">
                     <?php
                     foreach ($data as $name => $child) {
@@ -178,16 +178,20 @@ class DocView extends AdminView
                     ?>
                 </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-9">
                 <div class="rightContainer">
-                    <?php
-                    foreach ($data as $name => $child) {
-                        $this->renderTpl('doc/case', [
-                            'name' => $name,
-                            'child' => $child,
-                        ]);
-                    }
-                    ?>
+                    <div class="row">
+                        <div class="col-md-offset-1 col-md-9">
+                            <?php
+                                foreach ($data as $name => $child) {
+                                    $this->renderTpl('doc/case', [
+                                        'name' => $name,
+                                        'child' => $child,
+                                    ]);
+                                }
+                            ?>
+                        </div>
+                     </div>
                 </div>
             </div>
             <?php
@@ -213,28 +217,25 @@ class DocView extends AdminView
     {
         $data = $this->data['doc'];
         ?>
-        <div class="container">
-            <div class="navbar-header">
-                <button id="collapseBtn" type="button" class="navbar-toggle" data-toggle="collapse"
-                        data-target="leftContainer">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="" title="生成时间 <?php echo $data['last_update_time'] ?>">
-                    <?php echo $data['name'] ?>
-                </a>
-            </div>
+        <div class="navbar-header">
+            <button id="collapseBtn" type="button" class="navbar-toggle" data-toggle="collapse" data-target="leftContainer">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="" title="生成时间 <?php echo $data['last_update_time'] ?>">
+                <?php echo $data['name'] ?>
+            </a>
+        </div>
 
-            <div class="navbar-collapse collapse">
-                <?php $this->genCommonParams() ?>
-                <?php $this->genApiServerList() ?>
-                <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a href="<?php echo $this->url('doc:generator') ?>" target="_blank">代码生成</a>
-                    </li>
-                </ul>
-            </div>
+        <div class="navbar-collapse collapse">
+            <?php $this->genCommonParams() ?>
+            <?php $this->genApiServerList() ?>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="<?php echo $this->url('doc:generator') ?>" target="_blank">代码生成</a>
+                </li>
+            </ul>
         </div>
         <?php
     }

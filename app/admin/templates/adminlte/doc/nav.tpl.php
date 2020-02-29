@@ -6,7 +6,7 @@
 
 $current_child = current($data['child']);
 ?>
-<div class="panel panel-api-case">
+<div class="panel panel-nav-case">
     <div class="panel-heading">
         <h3>
             <a href="javascript:void(0)" onclick="apiClassList('<?php echo $current_child['class'] ?>')">
