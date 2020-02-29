@@ -11,14 +11,14 @@ namespace app\admin\controllers;
 use app\admin\supervise\ApiDocModule;
 use app\admin\supervise\CodeSegment\CURL;
 use app\admin\supervise\CodeSegment\Generator;
-use app\api\views\ApiView;
+use app\admin\views\DocView;
 use Cross\Core\Helper;
 use lib\Spyc;
 
 /**
  * Class Doc
  * @package app\admin\controllers
- * @property ApiView $view
+ * @property DocView $view
  */
 class Doc extends Admin
 {
@@ -554,9 +554,10 @@ class Doc extends Admin
 
         if ($display) {
             if (!$ret) {
-                $this->dieJson($this->getStatus(100720));
+                $this->dieJson($this->getStatus(100720, $url));
             } else {
                 $this->data['data'] = array(
+                    'url' => $url,
                     'cache_name' => $cache_file_name,
                     'cache_at' => TIME,
                     'user' => $this->u,
