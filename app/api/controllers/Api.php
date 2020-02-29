@@ -145,24 +145,27 @@ abstract class Api extends Controller
         if (!empty($annotate_request)) {
             $request = explode(',', $annotate_request);
             if (!empty($request)) {
-                foreach ($request as $p) {
-                    list($params, $message, $require) = explode('|', trim($p));
-                    if (strpos($params, ':') !== false) {
-                        list($params, $input_type) = explode(':', $params);
-                    }
-
-                    $this->api_request_params[] = $params;
-                    if ($require) {
-                        $data_container = $this->data_container;
-                        if (isset($input_type) && isset($this->input_data_container[$input_type])) {
-                            $data_container = $this->getDataContainer($input_type);
+                foreach ($request as $params) {
+                    $requestParams = explode("\n", $params);
+                    foreach ($requestParams as $p) {
+                        list($params, $message, $require) = explode('|', trim($p));
+                        if (strpos($params, ':') !== false) {
+                            list($params, $input_type) = explode(':', $params);
                         }
 
-                        if (!isset($data_container[$params])) {
-                            $this->data['status'] = 0;
-                            $this->data['message'] = "缺少参数{$params}($message)";
-                            $this->display($this->data);
-                            return;
+                        $this->api_request_params[] = $params;
+                        if ($require) {
+                            $data_container = $this->data_container;
+                            if (isset($input_type) && isset($this->input_data_container[$input_type])) {
+                                $data_container = $this->getDataContainer($input_type);
+                            }
+
+                            if (!isset($data_container[$params])) {
+                                $this->data['status'] = 0;
+                                $this->data['message'] = "缺少参数{$params}($message)";
+                                $this->display($this->data);
+                                return;
+                            }
                         }
                     }
                 }

@@ -524,13 +524,16 @@ class Doc extends Admin
                             if (isset($m['request'])) {
                                 if (!empty($m['request'])) {
                                     $request = explode(',', $m['request']);
-                                    foreach ($request as $f) {
-                                        @list($dd['field'], $dd['label'], $dd['required']) = explode('|', $f);
-                                        $dd = array_map('trim', $dd);
-                                        $apiParams[$dd['field']] = [
-                                            'label' => $dd['label'],
-                                            'required' => (bool)$dd['required'],
-                                        ];
+                                    foreach ($request as $r) {
+                                        $rParams = explode("\n", $r);
+                                        foreach ($rParams as $f) {
+                                            @list($dd['field'], $dd['label'], $dd['required']) = explode('|', $f);
+                                            $dd = array_map('trim', $dd);
+                                            $apiParams[$dd['field']] = [
+                                                'label' => $dd['label'],
+                                                'required' => (bool)$dd['required'],
+                                            ];
+                                        }
                                     }
                                 }
                             }
