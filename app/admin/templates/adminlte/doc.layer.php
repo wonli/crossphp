@@ -5,31 +5,44 @@
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title><?php echo isset($title) ? $title : '' ?></title>
-    <meta name="Keywords" content="<?php echo isset($keywords) ? $keywords : ''; ?>"/>
-    <meta name="Description" content="<?php echo isset($description) ? $description : ''; ?>"/>
-    <link href="<?php echo $this->res('libs/bootstrap/3.3.7/css/bootstrap.min.css') ?>" rel="stylesheet">
-    <link href="<?php echo $this->res('css/doc-default-theme.css') ?>" rel="stylesheet">
+    <title><?= isset($title) ? $title : '' ?></title>
+    <meta name="Keywords" content="<?= isset($keywords) ? $keywords : ''; ?>"/>
+    <meta name="Description" content="<?= isset($description) ? $description : ''; ?>"/>
+    <link href="<?= $this->res('libs/bootstrap/3.3.7/css/bootstrap.min.css') ?>" rel="stylesheet">
+    <link href="<?= $this->res('libs/font-awesome/4.7.0/css/font-awesome.min.css') ?>" rel="stylesheet">
+    <link href="<?= $this->res('libs/jquery/jquery.jsonview.min.css') ?>" rel="stylesheet">
+    <link href="<?= $this->res('libs/highlight/styles/default.css') ?>" rel="stylesheet">
+    <link href="<?= $this->res('libs/highlight/styles/github.css') ?>" rel="stylesheet">
+    <link href="<?= $this->res('css/doc-default-theme.css') ?>" rel="stylesheet">
 
-    <link href="<?php echo $this->res('libs/jquery/jquery.jsonview.min.css') ?>" rel="stylesheet">
-
-    <link href="<?php echo $this->res('libs/highlight/styles/default.css') ?>" rel="stylesheet">
-    <link href="<?php echo $this->res('libs/highlight/styles/github.css') ?>" rel="stylesheet">
-    <script src="<?php echo $this->res('libs/highlight/highlight.pack.js') ?>"></script>
-
-    <script src="<?php echo $this->res('libs/jquery/3.2.1/jquery.min.js') ?>"></script>
-    <script src="<?php echo $this->res('libs/jquery/jquery.jsonview.min.js') ?>"></script>
-    <script src="<?php echo $this->res('libs/bootstrap/3.3.7/js/bootstrap.min.js') ?>"></script>
-    <script src="<?php echo $this->res('libs/bootstrap-validator/0.11.8/validator.min.js') ?>"></script>
+    <script src="<?= $this->res('libs/jquery/3.2.1/jquery.min.js') ?>"></script>
+    <script src="<?= $this->res('libs/jquery/jquery.jsonview.min.js') ?>"></script>
+    <script src="<?= $this->res('libs/highlight/highlight.pack.js') ?>"></script>
+    <script src="<?= $this->res('libs/bootstrap/3.3.7/js/bootstrap.min.js') ?>"></script>
+    <script src="<?= $this->res('libs/bootstrap-validator/0.11.8/validator.min.js') ?>"></script>
 </head>
 <body>
 
-<div class="navbar navbar-inverse navbar-static-top" role="navigation">
-    <div class="container-fluid">
-
-        <?php $this->docHeader() ?>
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid navContainer">
+        <div class="navbar-header">
+            <button id="collapseBtn" type="button" class="navbar-toggle">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <?php $this->docInfo() ?>
+        </div>
+        <div class="navbar-collapse collapse">
+            <?php $this->genCommonParams() ?>
+            <?php $this->genApiServerList() ?>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="<?= $this->url('doc:generator') ?>" target="_blank">代码生成</a>
+                </li>
+            </ul>
+        </div>
     </div>
-
 </div>
 
 <div class="mainContainer">
@@ -89,11 +102,16 @@
 </div>
 <div class="modal fade fadeIn" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
      id="codeSegmentModal"></div>
-
+<div id="mask"></div>
 <script>
-    function apiActionList(action) {
+    function apiActionList(action, o) {
         var targetId = action + '_action_list', target = $('#' + targetId);
         target.show();
+
+        $('.a-nav-menu').each(function () {
+            $(this).removeClass('current');
+        });
+        $(o).parent().addClass('current');
 
         var className = action.split('_')[0], classID = className + 'ActionList', menuID = className + 'MenuList';
         $('#' + classID).show();
@@ -118,6 +136,7 @@
 
         $('html, body').animate({scrollTop: 0}, 5);
         $('.leftContainer').hide();
+        $('#mask').hide();
     }
 
     function apiClassList(className) {
@@ -144,7 +163,7 @@
         if (contentID.indexOf('_') > 0) {
             var hashInfo = contentID.split('_');
             apiClassList(hashInfo[0]);
-            apiActionList(contentID)
+            apiActionList(contentID, $('.' + contentID));
         } else {
             apiClassList(contentID);
         }
@@ -161,6 +180,7 @@
 
         $('#collapseBtn').on('click', function () {
             $('.leftContainer').toggle();
+            $('#mask').toggle();
         });
 
         $('.request-action').on('click', function () {

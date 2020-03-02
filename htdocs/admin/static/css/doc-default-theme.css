@@ -15,6 +15,48 @@ pre > code {
     background-color: #ffffff !important;
 }
 
+a {
+    color: #09647d;
+}
+
+a:hover, a:focus {
+    color: #007396;
+}
+
+.nav-title {
+    font-size: 20px;
+    color: #007396;
+    font-weight: 600;
+}
+
+.a-nav-menu {
+    margin: 10px 0;
+    position: relative
+}
+
+.a-nav-menu > a {
+    color: #333;
+    padding-left: 11px;
+}
+
+.dot:before {
+    top: -4px;
+    left: -4px;
+    font-size: 36px;
+    color: #333;
+    content: "\00b7";
+    display: block;
+    position: absolute;
+}
+
+.a-nav-menu.current > a {
+    color: #09647d;
+}
+
+.a-nav-menu.current .dot:before {
+    color: #09647d;
+}
+
 .navbar {
     margin-bottom: 0;
 }
@@ -26,8 +68,12 @@ pre > code {
     box-shadow: none !important;
 }
 
+.panel-api-case > .panel-heading {
+    padding: 5px 15px;
+}
+
 .panel-api-case > .panel-body {
-    padding: 0 15px;
+    padding: 0 20px;
 }
 
 .panel.panel-api-case.current {
@@ -38,6 +84,15 @@ pre > code {
     border: none;
     border-radius: 0;
     box-shadow: none;
+    background: transparent;
+}
+
+.panel-nav-case > .panel-heading {
+    padding: 0 0 10px 30px
+}
+
+.panel-nav-case > .panel-body {
+    padding: 0 20px 20px 30px
 }
 
 .panel-nav-case:nth-last-child(1) {
@@ -71,7 +126,7 @@ pre > code {
 }
 
 .menu-list {
-    border-top: #efefef dashed 1px;
+    /*border-top: #efefef dashed 1px;*/
 }
 
 .menu-list.current {
@@ -82,34 +137,63 @@ pre > code {
     min-height: 100%;
 }
 
+.navContainer {
+    padding: 0 30px
+}
+
 .mainContainer {
     min-height: 100%;
-}
-
-.leftWrap {
-    width: 25%;
-    min-height: 100%;
-    min-width: 300px;
-    background: #f0f8ff;
-}
-
-.rightWrap {
-    flex: 1;
     display: flex;
-    justify-content: center;
+    margin-top: 50px;
 }
 
 .leftContainer {
-    padding: 20px 5px;
+    width: 300px;
+    max-width: 500px;
+    padding: 0;
 }
 
 .rightContainer {
-    margin-top: 50px;
+    margin-top: 20px;
     min-height: 100%;
+    flex: 1;
+    display: flex;
+    padding: 0 15px;
+    justify-content: center;
+
+}
+
+.menuContainer {
+    padding: 35px 0;
+    position: fixed;
+    height: 100%;
+    width: 300px;
+    z-index: 999;
+    overflow-x: hidden;
+    border-right: solid #f1f1f1 1px;
+    background: #fcfcfc;
+}
+
+.contentContainer {
+    max-width: 700px;
+    width: 100%;
+    min-width: 470px;
 }
 
 .jsonview {
     font-size: 14px !important;
+}
+
+#mask {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #333;
+    opacity: 0.6;
+    z-index: 800;
+    display: none;
 }
 
 #goTop, #fold {
@@ -121,7 +205,6 @@ pre > code {
     _position: absolute;
     right: 3%;
     bottom: 80px;
-    _bottom: "auto";
     cursor: pointer;
     opacity: .6;
     filter: Alpha(opacity=60);

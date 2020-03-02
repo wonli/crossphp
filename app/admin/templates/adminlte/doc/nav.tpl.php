@@ -8,11 +8,9 @@ $current_child = current($data['child']);
 ?>
 <div class="panel panel-nav-case">
     <div class="panel-heading">
-        <h3>
-            <a href="javascript:void(0)" onclick="apiClassList('<?php echo $current_child['class'] ?>')">
-                <?php echo $data['name'] ?>
-            </a>
-        </h3>
+        <a href="javascript:void(0)" class="nav-title" onclick="apiClassList('<?php echo $current_child['class'] ?>')">
+            </i><?php echo $data['name'] ?>
+        </a>
     </div>
     <div class="panel-body menu-list" id="<?php echo $current_child['class'] . 'MenuList' ?>" style="display: none">
         <?php

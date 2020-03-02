@@ -166,8 +166,8 @@ class DocView extends AdminView
         $data = $this->data['data'];
         if (!empty($data)) {
             ?>
-            <div class="col-md-3">
-                <div class="leftContainer navbar-collapse collapse">
+            <div class="leftContainer navbar-collapse collapse">
+                <div class="menuContainer">
                     <?php
                     foreach ($data as $name => $child) {
                         $this->renderTpl('doc/nav', [
@@ -178,21 +178,17 @@ class DocView extends AdminView
                     ?>
                 </div>
             </div>
-            <div class="col-md-9">
-                <div class="rightContainer">
-                    <div class="row">
-                        <div class="col-md-offset-1 col-md-9">
-                            <?php
-                                foreach ($data as $name => $child) {
-                                    $this->renderTpl('doc/case', [
-                                        'name' => $name,
-                                        'child' => $child,
-                                    ]);
-                                }
-                            ?>
-                        </div>
-                     </div>
-                </div>
+            <div class="rightContainer">
+                <div class="contentContainer">
+                    <?php
+                        foreach ($data as $name => $child) {
+                            $this->renderTpl('doc/case', [
+                                'name' => $name,
+                                'child' => $child,
+                            ]);
+                        }
+                    ?>
+                 </div>
             </div>
             <?php
         } else {
@@ -209,41 +205,22 @@ class DocView extends AdminView
     }
 
     /**
-     * 文档头部
-     *
-     * @throws \Cross\Exception\CoreException
+     * 文档信息
      */
-    function docHeader()
+    function docInfo()
     {
         $data = $this->data['doc'];
         ?>
-        <div class="navbar-header">
-            <button id="collapseBtn" type="button" class="navbar-toggle" data-toggle="collapse" data-target="leftContainer">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="" title="生成时间 <?php echo $data['last_update_time'] ?>">
-                <?php echo $data['name'] ?>
-            </a>
-        </div>
-
-        <div class="navbar-collapse collapse">
-            <?php $this->genCommonParams() ?>
-            <?php $this->genApiServerList() ?>
-            <ul class="nav navbar-nav navbar-right">
-                <li>
-                    <a href="<?php echo $this->url('doc:generator') ?>" target="_blank">代码生成</a>
-                </li>
-            </ul>
-        </div>
+        <a class="navbar-brand" href="" title="生成时间 <?php echo $data['last_update_time'] ?>">
+            <?php echo $data['name'] ?>
+        </a>
         <?php
     }
 
     /**
      * 公共参数开关
      */
-    private function genCommonParams()
+    protected function genCommonParams()
     {
         $global = &$this->data['doc']['global_params'];
         $header = &$this->data['doc']['header_params'];
@@ -260,7 +237,7 @@ class DocView extends AdminView
     /**
      * 生成API服务器列表
      */
-    private function genApiServerList()
+    protected function genApiServerList()
     {
         $doc_id = $this->data['doc_id'];
         $servers = &$this->data['doc']['servers'];
