@@ -13,13 +13,18 @@ class Generator
 {
     /**
      * @param array $data
+     * @param bool $s 是否仅返回结构
      * @return array
      */
-    function run(array $data)
+    function run(array $data, $s = false)
     {
         if (is_array($data)) {
             $struct = array();
             $this->getStruct($data, $struct);
+            if ($s) {
+                return $struct;
+            }
+
             return [
                 'struct' => $struct,
                 'curl' => $data,

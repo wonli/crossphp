@@ -197,7 +197,10 @@
         });
 
         $('.gen-code-flag').on('click', function () {
-            var f = $(this).closest('form'), action = f.attr('data-ori-action'), method = f[0].method,
+            var f = $(this).closest('form'),
+                path = f.attr('data-api-path'),
+                apiUrl = f.attr('data-api-url'),
+                method = f[0].method,
                 fParams = f.serializeArray(),
                 params = {};
             if (fParams.length > 0) {
@@ -209,7 +212,7 @@
                 }
             }
 
-            var p = {params: params, method: method, action: action, doc_id: docId};
+            var p = {"params": params, "method": method, "api": apiUrl, "path": path, "doc_id": docId};
             $.post('<?= $this->url('doc:codeSegment') ?>', p, function (d) {
                 $('#codeSegmentModal').html(d).modal('toggle');
             });

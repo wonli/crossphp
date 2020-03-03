@@ -6,7 +6,7 @@
 
 
 $action = &$data['requestPath'];
-$formAction = $this->data['api_host'] . $action;
+$apiUrl = $this->data['api_host'] . $action;
 
 $list_container_id = $data['class'] . '_' . $data['action'];
 $formFields = &$data['params'];
@@ -14,7 +14,8 @@ $formFields = &$data['params'];
 <div class="action-list-container" id="<?= $list_container_id; ?>">
     <form class="form-inline" data-toggle="validator" role="form" target="_blank"
           method="<?= $data['method'] ?>"
-          data-ori-action="<?= $formAction ?>"
+          data-api-path="<?= $action ?>"
+          data-api-url="<?= $apiUrl ?>"
           action="<?= $this->getApiActionUrl($data) ?>" enctype="multipart/form-data">
         <div class="row">
             <div class="col-md-12 case-title" style="margin:10px 0">

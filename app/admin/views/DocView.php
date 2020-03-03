@@ -360,17 +360,17 @@ class DocView extends AdminView
             return '';
         }
 
-        $apiUrl =  $this->data['api_host']  .'/' . ltrim($data['requestPath'], '/');
         $headerParams = &$this->data['doc']['header_params'];
         if(empty($headerParams)) {
-           return $apiUrl;
+           return $this->data['api_host']  .'/' . ltrim($data['requestPath'], '/');
         }
 
         return $this->url('doc:curlRequest', [
             'ugp' => $data['useGlobalParams'],
             'method' => $data['method'],
             'doc_id'=> $this->data['doc']['id'],
-            'api' => urlencode($apiUrl)
+            'host' => urlencode($this->data['api_host']),
+            'path' => urlencode($data['requestPath'])
         ]);
     }
 }

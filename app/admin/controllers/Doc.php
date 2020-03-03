@@ -126,16 +126,22 @@ class Doc extends Admin
         $docId = &$_POST['doc_id'];
         $method = &$_POST['method'];
         $params = &$_POST['params'];
-        $url = &$_POST['action'];
+        $apiUrl = &$_POST['api'];
+        $apiPath = &$_POST['path'];
 
-        $data = $this->getApiCurlData($docId, $url, $method, $params);
+        $data = $this->getApiCurlData($docId, $apiUrl, $method, $params);
         if (!empty($data) && is_array($data)) {
-            $this->data['data'] = (new Generator())->run($data);
+            $g = (new Generator())->run($data);
+            if (!empty($g['struct'])) {
+                (new ApiDocModule())->saveCache($docId, $apiPath, $g['struct']);
+            }
+
+            $this->data['data'] = $g;
         } else {
             $this->data['data'] = [];
         }
         $this->data['curl_params'] = [
-            'url' => $url,
+            'url' => $apiUrl,
             'method' => $method,
             'params' => $params
         ];
@@ -144,15 +150,25 @@ class Doc extends Admin
     }
 
     /**
-     * @cp_params api, doc_id, method=post
+     * @cp_params host, path, doc_id, method=post
      * @throws \Cross\Exception\CoreException
      */
     function curlRequest()
     {
-        $api = $this->params['api'];
-        if (empty($api)) {
+        $host = $this->params['host'];
+        if (empty($host)) {
             $this->to('doc');
             return;
+        } else {
+            $host = urldecode($host);
+        }
+
+        $path = $this->params['path'];
+        if (empty($path)) {
+            $this->to('doc');
+            return;
+        } else {
+            $path = urldecode($path);
         }
 
         $docId = $this->params['doc_id'];
@@ -168,8 +184,13 @@ class Doc extends Admin
             }
         }
 
-        $apiUrl = urldecode($api);
-        $curlData = $this->getApiCurlData($docId, urldecode($apiUrl), $this->params['method'], $params);
+        $apiUrl = rtrim($host, '/') . '/' . ltrim($path, '/');
+        $curlData = $this->getApiCurlData($docId, $apiUrl, $this->params['method'], $params);
+        $g = (new Generator())->run($curlData, true);
+        if (!empty($g)) {
+            (new ApiDocModule())->saveCache($docId, $path, $g);
+        }
+
         $this->data['data'] = $curlData;
         $this->data['curl_params'] = [
             'url' => $apiUrl,

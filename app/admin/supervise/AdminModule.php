@@ -59,6 +59,13 @@ class AdminModule extends Module
     protected $t_api_doc_data = 'cpa_doc_data';
 
     /**
+     * 接口返回结构缓存
+     *
+     * @var string
+     */
+    protected $t_api_doc_cache = 'cpa_doc_cache';
+
+    /**
      * 存储密保卡的表名
      *
      * @var string

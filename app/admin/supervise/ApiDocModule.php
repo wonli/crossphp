@@ -220,6 +220,36 @@ class ApiDocModule extends AdminModule
     }
 
     /**
+     * 缓存接口结构
+     *
+     * @param int $doc_id
+     * @param string $api_path
+     * @param array $struct_data
+     * @return bool|mixed
+     * @throws \Cross\Exception\CoreException
+     */
+    function saveCache($doc_id, $api_path, array $struct_data)
+    {
+        $api_path = '/' . ltrim($api_path, '/');
+        $cacheInfo = $this->link->get($this->t_api_doc_cache, 'cache_id', [
+            'doc_id' => $doc_id,
+            'api_path' => $api_path,
+        ]);
+
+        $data['doc_id'] = $doc_id;
+        $data['api_path'] = $api_path;
+        $data['api_response'] = json_encode($struct_data);
+        $data['cache_at'] = TIME;
+        if (!empty($cacheInfo)) {
+            return $this->link->update($this->t_api_doc_cache, $data, [
+                'cache_id' => $cacheInfo['cache_id']
+            ]);
+        } else {
+            return $this->link->add($this->t_api_doc_cache, $data);
+        }
+    }
+
+    /**
      * 更新用户数据
      *
      * @param int $id
