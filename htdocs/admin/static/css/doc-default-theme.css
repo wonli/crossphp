@@ -175,9 +175,49 @@ a:hover, a:focus {
 }
 
 .contentContainer {
+    width: 100%;
+}
+
+.action-list-container {
+    display: flex;
+    justify-content: space-around;
+}
+
+.form-container-wrap {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.form-container {
     max-width: 700px;
     width: 100%;
     min-width: 470px;
+}
+
+.cache-container {
+    width: 400px;
+}
+
+.cache-panel {
+    padding-top: 77px;
+    position: fixed;
+    width: 400px;
+    border-left: 1px solid #f1f1f1;
+    padding-left: 20px;
+    display: none;
+    bottom: 0;
+    right: 0;
+    top: 0;
+}
+
+.cache-panel-title {
+    font-size: 18px;
+    padding-bottom: 20px;
+}
+
+.cache-tips {
+    color: #777;
 }
 
 .jsonview {

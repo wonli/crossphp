@@ -102,7 +102,7 @@ class Doc extends Admin
             }
 
             $apiServer = &$servers[$currentServerID];
-            $this->initApiData($apiServer['server_name'], $apiServer['api_addr'], $data['doc_token'], false);
+            $this->initApiData($doc_id, $apiServer['server_name'], $apiServer['api_addr'], $data['doc_token'], false);
 
             $this->data['api_host'] = $apiServer['api_addr'];
             $this->data['current_sid'] = $currentServerID;
@@ -462,13 +462,14 @@ class Doc extends Admin
     /**
      * 获取接口文档数据
      *
+     * @param int $docId
      * @param string $serverName
      * @param string $apiAddr
      * @param string $docToken
      * @param bool $display
      * @throws \Cross\Exception\CoreException
      */
-    function initApiData($serverName = '', $apiAddr = '', $docToken = '', $display = true)
+    function initApiData($docId, $serverName = '', $apiAddr = '', $docToken = '', $display = true)
     {
         if (empty($serverName)) {
             $serverName = &$_REQUEST['server_name'];
@@ -522,6 +523,7 @@ class Doc extends Admin
 
         $data = &$responseData['data'];
         $cache_file_name = md5($apiAddr);
+        $api_cache = (new ApiDocModule())->getCacheData($docId);
 
         $result = [];
         foreach ($data as $k => $d) {
@@ -539,6 +541,12 @@ class Doc extends Admin
                             'requestPath' => $api[1],
                             'useGlobalParams' => $m['global_params'],
                         ];
+
+                        if (isset($api_cache[$method['requestPath']])) {
+                            $method['apiCache'] = $api_cache[$method['requestPath']];
+                        } else {
+                            $method['apiCache'] = '';
+                        }
 
                         $apiParams = [];
                         if (!empty($m['request'])) {

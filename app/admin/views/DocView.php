@@ -75,7 +75,7 @@ class DocView extends AdminView
     function codeSegment($data = array())
     {
         $this->set(array(
-            'load_layer'=>false,
+            'load_layer' => false,
         ));
 
         $this->renderTpl('doc/code_segment', $data);
@@ -87,7 +87,7 @@ class DocView extends AdminView
     function curlRequest($data = array())
     {
         $this->set(array(
-            'layer'=>'doc_response',
+            'layer' => 'doc_response',
         ));
 
         $this->renderTpl('doc/curl_response', $data);
@@ -99,10 +99,10 @@ class DocView extends AdminView
     function generator($data = array())
     {
         $this->set(array(
-            'layer'=>'generator',
+            'layer' => 'generator',
         ));
 
-        if($data['show_input']) {
+        if ($data['show_input']) {
             $this->renderTpl('doc/generator_form');
         } else {
             $data['t'] = 'generator';
@@ -149,11 +149,11 @@ class DocView extends AdminView
     function makeAddButton($t = 'global')
     {
         $a = self::htmlTag('a', [
-                't' => $t,
-                'href' => 'javascript:void(0)',
-                'class' => 'addParams btn btn-default',
-                '@content' => self::htmlTag('i', ['class' => 'fa fa-plus'])
-            ]);
+            't' => $t,
+            'href' => 'javascript:void(0)',
+            'class' => 'addParams btn btn-default',
+            '@content' => self::htmlTag('i', ['class' => 'fa fa-plus'])
+        ]);
 
         return $a;
     }
@@ -181,14 +181,14 @@ class DocView extends AdminView
             <div class="rightContainer">
                 <div class="contentContainer">
                     <?php
-                        foreach ($data as $name => $child) {
-                            $this->renderTpl('doc/case', [
-                                'name' => $name,
-                                'child' => $child,
-                            ]);
-                        }
+                    foreach ($data as $name => $child) {
+                        $this->renderTpl('doc/case', [
+                            'name' => $name,
+                            'child' => $child,
+                        ]);
+                    }
                     ?>
-                 </div>
+                </div>
             </div>
             <?php
         } else {
@@ -281,7 +281,7 @@ class DocView extends AdminView
         if (!empty($global_params)) {
             foreach ($global_params as $field => $name) {
                 $userValue = '';
-                if(isset($userData[$field])) {
+                if (isset($userData[$field])) {
                     $userValue = $userData[$field];
                 }
                 ?>
@@ -325,7 +325,7 @@ class DocView extends AdminView
         if (!empty($data)) {
             foreach ($data as $field => $name) {
                 $userValue = '';
-                if(isset($userData[$field])) {
+                if (isset($userData[$field])) {
                     $userValue = $userData[$field];
                 }
                 ?>
@@ -356,21 +356,47 @@ class DocView extends AdminView
      */
     function getApiActionUrl($data)
     {
-        if(empty($data)) {
+        if (empty($data)) {
             return '';
         }
 
         $headerParams = &$this->data['doc']['header_params'];
-        if(empty($headerParams)) {
-           return $this->data['api_host']  .'/' . ltrim($data['requestPath'], '/');
+        if (empty($headerParams)) {
+            return $this->data['api_host'] . '/' . ltrim($data['requestPath'], '/');
         }
 
         return $this->url('doc:curlRequest', [
             'ugp' => $data['useGlobalParams'],
             'method' => $data['method'],
-            'doc_id'=> $this->data['doc']['id'],
+            'doc_id' => $this->data['doc']['id'],
             'host' => urlencode($this->data['api_host']),
             'path' => urlencode($data['requestPath'])
         ]);
+    }
+
+    /**
+     * 输出缓存数据
+     *
+     * @param $data
+     */
+    function cacheData($data)
+    {
+        ?>
+        <div class="cache-panel">
+            <div class="cache-panel-title">响应数据结构</div>
+            <div>
+                <?php
+                if (!empty($data)) {
+                    echo $this->wrap('div', ['class' => 'cache-data-wrap'])
+                        ->wrap('pre', ['class' => 'cache-data'])
+                        ->wrap('code', ['class' => 'json hljs'])
+                        ->html(json_encode(json_decode($data, true), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+                } else {
+                    echo $this->wrap('div', ['class' => 'cache-tips'])->html( '请求一次之后缓存');
+                }
+                ?>
+            </div>
+        </div>
+        <?php
     }
 }

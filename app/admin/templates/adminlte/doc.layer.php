@@ -116,6 +116,7 @@
         var className = action.split('_')[0], classID = className + 'ActionList', menuID = className + 'MenuList';
         $('#' + classID).show();
         $('#' + menuID).show();
+        $('#' + action + ' .cache-panel').show();
 
         window.location.hash = '!' + action;
         $('.action-list-container').each(function () {
@@ -221,6 +222,8 @@
         $('#fold').click(function () {
             if ($(this).attr('status') == 0) {
                 $('.action-list-container').show();
+
+                $('.cache-panel').hide();
                 $('.action-form').hide();
                 $('.menu-list').hide();
                 $(this).attr('status', 1);
@@ -236,6 +239,10 @@
 
         $('#commonModalSwitch').click(function () {
             $('#commonModal').modal('toggle');
+        });
+
+        $('pre code').each(function (i, block) {
+            hljs.highlightBlock(block);
         });
 
         $(window).bind("scroll", function () {

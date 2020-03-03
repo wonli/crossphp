@@ -250,6 +250,22 @@ class ApiDocModule extends AdminModule
     }
 
     /**
+     * 返回文档接口所有缓存数据
+     *
+     * @param int $doc_id
+     * @return array
+     * @throws \Cross\Exception\CoreException
+     */
+    function getCacheData($doc_id)
+    {
+        $data = $this->link->select('api_path, api_response')
+            ->from($this->t_api_doc_cache)->where(['doc_id' => $doc_id])
+            ->stmt()->fetchAll(\PDO::FETCH_GROUP|\PDO::FETCH_KEY_PAIR);
+
+        return $data;
+    }
+
+    /**
      * 更新用户数据
      *
      * @param int $id
