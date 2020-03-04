@@ -7,12 +7,14 @@
 
 namespace app\admin\controllers;
 
+use Cross\Exception\CoreException;
+use Cross\Core\Helper;
 
 use app\admin\supervise\ApiDocModule;
 use app\admin\supervise\CodeSegment\CURL;
 use app\admin\supervise\CodeSegment\Generator;
 use app\admin\views\DocView;
-use Cross\Core\Helper;
+
 use lib\Spyc;
 
 /**
@@ -46,7 +48,7 @@ class Doc extends Admin
     /**
      * Doc constructor.
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      * @throws \ReflectionException
      */
     function __construct()
@@ -57,7 +59,7 @@ class Doc extends Admin
     }
 
     /**
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function index()
     {
@@ -67,13 +69,14 @@ class Doc extends Admin
     /**
      * @param $doc_id
      * @param $args
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function __call($doc_id, $args)
     {
         $data = $this->ADM->get((int)$doc_id);
         if (empty($data)) {
-            return $this->to('doc:setting');
+            $this->to('doc:setting');
+            return;
         }
 
         $servers = &$data['servers'];
@@ -88,7 +91,8 @@ class Doc extends Admin
         $this->data['current_sid'] = $currentServerID;
 
         if (empty($servers)) {
-            return $this->display($this->data, 'index');
+            $this->display($this->data, 'index');
+            return;
         } else {
             if (isset($servers[$userServerID])) {
                 $currentServerID = $userServerID;
@@ -102,16 +106,25 @@ class Doc extends Admin
             }
 
             $apiServer = &$servers[$currentServerID];
-            $this->initApiData($doc_id, $apiServer['server_name'], $apiServer['api_addr'], $data['doc_token'], false);
-
-            $this->data['api_host'] = $apiServer['api_addr'];
             $this->data['current_sid'] = $currentServerID;
+            $this->data['api_host'] = $apiServer['api_addr'];
+
+            //更新文档数据
+            $updateStatus = $this->initApiData($doc_id, $apiServer['server_name'], $apiServer['api_addr'], $data['doc_token']);
+            if ($updateStatus['status'] != 1) {
+                $data = array_merge($this->data, $updateStatus);
+                $this->display($data, 'index');
+                return;
+            }
+
+
             $docData = Spyc::YAMLLoad($apiServer['cache_file']);
             if (!empty($docData)) {
                 $this->data['data'] = $docData;
             }
 
-            return $this->display($this->data, 'index');
+            $this->display($this->data, 'index');
+            return;
         }
     }
 
@@ -119,7 +132,7 @@ class Doc extends Admin
      * 代码片段
      *
      * @cp_display codeSegment
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function codeSegment()
     {
@@ -151,7 +164,7 @@ class Doc extends Admin
 
     /**
      * @cp_params host, path, doc_id, method=post
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function curlRequest()
     {
@@ -209,7 +222,7 @@ class Doc extends Admin
      * @param string $method
      * @param array $params
      * @return array|mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getApiCurlData($docId, $apiUrl, $method, &$params = array())
     {
@@ -248,7 +261,7 @@ class Doc extends Admin
     /**
      * 代码生成
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function generator()
     {
@@ -274,7 +287,7 @@ class Doc extends Admin
      * 更改API服务器地址
      *
      * @cp_params doc_id, sid=0
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function changeApiServer()
     {
@@ -300,6 +313,7 @@ class Doc extends Admin
             ));
         }
 
+        $this->data['current_sid'] = $sid;
         return $this->dieJson($this->data);
     }
 
@@ -307,7 +321,7 @@ class Doc extends Admin
      * 保存公共参数
      *
      * @cp_params doc_id
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function saveCommonParams()
     {
@@ -346,7 +360,7 @@ class Doc extends Admin
     }
 
     /**
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function setting()
     {
@@ -356,7 +370,7 @@ class Doc extends Admin
 
     /**
      * @cp_params action=add, id
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function action()
     {
@@ -466,10 +480,10 @@ class Doc extends Admin
      * @param string $serverName
      * @param string $apiAddr
      * @param string $docToken
-     * @param bool $display
-     * @throws \Cross\Exception\CoreException
+     * @return array|string
+     * @throws CoreException
      */
-    function initApiData($docId, $serverName = '', $apiAddr = '', $docToken = '', $display = true)
+    function initApiData($docId, $serverName = '', $apiAddr = '', $docToken = '')
     {
         if (empty($serverName)) {
             $serverName = &$_REQUEST['server_name'];
@@ -484,18 +498,15 @@ class Doc extends Admin
         }
 
         if (!$docToken) {
-            $this->dieJson($this->getStatus(100701));
-            return;
+            return $this->getStatus(100701);
         }
 
         if (!$serverName) {
-            $this->dieJson($this->getStatus(100710));
-            return;
+            return $this->getStatus(100710);
         }
 
         if (!$apiAddr) {
-            $this->dieJson($this->getStatus(100711));
-            return;
+            return $this->getStatus(100711);
         }
 
         $requestParams = http_build_query([
@@ -506,19 +517,16 @@ class Doc extends Admin
         $url = $apiAddr . '?' . $requestParams;
         $response = Helper::curlRequest($url);
         if (($responseData = json_decode($response, true)) === false) {
-            $this->dieJson($this->getStatus(100705, $url));
-            return;
+            return $this->getStatus(100705, $url);
         }
 
+        $responseData['api_url'] = $url;
         if (empty($responseData['status']) || $responseData['status'] != 1) {
-            $responseData['api_url'] = $url;
-            $this->dieJson($responseData);
-            return;
+            return $this->getStatus(100705, $responseData);
         }
 
         if (empty($responseData['data'])) {
-            $this->dieJson($this->getStatus(100706, $url));
-            return;
+            return $this->getStatus(100706, $responseData);
         }
 
         $data = &$responseData['data'];
@@ -584,19 +592,17 @@ class Doc extends Admin
         $cache_file = $this->yamlFileCachePath . "/{$cache_file_name}.yaml";
         $ret = file_put_contents($cache_file, $a);
 
-        if ($display) {
-            if (!$ret) {
-                $this->dieJson($this->getStatus(100720, $url));
-            } else {
-                $this->data['data'] = array(
-                    'url' => $url,
-                    'cache_name' => $cache_file_name,
-                    'cache_at' => TIME,
-                    'user' => $this->u,
-                );
-
-                $this->dieJson($this->data);
-            }
+        if (!$ret) {
+            return $this->getStatus(100720, $url);
         }
+
+        $this->data['data'] = array(
+            'url' => $url,
+            'cache_name' => $cache_file_name,
+            'cache_at' => TIME,
+            'user' => $this->u,
+        );
+
+        return $this->result(1, $this->data);
     }
 }

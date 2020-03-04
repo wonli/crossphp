@@ -9,6 +9,7 @@ namespace app\admin\views;
 
 
 use lib\UI\Component\Table;
+use lib\LogStation\LogBase;
 
 /**
  * @author wonli <wonli@live.com>
@@ -163,45 +164,49 @@ class DocView extends AdminView
      */
     function docData()
     {
-        $data = $this->data['data'];
-        if (!empty($data)) {
-            ?>
-            <div class="leftContainer navbar-collapse collapse">
-                <div class="menuContainer">
-                    <?php
-                    foreach ($data as $name => $child) {
-                        $this->renderTpl('doc/nav', [
-                            'name' => $name,
-                            'child' => $child,
-                        ]);
-                    }
-                    ?>
-                </div>
-            </div>
-            <div class="rightContainer">
-                <div class="contentContainer">
-                    <?php
-                    foreach ($data as $name => $child) {
-                        $this->renderTpl('doc/case', [
-                            'name' => $name,
-                            'child' => $child,
-                        ]);
-                    }
-                    ?>
-                </div>
-            </div>
-            <?php
-        } else {
-            ?>
-            <div class="col-md-12">
-                <div class="text-center">
-                    <div class="well-lg none">
-                        暂无数据
-                    </div>
-                </div>
-            </div>
-            <?php
+        if(empty($this->data) || (isset($this->data['status']) && $this->data['status'] != 1)) {
+
+            $message = $this->data['message'];
+            if(is_array($message)) {
+                $message = LogBase::prettyArray('', $message);
+            }
+
+            $title = $this->wrap('div', ['class' => 'h4'])->html('发生错误！' . ' - '. $this->data['status']);
+            $msg = $this->wrap('pre', ['class' => ''])->html($message);
+
+             echo $this->wrap('div', ['class' => 'col-md-8', 'style' => 'margin:0 auto'])
+                ->wrap('div', ['class' => 'alert alert-danger alert-dismissible fade in', 'style' => 'margin-top: 100px'])
+                ->html($title . $msg);
+            return;
         }
+
+        $data = $this->data['data'];
+        ?>
+        <div class="leftContainer navbar-collapse collapse">
+            <div class="menuContainer">
+                <?php
+                foreach ($data as $name => $child) {
+                    $this->renderTpl('doc/nav', [
+                        'name' => $name,
+                        'child' => $child,
+                    ]);
+                }
+                ?>
+            </div>
+        </div>
+        <div class="rightContainer">
+            <div class="contentContainer">
+                <?php
+                foreach ($data as $name => $child) {
+                    $this->renderTpl('doc/case', [
+                        'name' => $name,
+                        'child' => $child,
+                    ]);
+                }
+                ?>
+            </div>
+        </div>
+        <?php
     }
 
     /**
