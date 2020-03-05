@@ -179,14 +179,25 @@
             }
 
             $.post('<?= $this->url('doc:initApiData') ?>', {
-                server_name: server_name,
                 api_addr: api_addr,
                 doc_token: doc_token
             }, function (d) {
+                console.log(d);
                 if (!d.status) {
                     layer.msg('返回数据出错, 请联系技术部');
-                } else if (d.status != 1) {
-                    layer.msg(d.message);
+                } else if (d.status !== 1) {
+                    var msg = '';
+                    if (typeof d.message !== 'string') {
+                        msg = JSON.stringify(d.message, null, 2);
+                    } else {
+                        msg = d.message;
+                    }
+
+                    layer.msg(msg, {
+                        time: 0,
+                        shade: 0.5,
+                        closeBtn: 2
+                    });
                 } else {
                     layer.msg('获取数据成功');
                     vm[0].innerHTML = '更新数据';

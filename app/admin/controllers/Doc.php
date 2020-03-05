@@ -106,17 +106,20 @@ class Doc extends Admin
             }
 
             $apiServer = &$servers[$currentServerID];
+            if (empty($apiServer)) {
+                $this->to('doc');
+            }
+
             $this->data['current_sid'] = $currentServerID;
             $this->data['api_host'] = $apiServer['api_addr'];
 
             //更新文档数据
-            $updateStatus = $this->initApiData($doc_id, $apiServer['server_name'], $apiServer['api_addr'], $data['doc_token']);
+            $updateStatus = $this->getInitApiData($doc_id, $apiServer['api_addr'], $data['doc_token']);
             if ($updateStatus['status'] != 1) {
                 $data = array_merge($this->data, $updateStatus);
                 $this->display($data, 'index');
                 return;
             }
-
 
             $docData = Spyc::YAMLLoad($apiServer['cache_file']);
             if (!empty($docData)) {
@@ -126,6 +129,40 @@ class Doc extends Admin
             $this->display($this->data, 'index');
             return;
         }
+    }
+
+    /**
+     * 初始化api接口数据
+     *
+     * @throws CoreException
+     */
+    function initApiData()
+    {
+        $status = 1;
+        $apiAddr = &$_REQUEST['api_addr'];
+        if (empty($apiAddr)) {
+            $status = 100711;
+        }
+
+        $docToken = &$_REQUEST['doc_token'];
+        if (empty($docToken)) {
+            $status = 100701;
+        }
+
+        if ($status !== 1) {
+            $this->data = $this->getStatus($status);
+            $this->display($this->data, 'JSON');
+            return;
+        }
+
+        $updateStatus = $this->getInitApiData(0, $apiAddr, $docToken);
+        if ($updateStatus['status'] != 1) {
+            $this->display($updateStatus, 'JSON');
+            return;
+        }
+
+        $this->data['data'] = $updateStatus['message'];
+        $this->display($this->data, 'JSON');
     }
 
     /**
@@ -477,38 +514,13 @@ class Doc extends Admin
      * 获取接口文档数据
      *
      * @param int $docId
-     * @param string $serverName
      * @param string $apiAddr
      * @param string $docToken
      * @return array|string
      * @throws CoreException
      */
-    function initApiData($docId, $serverName = '', $apiAddr = '', $docToken = '')
+    protected function getInitApiData($docId, $apiAddr, $docToken)
     {
-        if (empty($serverName)) {
-            $serverName = &$_REQUEST['server_name'];
-        }
-
-        if (empty($apiAddr)) {
-            $apiAddr = &$_REQUEST['api_addr'];
-        }
-
-        if (empty($docToken)) {
-            $docToken = &$_REQUEST['doc_token'];
-        }
-
-        if (!$docToken) {
-            return $this->getStatus(100701);
-        }
-
-        if (!$serverName) {
-            return $this->getStatus(100710);
-        }
-
-        if (!$apiAddr) {
-            return $this->getStatus(100711);
-        }
-
         $requestParams = http_build_query([
             'doc_token' => md5(md5($docToken . TIME) . TIME),
             't' => TIME,
@@ -531,7 +543,12 @@ class Doc extends Admin
 
         $data = &$responseData['data'];
         $cache_file_name = md5($apiAddr);
-        $api_cache = (new ApiDocModule())->getCacheData($docId);
+
+        //获取缓存数据
+        $api_cache = [];
+        if ($docId != 0) {
+            $api_cache = (new ApiDocModule())->getCacheData($docId);
+        }
 
         $result = [];
         foreach ($data as $k => $d) {
@@ -596,13 +613,13 @@ class Doc extends Admin
             return $this->getStatus(100720, $url);
         }
 
-        $this->data['data'] = array(
+        $data = array(
             'url' => $url,
             'cache_name' => $cache_file_name,
             'cache_at' => TIME,
             'user' => $this->u,
         );
 
-        return $this->result(1, $this->data);
+        return $this->result(1, $data);
     }
 }
