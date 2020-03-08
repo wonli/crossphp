@@ -11,6 +11,7 @@
     <link href="<?= $this->res('libs/bootstrap/3.3.7/css/bootstrap.min.css') ?>" rel="stylesheet">
     <link href="<?= $this->res('libs/font-awesome/4.7.0/css/font-awesome.min.css') ?>" rel="stylesheet">
     <link href="<?= $this->res('libs/jquery/jquery.jsonview.min.css') ?>" rel="stylesheet">
+    <link href="<?= $this->res('libs/layer/theme/default/layer.css') ?>" rel="stylesheet">
     <link href="<?= $this->res('libs/highlight/styles/default.css') ?>" rel="stylesheet">
     <link href="<?= $this->res('libs/highlight/styles/github.css') ?>" rel="stylesheet">
     <link href="<?= $this->res('css/doc-default-theme.css') ?>" rel="stylesheet">
@@ -20,6 +21,7 @@
     <script src="<?= $this->res('libs/highlight/highlight.pack.js') ?>"></script>
     <script src="<?= $this->res('libs/bootstrap/3.3.7/js/bootstrap.min.js') ?>"></script>
     <script src="<?= $this->res('libs/bootstrap-validator/0.11.8/validator.min.js') ?>"></script>
+    <script src="<?= $this->res('libs/layer/layer.js') ?>"></script>
 </head>
 <body>
 
@@ -204,6 +206,8 @@
                 method = f[0].method,
                 fParams = f.serializeArray(),
                 params = {};
+
+            layer.load();
             if (fParams.length > 0) {
                 for (var i in fParams) {
                     if (fParams.hasOwnProperty(i)) {
@@ -216,6 +220,7 @@
             var p = {"params": params, "method": method, "api": apiUrl, "path": path, "doc_id": docId};
             $.post('<?= $this->url('doc:codeSegment') ?>', p, function (d) {
                 $('#codeSegmentModal').html(d).modal('toggle');
+                layer.closeAll();
             });
         });
 
