@@ -203,7 +203,7 @@
             var f = $(this).closest('form'),
                 path = f.attr('data-api-path'),
                 apiUrl = f.attr('data-api-url'),
-                method = f[0].method,
+                method = f.attr('data-api-method'),
                 fParams = f.serializeArray(),
                 params = {};
 

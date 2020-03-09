@@ -1,5 +1,7 @@
 body {
     background-color: #fff;
+    height: 100%;
+    box-sizing: content-box;
 }
 
 h3 {
@@ -27,6 +29,69 @@ a:hover, a:focus {
     font-size: 20px;
     color: #007396;
     font-weight: 600;
+}
+
+.curl-container {
+    display: flex;
+}
+
+.response-slide {
+    width: 100px;
+    height: 100%;
+    position: relative;
+}
+
+.response-content {
+    padding: 15px;
+    flex: 1
+}
+
+.response-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fff;
+    width: 100px;
+    height: 100%;
+    border-right: 1px solid #e6e6e6;
+}
+
+.response-menu > ul li {
+    list-style: none;
+}
+
+.menu-box-wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 50px;
+}
+
+.nav-item {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: content-box;
+}
+
+.nav-item.active {
+    border-right: 2px solid #03a9f4;
+}
+
+.nav-item > img {
+    width: 38px;
+    height: 38px;
+}
+
+.response-segment {
+    display: none;
 }
 
 .a-nav-menu {

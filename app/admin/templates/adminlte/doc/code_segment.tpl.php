@@ -100,8 +100,5 @@ if(!empty($data['data'])) {
     $(document).ready(function () {
         $('#curl').JSONView(<?php echo $curlData ?>, {collapsed: false});
         $('#struct').JSONView(<?php echo $structData ?>, {collapsed: false});
-        $('pre code').each(function (i, block) {
-            hljs.highlightBlock(block);
-        });
     });
 </script>

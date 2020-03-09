@@ -25,4 +25,11 @@
 <body>
     <?= empty($content)?'':$content ?>
 </body>
+<script>
+    $(function(){
+        $('pre code').each(function (i, block) {
+            hljs.highlightBlock(block);
+        });
+    })
+</script>
 </html>

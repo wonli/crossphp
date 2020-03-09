@@ -236,12 +236,12 @@ class Doc extends Admin
 
         $apiUrl = rtrim($host, '/') . '/' . ltrim($path, '/');
         $curlData = $this->getApiCurlData($docId, $apiUrl, $this->params['method'], $params);
-        $g = (new Generator())->run($curlData, true);
-        if (!empty($g)) {
-            (new ApiDocModule())->saveCache($docId, $path, $g);
+        $g = (new Generator())->run($curlData);
+        if (!empty($g['struct'])) {
+            (new ApiDocModule())->saveCache($docId, $path, $g['struct']);
         }
 
-        $this->data['data'] = $curlData;
+        $this->data['data'] = $g;
         $this->data['curl_params'] = [
             'url' => $apiUrl,
             'method' => $this->params['method'],

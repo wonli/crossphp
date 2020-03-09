@@ -365,11 +365,6 @@ class DocView extends AdminView
             return '';
         }
 
-        $headerParams = &$this->data['doc']['header_params'];
-        if (empty($headerParams)) {
-            return $this->data['api_host'] . '/' . ltrim($data['requestPath'], '/');
-        }
-
         return $this->url('doc:curlRequest', [
             'ugp' => $data['useGlobalParams'],
             'method' => $data['method'],
