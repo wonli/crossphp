@@ -52,10 +52,10 @@ a:hover, a:focus {
     left: 0;
     right: 0;
     bottom: 0;
-    background: #fff;
+    background: #f0f8ff;
     width: 100px;
     height: 100%;
-    border-right: 1px solid #e6e6e6;
+    border-right: 1px solid #f3f3f3;
 }
 
 .response-menu > ul li {
@@ -67,7 +67,7 @@ a:hover, a:focus {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding-top: 50px;
+    padding:50px 0;
 }
 
 .nav-item {
@@ -340,6 +340,7 @@ a:hover, a:focus {
     cursor: pointer;
     opacity: .6;
     filter: Alpha(opacity=60);
+    z-index: 999;
 }
 
 #goTop > i, #fold > i {
