@@ -21,6 +21,7 @@
     <script src="<?= $this->res('libs/highlight/highlight.pack.js') ?>"></script>
     <script src="<?= $this->res('libs/bootstrap/3.3.7/js/bootstrap.min.js') ?>"></script>
     <script src="<?= $this->res('libs/bootstrap-validator/0.11.8/validator.min.js') ?>"></script>
+    <script src="<?= $this->res('libs/clipboard/clipboard.min.js') ?>"></script>
     <script src="<?= $this->res('libs/layer/layer.js') ?>"></script>
 </head>
 <body>
@@ -186,8 +187,18 @@
             $('#mask').toggle();
         });
 
-        $('.request-action').on('click', function () {
-            $(this).select();
+        var c = new ClipboardJS('.request-action', {
+            text: function (a) {
+                return $(a).attr('value');
+            }
+        });
+
+        c.on('success', function (a) {
+            layer.tips('已复制', a.trigger, {
+                tips: [3, '#666'],
+                time: 1000
+            });
+            a.trigger.select();
         });
 
         $('.change-server-flag').on('click', function () {
