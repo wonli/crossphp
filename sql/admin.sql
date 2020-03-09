@@ -1,13 +1,13 @@
 CREATE TABLE IF NOT EXISTS `cpa_acl_menu` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `pid` int(11) unsigned NOT NULL DEFAULT '0',
-  `type` tinyint(4) unsigned NOT NULL DEFAULT '1' COMMENT '0,系统 1,用户',
-  `name` varchar(128) NOT NULL DEFAULT '',
-  `link` varchar(255) NOT NULL DEFAULT '',
-  `display` tinyint(4) unsigned NOT NULL DEFAULT '1' COMMENT '0,不显示 1,显示',
-  `order` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '排序',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `pid` int(11) UNSIGNED NOT NULL DEFAULT 0,
+  `type` tinyint(4) UNSIGNED NOT NULL DEFAULT 1 COMMENT '0,系统 1,用户',
+  `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `link` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `display` tinyint(4) UNSIGNED NOT NULL DEFAULT 1 COMMENT '0,不显示 1,显示',
+  `order` int(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT '排序',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 DELETE FROM `cpa_acl_menu`;
 INSERT INTO `cpa_acl_menu` (`id`, `pid`, `type`, `name`, `link`, `display`, `order`) VALUES
@@ -45,86 +45,96 @@ INSERT INTO `cpa_acl_menu` (`id`, `pid`, `type`, `name`, `link`, `display`, `ord
 	(33, 24, 1, '', 'initApiData', 0, 0);
 
 CREATE TABLE IF NOT EXISTS `cpa_acl_role` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(50) NOT NULL DEFAULT '' COMMENT '角色名称',
-  `behavior` mediumtext COMMENT '允许的行为',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='角色管理';
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '角色名称',
+  `behavior` mediumtext CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '允许的行为',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '角色管理' ROW_FORMAT = Dynamic;
 
 DELETE FROM `cpa_acl_role`;
 INSERT INTO `cpa_acl_role` (`id`, `name`, `behavior`) VALUES
 	(1, '默认用户', '2,3,4,16,5,17,18,19,23');
 
 CREATE TABLE IF NOT EXISTS `cpa_act_log` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `type` varchar(32) NOT NULL,
-  `controller` varchar(255) NOT NULL,
-  `action` varchar(255) NOT NULL,
-  `params` text,
-  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `ip` varchar(128) NOT NULL DEFAULT '',
-  PRIMARY KEY (`id`),
-  KEY `name` (`name`),
-  KEY `type` (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `type` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `controller` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `action` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `params` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
+  `date` timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0),
+  `ip` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `name`(`name`) USING BTREE,
+  INDEX `type`(`type`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 DELETE FROM `cpa_act_log`;
 
 CREATE TABLE IF NOT EXISTS `cpa_admin` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `nickname` varchar(255) NOT NULL DEFAULT '' COMMENT '对外显示名称',
-  `real_name` varchar(255) NOT NULL DEFAULT '' COMMENT '真实姓名',
-  `avatar` varchar(255) NOT NULL DEFAULT '' COMMENT '头像',
-  `cellphone` varchar(32) NOT NULL DEFAULT '' COMMENT '手机号',
-  `password` varchar(255) NOT NULL,
-  `token` varchar(64) NOT NULL DEFAULT '' COMMENT '授权访问时身份验证令牌',
-  `theme` varchar(32) NOT NULL DEFAULT '' COMMENT '主题风格名称',
-  `salt` char(16) NOT NULL,
-  `usc` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '是否允许解绑密保卡',
-  `last_login_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `last_login_ip` varchar(128) NOT NULL,
-  `rid` int(11) unsigned NOT NULL DEFAULT '1' COMMENT '角色ID',
-  `t` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '0,禁用 1,正常',
-  PRIMARY KEY (`id`),
-  KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `nickname` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '对外显示名称',
+  `real_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '真实姓名',
+  `avatar` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '头像',
+  `cellphone` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '手机号',
+  `password` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `token` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '授权访问时身份验证令牌',
+  `theme` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '主题风格名称',
+  `salt` char(16) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `usc` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '是否允许解绑密保卡',
+  `last_login_date` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+  `last_login_ip` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `rid` int(11) UNSIGNED NOT NULL DEFAULT 1 COMMENT '角色ID',
+  `t` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '0,禁用 1,正常',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `name`(`name`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 DELETE FROM `cpa_admin`;
 INSERT INTO `cpa_admin` (`id`, `name`, `nickname`, `real_name`, `avatar`, `cellphone`, `password`, `token`, `theme`, `salt`, `usc`, `last_login_date`, `last_login_ip`, `rid`, `t`) VALUES
 	(1, 'admin', 'admin', 'admin', '', '13800138000', '5f77498804fde517ba653162490cc4e5ca204779754f974078e35d3407b32bce', 'B16um0dnBF4qqy0DqZ0eBuuyBFA3d080', 'skin-black', '1234567887654321', 1, '2018-01-16 14:59:26', '127.0.0.1', 0, 1);
 
 CREATE TABLE IF NOT EXISTS `cpa_security_card` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `card_data` text NOT NULL,
-  `bind_user` varchar(255) NOT NULL,
-  `ext_time` tinyint(4) NOT NULL DEFAULT '0' COMMENT '已过期,-1',
-  PRIMARY KEY (`id`),
-  KEY `bind_user` (`bind_user`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `card_data` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `bind_user` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `ext_time` tinyint(4) NOT NULL DEFAULT 0 COMMENT '已过期,-1',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `bind_user`(`bind_user`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 DELETE FROM `cpa_security_card`;
 
 CREATE TABLE IF NOT EXISTS `cpa_doc` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL DEFAULT '',
-  `doc_token` varchar(255) NOT NULL DEFAULT '',
-  `servers` text NOT NULL,
-  `global_params` text NOT NULL,
-  `header_params` text NOT NULL,
-  `last_update_admin` varchar(255) NOT NULL DEFAULT '',
-  `last_update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `doc_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `servers` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `global_params` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `header_params` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `last_update_admin` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `last_update_time` timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0),
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 CREATE TABLE IF NOT EXISTS `cpa_doc_data` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `u` varchar(255) NOT NULL DEFAULT '',
-  `doc_id` int(11) NOT NULL DEFAULT '0',
-  `name` varchar(255) NOT NULL DEFAULT '',
-  `value` text NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `u` (`u`),
-  KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+  `u` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `doc_id` int(11) NOT NULL DEFAULT 0,
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
+  `value` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `u`(`u`) USING BTREE,
+  INDEX `name`(`name`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+CREATE TABLE IF NOT EXISTS `cpa_doc_cache`  (
+  `cache_id` int(11) NOT NULL AUTO_INCREMENT,
+  `doc_id` int(11) NULL DEFAULT NULL,
+  `api_path` varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '',
+  `api_response` longtext CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
+  `cache_at` int(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`cache_id`) USING BTREE,
+  UNIQUE INDEX `doc_api_path_uindex`(`doc_id`, `api_path`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
