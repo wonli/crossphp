@@ -182,18 +182,21 @@ class DocView extends AdminView
 
         $data = $this->data['data'];
         ?>
-        <div class="leftContainer navbar-collapse collapse">
-            <div class="menuContainer">
-                <?php
-                foreach ($data as $name => $child) {
-                    $this->renderTpl('doc/nav', [
-                        'name' => $name,
-                        'child' => $child,
-                    ]);
-                }
-                ?>
+        <div id="leftContainerWrap">
+            <div class="leftContainer navbar-collapse collapse">
+                <div class="menuContainer">
+                    <?php
+                    foreach ($data as $name => $child) {
+                        $this->renderTpl('doc/nav', [
+                            'name' => $name,
+                            'child' => $child,
+                        ]);
+                    }
+                    ?>
+                </div>
             </div>
         </div>
+
         <div class="rightContainer">
             <div class="contentContainer">
                 <?php
@@ -219,6 +222,11 @@ class DocView extends AdminView
         <a class="navbar-brand" href="" title="生成时间 <?php echo $data['last_update_time'] ?>">
             <?php echo $data['name'] ?>
         </a>
+        <button id="menuSwitch" type="button" class="menu-switch visible-lg visible-md visible-sm">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
         <?php
     }
 
@@ -383,7 +391,7 @@ class DocView extends AdminView
     {
         ?>
         <div class="cache-panel">
-            <div class="cache-panel-title">响应数据结构</div>
+            <div class="cache-panel-title">Response structural</div>
             <div>
                 <?php
                 if (!empty($data)) {
@@ -392,7 +400,7 @@ class DocView extends AdminView
                         ->wrap('code', ['class' => 'json hljs'])
                         ->html(json_encode(json_decode($data, true), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
                 } else {
-                    echo $this->wrap('div', ['class' => 'cache-tips'])->html( '请求一次之后缓存');
+                    echo $this->wrap('div', ['class' => 'cache-tips'])->html( '第一次请求接口之后生成');
                 }
                 ?>
             </div>

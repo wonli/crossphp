@@ -177,11 +177,7 @@ $formFields = &$data['params'];
     </div>
 
     <div class="cache-container navbar-collapse collapse">
-        <?php
-        if (!empty($data['apiCache'])) {
-            echo $this->cacheData($data['apiCache']);
-        }
-        ?>
+        <?= $this->cacheData($data['apiCache']) ?>
     </div>
 </div>
 

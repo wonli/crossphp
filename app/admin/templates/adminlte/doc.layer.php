@@ -183,8 +183,10 @@
         }
 
         $('#collapseBtn').on('click', function () {
-            $('.leftContainer').toggle();
+            $('#leftContainerWrap').show();
             $('#mask').toggle();
+
+            $('.leftContainer').toggle();
         });
 
         var c = new ClipboardJS('.request-action', {
@@ -255,6 +257,10 @@
 
         $('#commonModalSwitch').click(function () {
             $('#commonModal').modal('toggle');
+        });
+
+        $('#menuSwitch').click(function () {
+            $('#leftContainerWrap').toggle();
         });
 
         $('pre code').each(function (i, block) {
