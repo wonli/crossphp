@@ -184,7 +184,7 @@ class DocView extends AdminView
         ?>
         <div id="leftContainerWrap">
             <div class="leftContainer navbar-collapse collapse">
-                <div class="menuContainer">
+                <div class="menuContainer scroll">
                     <?php
                     foreach ($data as $name => $child) {
                         $this->renderTpl('doc/nav', [

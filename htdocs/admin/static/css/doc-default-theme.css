@@ -27,7 +27,7 @@ a:hover, a:focus {
 
 .nav-title {
     font-size: 20px;
-    color: #007396;
+    color: #353535;
     font-weight: 600;
 }
 
@@ -67,7 +67,7 @@ a:hover, a:focus {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding:50px 0;
+    padding: 50px 0;
 }
 
 .nav-item {
@@ -211,7 +211,7 @@ a:hover, a:focus {
     background: #fff;
 }
 
-.menu-switch .icon-bar+.icon-bar {
+.menu-switch .icon-bar + .icon-bar {
     margin-top: 4px;
 }
 
@@ -351,4 +351,21 @@ a:hover, a:focus {
 #fold {
     display: block;
     bottom: 130px;
+}
+
+.scroll {
+
+}
+
+.scroll::-webkit-scrollbar {
+    width: 9px;
+}
+
+.scroll::-webkit-scrollbar-track {
+    box-shadow: none;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+    background: #aaa;
+    border-radius: 5px;
 }
