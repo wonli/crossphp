@@ -413,6 +413,16 @@ use PDO;
     }
 
     /**
+     * 重置属性
+     */
+    function resetProperty()
+    {
+        array_walk(self::$propertyInfo, function ($v, $p) {
+            $this->{$p} = null;
+        });
+    }
+
+    /**
      * 获取数据库表字段
      *
      * @param string $alias 别名
