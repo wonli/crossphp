@@ -417,6 +417,7 @@ use PDO;
      */
     function resetProperty()
     {
+        $this->index = [];
         array_walk(self::$propertyInfo, function ($v, $p) {
             $this->{$p} = null;
         });
