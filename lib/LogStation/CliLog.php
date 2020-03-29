@@ -18,6 +18,7 @@ class CliLog extends LogBase
 {
     protected $t = 'cliLog';
     protected $defaultLogData = '';
+    protected static $lineSeparator = '';
 
     /**
      * CliLog constructor.
@@ -43,6 +44,6 @@ class CliLog extends LogBase
         $this->addToLog($e, $log);
         $log = $this->getLogContent();
 
-        return fputs(STDOUT, sprintf('(%s)%s' . PHP_EOL, $this->t, $log));
+        return fputs(STDOUT, sprintf('(%s) %s' . PHP_EOL, $this->t, $log));
     }
 }

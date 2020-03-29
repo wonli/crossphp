@@ -73,6 +73,18 @@ abstract class LogBase implements ILog
     abstract function write($e, $log = '');
 
     /**
+     * 格式化日志输出
+     *
+     * @param string $format
+     * @param mixed ...$args
+     */
+    function writef($format, ...$args)
+    {
+        $msg = sprintf($format, ...$args);
+        $this->write($msg);
+    }
+
+    /**
      * stack
      *
      * @param string $tag
@@ -87,6 +99,20 @@ abstract class LogBase implements ILog
 
         $this->stack[] = self::prettyArray($tag, $data);
         return $this;
+    }
+
+    /**
+     * @see addToLog
+     *
+     * @param string $tag
+     * @param string $format
+     * @param mixed ...$args
+     * @return $this
+     */
+    function addToLogf($tag, $format, ...$args)
+    {
+        $data = sprintf($format, ...$args);
+        return $this->addToLog($tag, [$data]);
     }
 
     /**
