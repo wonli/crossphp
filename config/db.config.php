@@ -25,8 +25,16 @@ $redis_link = array(
 $db = $mysql_link;
 $db['name'] = 'test';
 
-return array(
-    'mysql' => array(
+#redis
+$redis = $redis_link;
+$redis['db'] = 1;
+
+return [
+    'mysql' => [
         'db' => $db,
-    )
-);
+    ],
+
+    'redis' => [
+        'cache' => $redis
+    ],
+];
