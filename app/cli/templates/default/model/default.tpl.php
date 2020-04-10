@@ -177,6 +177,29 @@ use PDO;
     }
 
     /**
+     * 更新或添加（必须要有唯一索引）
+     *
+     * @param string $updateField 待更新字段
+     * @param string $value 值
+     * @return bool
+     * @throws CoreException
+     */
+    function updateOrAdd($updateField = null, $value = null)
+    {
+        $data = $this->getModifiedData();
+        if (null === $updateField) {
+            $updateField = $this->modelInfo['primary_key'];
+        }
+
+        if (null === $value) {
+            $value = $this->modelInfo['primary_key'];
+        }
+
+        return $this->db()->insert($this->getTable(false), $data)
+            ->on("DUPLICATE KEY UPDATE {$updateField}={$value}")->stmtExecute();
+    }
+
+    /**
      * 删除
      *
      * @param array $condition
