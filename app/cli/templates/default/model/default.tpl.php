@@ -189,14 +189,13 @@ use PDO;
         $data = $this->getModifiedData();
         if (null === $updateField) {
             $updateField = $this->modelInfo['primary_key'];
-        }
-
-        if (null === $value) {
             $value = $this->modelInfo['primary_key'];
+        } elseif (null === $value && (null !== $this->{$updateField})) {
+            $value = sprintf("'%s'", $this->{$updateField});
         }
 
         return $this->db()->insert($this->getTable(false), $data)
-            ->on("DUPLICATE KEY UPDATE {$updateField}={$value}")->stmtExecute();
+            ->on("DUPLICATE KEY UPDATE `{$updateField}`=$value")->stmtExecute();
     }
 
     /**
