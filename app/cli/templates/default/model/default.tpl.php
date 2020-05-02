@@ -230,6 +230,10 @@ use PDO;
      */
     function getAll($where = array(), $fields = '*', $order = null, $group_by = null, $limit = null)
     {
+        if (empty($where)) {
+            $where = $this->getDefaultCondition();
+        }
+
         return $this->db()->getAll($this->getTable(), $fields, $where, $order, $group_by, $limit);
     }
 
