@@ -8,6 +8,8 @@
 namespace app\admin\views;
 
 
+use Cross\Exception\CoreException;
+
 use lib\UI\Component\Table;
 use lib\LogStation\LogBase;
 
@@ -365,12 +367,17 @@ class DocView extends AdminView
      *
      * @param array $data
      * @return string
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getApiActionUrl($data)
     {
         if (empty($data)) {
             return '';
+        }
+
+        $headerParams = &$this->data['doc']['header_params'];
+        if (empty($headerParams)) {
+            return $this->data['api_host'] . '/' . ltrim($data['requestPath'], '/');
         }
 
         return $this->url('doc:curlRequest', [
@@ -380,6 +387,22 @@ class DocView extends AdminView
             'host' => urlencode($this->data['api_host']),
             'path' => urlencode($data['requestPath'])
         ]);
+    }
+
+    /**
+     * 获取接口请求地址
+     *
+     * @param array $data
+     * @return string
+     */
+    function getApiActionMethod( $data )
+    {
+        $headerParams = &$this->data['doc']['header_params'];
+        if (empty($headerParams)) {
+            return $data['method'];
+        }
+
+        return 'POST';
     }
 
     /**

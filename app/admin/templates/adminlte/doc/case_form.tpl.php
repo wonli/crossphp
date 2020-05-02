@@ -15,7 +15,7 @@ $formFields = &$data['params'];
     <div class="form-container-wrap">
         <div class="form-container">
             <form class="form-inline" data-toggle="validator" role="form" target="_blank"
-                  method="post"
+                  method="<?= $this->getApiActionMethod($data) ?>"
                   data-api-method="<?= $data['method'] ?>"
                   data-api-path="<?= $action ?>"
                   data-api-url="<?= $apiUrl ?>"
