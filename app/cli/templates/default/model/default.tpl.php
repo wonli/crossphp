@@ -179,23 +179,26 @@ use PDO;
     /**
      * 更新或添加（必须要有唯一索引）
      *
-     * @param string $updateField 待更新字段
-     * @param string $value 值
      * @return bool
      * @throws CoreException
      */
-    function updateOrAdd($updateField = null, $value = null)
+    function updateOrAdd()
     {
         $data = $this->getModifiedData();
-        if (null === $updateField) {
-            $updateField = $this->modelInfo['primary_key'];
-            $value = $this->modelInfo['primary_key'];
-        } elseif (null === $value && (null !== $this->{$updateField})) {
-            $value = sprintf("'%s'", $this->{$updateField});
+        if (empty($data)) {
+            $pk = $this->modelInfo['primary_key'];
+            $dup = "`{$pk}`={$pk}";
+        } else {
+            $dup = [];
+            foreach ($data as $k => $v) {
+                $dup[] = sprintf("{$k}='%s'", $v);
+            }
+
+            $dup = implode(',', $dup);
         }
 
         return $this->db()->insert($this->getTable(false), $data)
-            ->on("DUPLICATE KEY UPDATE `{$updateField}`=$value")->stmtExecute();
+            ->on("DUPLICATE KEY UPDATE {$dup}")->stmtExecute();
     }
 
     /**
