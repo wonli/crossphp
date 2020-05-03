@@ -8,6 +8,8 @@
 $action = &$data['requestPath'];
 $apiUrl = $this->data['api_host'] . $action;
 
+$useGlobalParams = &$data['useGlobalParams'];
+
 $list_container_id = $data['class'] . '_' . $data['action'];
 $formFields = &$data['params'];
 ?>
@@ -134,18 +136,18 @@ $formFields = &$data['params'];
                                                         <div class="form-group col-lg-12">
                                                             <?= $input ?>
                                                             <span class="hidden-xs">
-                                                    <?= $input_addition_html ?>
-                                                </span>
+                                                                <?= $input_addition_html ?>
+                                                            </span>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="form-control-static">
-                                                <span class="visible-xs">
-                                                    <?= $input_addition_html ?>
-                                                </span>
+                                                            <span class="visible-xs">
+                                                                <?= $input_addition_html ?>
+                                                            </span>
                                                             <span class="hidden-xs">
-                                                    <?= $field['label'] ?>
-                                                </span>
+                                                                <?= $field['label'] ?>
+                                                            </span>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -154,7 +156,9 @@ $formFields = &$data['params'];
                                         }
 
                                         //公共参数表单
-                                        $this->globalParams();
+                                        if ($useGlobalParams) {
+                                            $this->globalParams();
+                                        }
                                         ?>
                                         </tbody>
                                     </table>

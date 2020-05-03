@@ -299,11 +299,11 @@ abstract class Api extends Controller
     }
 
     /**
-     * @see parent::display()
-     *
      * @param null $data
      * @param null $method
      * @param int $http_response_status
+     * @see parent::display()
+     *
      */
     function display($data = null, $method = null, $http_response_status = 200)
     {
@@ -398,10 +398,11 @@ abstract class Api extends Controller
             }
 
             //公共参数是否生效
-            $classAnnotate['global_params'] = true;
             $enable = array('enable' => true, 'true' => true, 'yes' => true, '1' => true);
             if (isset($classAnnotate['global_params'])) {
                 $classAnnotate['global_params'] = isset($enable[$classAnnotate['global_params']]) ? true : false;
+            } else {
+                $classAnnotate['global_params'] = true;
             }
 
             $methodAnnotate = [];
@@ -419,9 +420,10 @@ abstract class Api extends Controller
                     }
 
                     $annotate = $ANNOTATE->parse($comment);
-                    $annotate['global_params'] = &$classAnnotate['global_params'];
-                    if (!empty($annotate['global_params'])) {
+                    if (isset($annotate['global_params'])) {
                         $annotate['global_params'] = isset($enable[$annotate['global_params']]) ? true : false;
+                    } else {
+                        $annotate['global_params'] = &$classAnnotate['global_params'];
                     }
 
                     $methodAnnotate[$method->name] = $annotate;
