@@ -95,7 +95,7 @@ class Model extends Cli
     }
 
     /**
-     * @see index
+     * 生成model类
      *
      * @param array $config
      * @throws CoreException
@@ -114,15 +114,15 @@ class Model extends Cli
                 return;
             }
 
-            if(empty($config['namespace'])) {
+            if (empty($config['namespace'])) {
                 $this->consoleMsg('请指定类的命名空间');
                 return;
             }
 
             $this->namespacePrefix = str_replace('/', '\\', $config['namespace']);
             if (!empty($config['models'])) {
-                foreach ($config['models'] as $modelName => $databaseTableName) {
-                    $this->genClass($databaseTableName, $modelName, $db, $config['type']);
+                foreach ($config['models'] as $modelName => $tableNameConfig) {
+                    $this->genClass($tableNameConfig, $modelName, $db, $config['type']);
                 }
             }
         }
@@ -131,14 +131,14 @@ class Model extends Cli
     /**
      * 生成类
      *
-     * @param string $databaseTableName
+     * @param string $tableNameConfig
      * @param string $modelName
      * @param string $db
      * @param string $propertyType 生成类的类型
      * @param array $tableConfig
      * @throws CoreException
      */
-    private function genClass($databaseTableName, $modelName, $db = '', $propertyType = 'class', $tableConfig = array())
+    private function genClass($tableNameConfig, $modelName, $db = '', $propertyType = 'class', $tableConfig = array())
     {
         if (empty($db)) {
             $key = ':';
@@ -181,8 +181,47 @@ class Model extends Cli
         }
 
         try {
+            if (is_array($tableNameConfig)) {
+                $method = &$tableNameConfig['method'];
+                if (null === $method) {
+                    $method = 'hash';
+                }
 
-            $mateData = $M->link->getMetaData($M->getPrefix($databaseTableName));
+                $field = &$tableNameConfig['field'];
+                if (null === $field) {
+                    throw new CoreException('请指定分表字段: field');
+                }
+
+                $prefix = &$tableNameConfig['prefix'];
+                if (null === $prefix) {
+                    throw new CoreException('请指定分表前缀: prefix');
+                }
+
+                $number = &$tableNameConfig['number'];
+                if (null === $number) {
+                    $number = 32;
+                } elseif (!is_numeric($number) || $number > 2048) {
+                    throw new CoreException('分表数量仅支持数字且不能大于2048！');
+                }
+
+                $data['split_info'] = [
+                    'number' => $number,
+                    'method' => $method,
+                    'field' => $field,
+                    'prefix' => $prefix,
+                ];
+                //分表时默认使用第一张表的结构
+                $tableName = $tableNameConfig['prefix'] . '0';
+            } else {
+                $data['split_info'] = [];
+                $tableName = $tableNameConfig;
+            }
+
+            $mateData = $M->link->getMetaData($M->getPrefix($tableName));
+            if (isset($field) && !isset($mateData[$field])) {
+                throw new CoreException('分表字段不存在: ' . $field);
+            }
+
             $primaryKey = &$tableConfig['primary_key'];
             if (empty($primaryKey)) {
                 foreach ($mateData as $key => $value) {
@@ -193,14 +232,17 @@ class Model extends Cli
                 }
             }
 
-            $data['link_name'] = $linkName;
-            $data['link_type'] = $linkType;
-            $data['mate_data'] = $mateData;
-            $data['primary_key'] = $primaryKey;
-            $data['database_table_name'] = $databaseTableName;
-            $data['namespace'] = $namespace;
             $data['type'] = $propertyType;
             $data['name'] = $modelName;
+            $data['mate_data'] = $mateData;
+            $data['namespace'] = $namespace;
+            $data['model_info'] = [
+                'mode' => $linkType . ':' . $linkName,
+                'table' => $tableName,
+                'primary_key' => $primaryKey,
+                'link_type' => $linkType,
+                'link_name' => $linkName,
+            ];
 
             $ret = $this->view->genClass($data);
             if (false === $ret) {

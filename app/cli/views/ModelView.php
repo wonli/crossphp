@@ -58,6 +58,27 @@ class ModelView extends CliView
     }
 
     /**
+     * 生成类名
+     *
+     * @param string $name
+     * @param string $type
+     */
+    protected function makeObjectName($name, $type)
+    {
+        $objs = [];
+        if ($type == 'class') {
+            $objs[] = 'use Cross\Model\SQLModel;';
+            $objs[] = PHP_EOL;
+            $className = sprintf('%s %s extends SQLModel' . PHP_EOL, $type, $name);
+        } else {
+            $className = sprintf("%s %s" . PHP_EOL, $type, $name);
+        }
+
+        $objs[] = $className;
+        echo implode(PHP_EOL, $objs);
+    }
+
+    /**
      * 生成属性字段
      *
      * @param $data
@@ -68,9 +89,29 @@ class ModelView extends CliView
         $i = 0;
         foreach ($data as $mate_key => $mate_info) {
             if ($i != 0) {
-                echo '        \'' . $mate_key . '\' => array(' . $this->fieldsConfig($mate_info) . '),' . PHP_EOL;
+                echo '        \'' . $mate_key . '\' => [' . $this->fieldsConfig($mate_info) . '],' . PHP_EOL;
             } else {
-                echo '\'' . $mate_key . '\' => array(' . $this->fieldsConfig($mate_info) . '),' . PHP_EOL;
+                echo '\'' . $mate_key . '\' => [' . $this->fieldsConfig($mate_info) . '],' . PHP_EOL;
+            }
+            $i++;
+        }
+    }
+
+    /**
+     * 生成数组属性
+     *
+     * @param array $data
+     * @throws CoreException
+     */
+    protected function makeArrayProperty(array $data)
+    {
+        $i = 0;
+
+        foreach ($data as $name => $value) {
+            if ($i != 0) {
+                echo '        \'' . $name . '\' => ' . $this->getDefaultValue($value) . ',' . PHP_EOL;
+            } else {
+                echo '\'' . $name . '\' => ' . $this->getDefaultValue($value) . ',' . PHP_EOL;
             }
             $i++;
         }
@@ -83,7 +124,7 @@ class ModelView extends CliView
      * @return string
      * @throws CoreException
      */
-    protected function getFieldsDefaultValue($value)
+    protected function getDefaultValue($value)
     {
         if (is_scalar($value)) {
             if (is_bool($value)) {
@@ -135,7 +176,7 @@ class ModelView extends CliView
                     break;
 
                 case 'default_value':
-                    $v = $this->getFieldsDefaultValue($av);
+                    $v = $this->getDefaultValue($av);
             }
 
             if ($i == 0) {
