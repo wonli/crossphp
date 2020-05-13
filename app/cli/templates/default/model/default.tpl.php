@@ -32,7 +32,7 @@ namespace <?= $data['namespace'] ?>;
      *
      * @var array
      */
-    protected static $fieldsInfo = [
+    protected $fieldsInfo = [
         <?php $this->makeModelInfo($data['mate_data']) ?>
     ];
 
