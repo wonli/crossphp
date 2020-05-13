@@ -35,4 +35,13 @@ namespace <?= $data['namespace'] ?>;
     protected static $fieldsInfo = [
         <?php $this->makeModelInfo($data['mate_data']) ?>
     ];
+
+    /**
+     * ⚠️以上代码是自动生的，任何修改都将被覆盖
+     * ⚠️请在此成员变量之后编写业务代码
+     * ⚠️请不要修改或使用此成员变量
+     *
+     * @var mixed
+     */
+    private $autoGenCodeFlag;
 }

@@ -4,12 +4,13 @@ namespace app\cli\views;
 
 use Cross\Exception\CoreException;
 use Cross\Core\Helper;
+use Cross\MVC\View;
 
 /**
  * Class PropertyView
  * @package app\cli\views
  */
-class ModelView extends CliView
+class ModelView extends View
 {
     /**
      * 单个类生成
@@ -22,9 +23,19 @@ class ModelView extends CliView
         $content = $this->obRenderTpl('model/default', $data);
         $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $data['namespace']);
         $classSavePath = PROJECT_REAL_PATH . trim($namespacePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $classAbsoluteFile = $classSavePath . $data['name'] . '.php';
+        if (file_exists($classAbsoluteFile)) {
+            //处理用户自定义代码
+            $classContent = file_get_contents($classAbsoluteFile);
+            preg_match("/.*autoGenCodeFlag;(\n|\r\n)(.*)}/s", $classContent, $matches);
+            $userCodeSegment = &$matches[2];
+            if (!empty($userCodeSegment)) {
+                $content = preg_replace("/(.*autoGenCodeFlag;(\n|\r\n).*?)/s", "$1{$userCodeSegment}", $content);
+            }
+        }
 
         Helper::createFolders($classSavePath);
-        return file_put_contents($classSavePath . "{$data['name']}.php", $content);
+        return file_put_contents($classAbsoluteFile, $content);
     }
 
     /**
