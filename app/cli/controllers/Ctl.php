@@ -12,6 +12,8 @@ use Cross\Exception\CoreException;
 use Cross\Core\Loader;
 use Cross\Core\Helper;
 use ReflectionClass;
+use Exception;
+
 
 /**
  * Class Ctl
@@ -202,7 +204,7 @@ class Ctl extends Cli
                 $rc = new ReflectionClass($menuClass);
                 $model = $rc->newInstance();
                 $model->saveNavData($menuData);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->consoleMsg("Update nav menu fail!");
             }
         }

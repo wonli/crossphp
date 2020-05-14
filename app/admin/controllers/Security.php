@@ -8,6 +8,9 @@ namespace app\admin\controllers;
 
 use app\admin\supervise\SecurityModule;
 
+use Cross\Exception\CoreException;
+use ReflectionException;
+
 /**
  * 安全管理,密码和密保卡
  * @author wonli <wonli@live.com>
@@ -25,8 +28,8 @@ class Security extends Admin
     /**
      * Security constructor.
      *
-     * @throws \Cross\Exception\CoreException
-     * @throws \ReflectionException
+     * @throws CoreException
+     * @throws ReflectionException
      */
     function __construct()
     {
@@ -37,7 +40,7 @@ class Security extends Admin
     /**
      * 默认跳转到修改密码页面
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function index()
     {
@@ -48,7 +51,7 @@ class Security extends Admin
      * 密保卡
      *
      * @cp_params act=preview
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function securityCard()
     {
@@ -90,7 +93,7 @@ class Security extends Admin
     /**
      * 更改密码
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function changePassword()
     {
@@ -113,7 +116,7 @@ class Security extends Admin
      * 个人信息
      *
      * @cp_params act, theme
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function profile()
     {
@@ -162,7 +165,7 @@ class Security extends Admin
     /**
      * 创建用户存储密保卡的表
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function create()
     {

@@ -10,6 +10,7 @@ use Cross\Exception\CoreException;
 
 use app\admin\supervise\SecurityModule;
 use app\admin\supervise\AclModule;
+use ReflectionException;
 
 /**
  * 权限管理(菜单,角色及用户)
@@ -31,7 +32,7 @@ class Acl extends Admin
      * Acl constructor.
      *
      * @throws CoreException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     function __construct()
     {
@@ -82,7 +83,7 @@ class Acl extends Admin
      * 导航菜单管理
      *
      * @throws CoreException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     function navManager()
     {
@@ -130,7 +131,7 @@ class Acl extends Admin
      * 添加管理角色
      *
      * @throws CoreException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     function addRole()
     {
@@ -178,7 +179,7 @@ class Acl extends Admin
      *
      * @cp_params rid
      * @throws CoreException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     function editRole()
     {

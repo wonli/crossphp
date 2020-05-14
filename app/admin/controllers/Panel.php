@@ -6,6 +6,8 @@
 
 namespace app\admin\controllers;
 
+use Cross\Exception\CoreException;
+
 /**
  * 登录成功后默认跳转到空白的面板
  *
@@ -17,7 +19,7 @@ namespace app\admin\controllers;
 class Panel extends Admin
 {
     /**
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function index()
     {

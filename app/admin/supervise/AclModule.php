@@ -5,6 +5,10 @@
 
 namespace app\admin\supervise;
 
+use Cross\Exception\CoreException;
+use PDO;
+
+use ReflectionException;
 use ReflectionMethod;
 use ReflectionClass;
 
@@ -24,7 +28,7 @@ class AclModule extends AdminModule
      * @param string $link
      * @param int $pid
      * @return array|string
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function addNav($name, $link, $pid = 0)
     {
@@ -46,7 +50,7 @@ class AclModule extends AdminModule
      *
      * @param int $nav_id
      * @return mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function delNav($nav_id)
     {
@@ -57,8 +61,8 @@ class AclModule extends AdminModule
      * 初始化菜单
      *
      * @return mixed
-     * @throws \Cross\Exception\CoreException
-     * @throws \ReflectionException
+     * @throws CoreException
+     * @throws ReflectionException
      */
     function initMenuList()
     {
@@ -158,13 +162,13 @@ class AclModule extends AdminModule
      *
      * @param int $id
      * @return array
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getMenuAllDate($id)
     {
         $data = $this->link->select('*')
             ->from("{$this->t_acl_menu} where id={$id} union all select * from {$this->t_acl_menu} where pid={$id}")
-            ->stmt()->fetchAll(\PDO::FETCH_ASSOC);
+            ->stmt()->fetchAll(PDO::FETCH_ASSOC);
 
         $main = $child = array();
         if (!empty($data)) {
@@ -189,7 +193,7 @@ class AclModule extends AdminModule
      *
      * @param int $pid
      * @return mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getChildMenuData($pid)
     {
@@ -203,7 +207,7 @@ class AclModule extends AdminModule
      *
      * @param array $menus
      * @return bool
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function saveNav(array $menus)
     {
@@ -235,7 +239,7 @@ class AclModule extends AdminModule
      *
      * @param array $data
      * @return bool|mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function saveNavData(array $data)
     {
@@ -269,8 +273,8 @@ class AclModule extends AdminModule
      * 返回菜单列表
      *
      * @return array
-     * @throws \Cross\Exception\CoreException
-     * @throws \ReflectionException
+     * @throws CoreException
+     * @throws ReflectionException
      */
     function getMenu()
     {
@@ -294,7 +298,7 @@ class AclModule extends AdminModule
      *
      * @param $nav_menu
      * @return mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getNavChildMenu($nav_menu)
     {
@@ -319,8 +323,8 @@ class AclModule extends AdminModule
     /**
      * 从控制器中初始化菜单数据
      *
-     * @throws \Cross\Exception\CoreException
-     * @throws \ReflectionException
+     * @throws CoreException
+     * @throws ReflectionException
      */
     function initMenu4controllers()
     {
@@ -336,7 +340,7 @@ class AclModule extends AdminModule
      * 菜单修改(批量更新导航菜单)
      *
      * @param array $menu
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function saveMenu(array $menu)
     {
@@ -399,7 +403,7 @@ class AclModule extends AdminModule
      * @param string $class
      * @param string $method
      * @param array $menu_data
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function addClassMethodMenu($class, $method, &$menu_data = array())
     {
@@ -424,7 +428,7 @@ class AclModule extends AdminModule
      *
      * @param array $data
      * @return bool
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function addAclMenuFunction(&$data)
     {
@@ -446,7 +450,7 @@ class AclModule extends AdminModule
      * 角色列表
      *
      * @return mixed 角色列表
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getRoleList()
     {
@@ -458,7 +462,7 @@ class AclModule extends AdminModule
      *
      * @param array|string $condition
      * @return mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getRoleInfo($condition)
     {
@@ -470,7 +474,7 @@ class AclModule extends AdminModule
      *
      * @param int $rid
      * @return bool
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function delRole($rid)
     {
@@ -483,7 +487,7 @@ class AclModule extends AdminModule
      * @param string $menu_name
      * @param array $data
      * @return array|string
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function saveRoleMenu($menu_name, $data)
     {
@@ -517,7 +521,7 @@ class AclModule extends AdminModule
      * @param string $menu_name
      * @param array $data
      * @return array|string
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function editRoleMenu($rid, $menu_name, $data)
     {
@@ -551,7 +555,7 @@ class AclModule extends AdminModule
      *
      * @param int $id
      * @return mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getMenuInfo($id)
     {
@@ -563,7 +567,7 @@ class AclModule extends AdminModule
      *
      * @param null $pid
      * @return mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getMenuList($pid = null)
     {
@@ -580,8 +584,8 @@ class AclModule extends AdminModule
      *
      * @param array $un_save_menu
      * @return mixed
-     * @throws \Cross\Exception\CoreException
-     * @throws \ReflectionException
+     * @throws CoreException
+     * @throws ReflectionException
      */
     function getNavList(&$un_save_menu = array())
     {
@@ -609,7 +613,7 @@ class AclModule extends AdminModule
      *
      * @param int $pid
      * @return mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getChildMenu($pid)
     {
@@ -622,7 +626,7 @@ class AclModule extends AdminModule
      * @param array|string $condition
      * @param array|string $order
      * @return array
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getMenuByCondition($condition, $order = '`order` ASC')
     {
@@ -639,7 +643,7 @@ class AclModule extends AdminModule
      *
      * @param $condition
      * @return bool
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     private function delNavByCondition($condition)
     {
@@ -651,7 +655,7 @@ class AclModule extends AdminModule
      *
      * @param bool $hashMap
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function scanControllers($hashMap = false)
     {

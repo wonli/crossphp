@@ -7,6 +7,7 @@
 namespace app\admin\supervise;
 
 use Cross\Core\Helper;
+use Cross\Exception\CoreException;
 use Exception;
 
 /**
@@ -31,7 +32,7 @@ class AdminUserModule extends AdminModule
      * @param string $code_location
      * @param string $code_value
      * @return array|string
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function checkAdmin($username, $password, $code_location = '', $code_value = '')
     {
@@ -92,7 +93,7 @@ class AdminUserModule extends AdminModule
      * 管理员列表
      *
      * @return mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getAdminUserList()
     {
@@ -105,7 +106,7 @@ class AdminUserModule extends AdminModule
      *
      * @param $data
      * @return bool
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function addAdmin($data)
     {
@@ -133,7 +134,7 @@ class AdminUserModule extends AdminModule
      *
      * @param $condition
      * @return mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getAdminInfo($condition)
     {
@@ -145,7 +146,7 @@ class AdminUserModule extends AdminModule
      *
      * @param $condition
      * @return mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function del($condition)
     {
@@ -163,7 +164,7 @@ class AdminUserModule extends AdminModule
      * @param int $id
      * @param array $data
      * @return array|string
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function update($id, $data)
     {
@@ -200,7 +201,7 @@ class AdminUserModule extends AdminModule
      * @param string $name
      * @param string|array $params
      * @param string $type
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function updateActLog($name, $params, $type = 'post')
     {
@@ -241,7 +242,7 @@ class AdminUserModule extends AdminModule
      * @param string $name
      * @param string $pwd
      * @return bool
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function checkPassword($name, $pwd)
     {
@@ -255,7 +256,7 @@ class AdminUserModule extends AdminModule
      * @param string $name
      * @param string $pwd
      * @return array|string
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function updatePassword($name, $pwd)
     {

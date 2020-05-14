@@ -6,6 +6,7 @@
 
 namespace lib\UI\Component;
 
+use Cross\Exception\CoreException;
 use Cross\Lib\Document\HTML;
 use lib\UI\UI;
 use Closure;
@@ -239,7 +240,7 @@ class Table extends UI
      * 生成表格
      *
      * @return mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function render()
     {
@@ -344,7 +345,7 @@ class Table extends UI
      * 生成表单体
      *
      * @return string
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     private function makeTableBody()
     {

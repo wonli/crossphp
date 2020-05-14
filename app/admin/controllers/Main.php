@@ -8,6 +8,7 @@ namespace app\admin\controllers;
 
 use app\admin\supervise\AdminUserModule;
 use app\admin\supervise\SecurityModule;
+use Cross\Exception\CoreException;
 use Cross\MVC\Controller;
 
 /**
@@ -32,7 +33,7 @@ class Main extends Controller
 
     /**
      * 设置layer
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function __construct()
     {
@@ -48,7 +49,7 @@ class Main extends Controller
     /**
      * 登录入口
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function login()
     {
@@ -75,7 +76,7 @@ class Main extends Controller
     /**
      * 退出登录
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function logout()
     {

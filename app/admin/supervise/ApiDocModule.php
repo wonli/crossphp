@@ -7,7 +7,9 @@
 
 namespace app\admin\supervise;
 
+use Cross\Exception\CoreException;
 use Cross\Core\Helper;
+use PDO;
 
 /**
  * @author wonli <wonli@live.com>
@@ -26,7 +28,7 @@ class ApiDocModule extends AdminModule
      *
      * @param int $id
      * @return mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function get($id)
     {
@@ -62,7 +64,7 @@ class ApiDocModule extends AdminModule
      *
      * @param array $data
      * @return bool|mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function add($data = array())
     {
@@ -75,7 +77,7 @@ class ApiDocModule extends AdminModule
      * @param int $id
      * @param array $data
      * @return bool
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function update($id, $data)
     {
@@ -87,7 +89,7 @@ class ApiDocModule extends AdminModule
     /**
      * 获取所有数据
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getAll()
     {
@@ -123,7 +125,7 @@ class ApiDocModule extends AdminModule
      * 删除
      *
      * @param int $id
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function del($id)
     {
@@ -153,7 +155,7 @@ class ApiDocModule extends AdminModule
      * @param string $u
      * @param int $doc_id
      * @return mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getAllUserData($u, $doc_id)
     {
@@ -180,7 +182,7 @@ class ApiDocModule extends AdminModule
      * @param int $doc_id
      * @param string $name
      * @return bool|array
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getUserData($u, $doc_id, $name)
     {
@@ -205,7 +207,7 @@ class ApiDocModule extends AdminModule
      * @param string $name
      * @param array $value
      * @return bool|mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function addUserData($u, $doc_id, $name, array $value)
     {
@@ -226,7 +228,7 @@ class ApiDocModule extends AdminModule
      * @param string $api_path
      * @param array $struct_data
      * @return bool|mixed
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function saveCache($doc_id, $api_path, array $struct_data)
     {
@@ -254,13 +256,13 @@ class ApiDocModule extends AdminModule
      *
      * @param int $doc_id
      * @return array
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function getCacheData($doc_id)
     {
         $data = $this->link->select('api_path, api_response')
             ->from($this->t_api_doc_cache)->where(['doc_id' => $doc_id])
-            ->stmt()->fetchAll(\PDO::FETCH_GROUP|\PDO::FETCH_KEY_PAIR);
+            ->stmt()->fetchAll(PDO::FETCH_GROUP| PDO::FETCH_KEY_PAIR);
 
         return $data;
     }
@@ -271,7 +273,7 @@ class ApiDocModule extends AdminModule
      * @param int $id
      * @param array $data
      * @return bool
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function updateUserData($id, array $data)
     {

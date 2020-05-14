@@ -6,6 +6,7 @@
 
 namespace app\admin\views;
 
+use Cross\Exception\CoreException;
 use Cross\MVC\View;
 
 /**
@@ -31,7 +32,7 @@ class AdminView extends View
      *
      * @param $code
      * @param null $tpl
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function notice($code, $tpl = null)
     {
@@ -131,7 +132,7 @@ class AdminView extends View
      *
      * @param string $controller_menu_name
      * @param string $action_menu_name
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function renderNavMenu(&$controller_menu_name = '', &$action_menu_name = '')
     {
@@ -200,7 +201,7 @@ class AdminView extends View
      * @param string $params
      * @param string $link_text
      * @param string $confirm_title
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function confirmUrl($controller, $params, $link_text, $confirm_title = '确定执行该操作吗?')
     {

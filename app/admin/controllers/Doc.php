@@ -7,6 +7,7 @@
 
 namespace app\admin\controllers;
 
+use ReflectionException;
 use Cross\Exception\CoreException;
 use Cross\Core\Helper;
 
@@ -16,6 +17,7 @@ use app\admin\supervise\CodeSegment\Generator;
 use app\admin\views\DocView;
 
 use lib\Spyc;
+
 
 /**
  * Class Doc
@@ -49,7 +51,7 @@ class Doc extends Admin
      * Doc constructor.
      *
      * @throws CoreException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     function __construct()
     {

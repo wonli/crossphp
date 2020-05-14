@@ -5,11 +5,13 @@
 
 namespace app\admin\controllers;
 
+use Cross\Exception\CoreException;
 use Cross\MVC\Controller;
 
 use app\admin\supervise\AdminUserModule;
 use app\admin\supervise\AclModule;
 use app\admin\views\AdminView;
+use ReflectionException;
 
 /**
  * 管理模块控制器基类(导航菜单及权限验证)
@@ -65,8 +67,8 @@ abstract class Admin extends Controller
     /**
      * Admin constructor.
      *
-     * @throws \Cross\Exception\CoreException
-     * @throws \ReflectionException
+     * @throws CoreException
+     * @throws ReflectionException
      */
     function __construct()
     {
@@ -191,7 +193,7 @@ abstract class Admin extends Controller
      * @param int $code
      * @param string $msg
      * @return array|string
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     protected function getStatus($code, $msg = '')
     {
@@ -206,7 +208,7 @@ abstract class Admin extends Controller
      *
      * @param int $code
      * @return string
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     protected function getStatusMessage($code)
     {

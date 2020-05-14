@@ -180,7 +180,7 @@ $formFields = &$data['params'];
         </div>
     </div>
 
-    <div class="cache-container navbar-collapse collapse">
+    <div class="visible-lg cache-container">
         <?= $this->cacheData($data['apiCache']) ?>
     </div>
 </div>

@@ -5,13 +5,14 @@
 namespace app\web\controllers;
 
 use Cross\Core\Delegate;
+use Cross\Exception\CoreException;
 
 class Main extends Web
 {
     /**
      * 默认控制器
      *
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
     function index()
     {
