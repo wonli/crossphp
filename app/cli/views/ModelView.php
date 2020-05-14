@@ -58,12 +58,19 @@ class ModelView extends View
     protected function makeModelFields($data)
     {
         $i = 0;
-        foreach ($data as $mate_key => $mate_info) {
+        foreach ($data as $f => $info) {
             if ($i != 0) {
-                echo '    public $' . $mate_key . ' = null;' . PHP_EOL;
+                $space = '    ';
             } else {
-                echo 'public $' . $mate_key . ' = null;' . PHP_EOL;
+                $space = '';
             }
+
+            $fieldsTpl = sprintf('%spublic $%s = null;', $space, $f);
+            if (!empty($info['comment'])) {
+                $fieldsTpl = sprintf('%spublic $%s = null; //%s', $space, $f, $info['comment']);
+            }
+
+            echo $fieldsTpl . PHP_EOL;
             $i++;
         }
     }
@@ -187,6 +194,7 @@ class ModelView extends View
                     break;
 
                 case 'default_value':
+                default:
                     $v = $this->getDefaultValue($av);
             }
 
