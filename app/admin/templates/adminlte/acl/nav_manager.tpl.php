@@ -53,7 +53,7 @@
                         </td>
                         <td style="vertical-align:middle">
                             <?php echo $this->confirmUrl('acl:del', array('id' => $m['id']), '删除') ?>
-                            <a href="<?php echo $this->link('acl:editMenu', array('id' => $m['id'])) ?>">编辑子菜单</a>
+                            <a href="<?php echo $this->url('acl:editMenu', array('id' => $m['id'])) ?>">编辑子菜单</a>
                         </td>
                     </tr>
                 <?php endforeach ?>

@@ -87,7 +87,7 @@ $customMenuNamePrefix = sprintf('customMenu[%s][0]', $menu['id']);
                                         $text = '删除';
                                         $title = '确实要删除吗?';
                                         $class = 'confirm-href-flag';
-                                        $action = $this->link("acl:del", array('id' => $set['id'], 'e' => $menu['id']));
+                                        $action = $this->url("acl:del", array('id' => $set['id'], 'e' => $menu['id']));
                                     }
 
                                     echo $this->a($text, 'javascript:void(0)', array(
