@@ -14,20 +14,21 @@ use Exception;
  *
  * Class Property
  * @package app\cli\controllers
+ * @property ModelView $view
  */
 class Model extends Cli
 {
     /**
      * @var ModelView
      */
-    private $view;
+    protected $view;
 
     /**
      * 命名空间前缀
      *
      * @var string
      */
-    private $namespacePrefix;
+    protected $namespacePrefix;
 
     /**
      * Model constructor.
