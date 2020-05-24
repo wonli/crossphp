@@ -22,8 +22,8 @@
  * 命令行控制
  * 可以通过命令行临时覆盖配置，比如变更父类：extends=className
  */
-return array(
-    'admin' => array(
+return [
+    'admin' => [
         'app' => 'admin',
         'updateNavMenu' => true,
 
@@ -32,8 +32,8 @@ return array(
         'makeViewController' => true,
         'viewExtends' => 'AdminView',
         'makeTpl' => true
-    ),
-    'api' => array(
+    ],
+    'api' => [
         'app' => 'api',
 
         'extends' => 'Api',
@@ -41,8 +41,8 @@ return array(
         'makeViewController' => false,
         'viewExtends' => '',
         'makeTpl' => false
-    ),
-    'web' => array(
+    ],
+    'web' => [
         'app' => 'web',
 
         'extends' => 'Web',
@@ -50,5 +50,5 @@ return array(
         'makeViewController' => true,
         'viewExtends' => 'WebView',
         'makeTpl' => true
-    )
-);
+    ]
+];

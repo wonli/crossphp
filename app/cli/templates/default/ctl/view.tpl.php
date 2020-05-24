@@ -10,7 +10,7 @@ class <?php echo $data['name'] ?> extends <?php echo $data['extends'] . PHP_EOL 
 {
 
     <?php echo $this->makeActionAnnotate() ?>
-    function index($data = array())
+    function index($data = [])
     {
         <?php echo $this->makeActionBody($data['tplName']).PHP_EOL ?>
     }
