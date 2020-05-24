@@ -36,7 +36,7 @@ class AdminView extends View
      */
     function notice($code, $tpl = null)
     {
-        $code_text = $this->parseGetFile('config::notice.config.php');
+        $code_text = $this->parseGetFile('config::status.config.php');
         if (isset($code_text[$code])) {
             $this->text($code_text[$code], $tpl);
         } else {

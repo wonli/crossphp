@@ -47,7 +47,7 @@ return [
         /**
          * 默认调用的控制器和方法
          */
-        '*' => 'Main:index',
+        '*' => 'Main:login',
         /**
          * URL风格配置
          *  1 最短最美观(搭配注释@cp_params使用)

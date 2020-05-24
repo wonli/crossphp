@@ -45,7 +45,7 @@ class Acl extends Admin
      */
     function index()
     {
-        return $this->to("acl:navManager");
+        $this->to("acl:navManager");
     }
 
     /**
@@ -57,7 +57,7 @@ class Acl extends Admin
     function editMenu()
     {
         $id = (int)$this->params['id'];
-        if ($this->is_post()) {
+        if ($this->isPost()) {
             if (!empty($_POST['menu'])) {
                 $this->ACL->saveMenu($_POST['menu']);
             }
@@ -66,17 +66,18 @@ class Acl extends Admin
                 $this->ACL->saveMenu($_POST['customMenu']);
             }
 
-            $this->return_referer();
+            $this->returnReferer();
         } else {
             $menu_list = $this->ACL->getMenuAllDate($id);
             if (false === $menu_list) {
-                return $this->to('acl');
+                $this->to('acl');
+                return;
             }
 
             $this->data['menu_list'] = $menu_list;
         }
 
-        return $this->display($this->data);
+        $this->display($this->data);
     }
 
     /**
@@ -87,7 +88,7 @@ class Acl extends Admin
      */
     function navManager()
     {
-        if ($this->is_post()) {
+        if ($this->isPost()) {
             if (!empty($_POST['addNav'])) {
                 $this->ACL->saveNav($_POST['addNav']);
             }
@@ -96,16 +97,17 @@ class Acl extends Admin
                 $this->ACL->saveNav($_POST['nav']);
             }
 
-            return $this->to('acl:navManager');
+            $this->to('acl:navManager');
+            return;
         }
 
-        $un_save_menu = array();
+        $un_save_menu = [];
         $this->ACL->initMenuList();
 
         $this->data['menu'] = $this->ACL->getNavList($un_save_menu);
         $this->data['un_save_menu'] = $un_save_menu;
 
-        return $this->display($this->data);
+        $this->display($this->data);
     }
 
     /**
@@ -121,10 +123,11 @@ class Acl extends Admin
         }
 
         if (!empty($this->params['e'])) {
-            return $this->to('acl:editMenu', array('id' => (int)$this->params['e']));
+            $this->to('acl:editMenu', array('id' => (int)$this->params['e']));
+            return;
         }
 
-        return $this->to('acl:navManager');
+        $this->to('acl:navManager');
     }
 
     /**
@@ -137,13 +140,14 @@ class Acl extends Admin
     {
         $menu_list = $this->ACL->initMenuList();
 
-        if ($this->is_post()) {
+        if ($this->isPost()) {
             if (!empty($_POST['name']) && !empty($_POST['menu_id'])) {
                 $menu_set = $_POST ['menu_id'];
                 $ret = $this->ACL->saveRoleMenu($_POST['name'], $menu_set);
 
                 if ($ret['status'] == 1) {
-                    return $this->to('acl:roleList');
+                    $this->to('acl:roleList');
+                    return;
                 } else {
                     $data ['status'] = $ret['status'];
                 }
@@ -153,7 +157,7 @@ class Acl extends Admin
         }
 
         $this->data ['menu_list'] = $menu_list;
-        return $this->display($this->data);
+        $this->display($this->data);
     }
 
     /**
@@ -164,14 +168,15 @@ class Acl extends Admin
     function roleList()
     {
         $this->data ['role_list'] = $this->ACL->getRoleList();
-        if ($this->is_post()) {
+        if ($this->isPost()) {
             $ret = $this->ACL->editRoleMenu($_POST['rid'], $_POST['name'], $_POST['menu_id']);
             if ($ret['status'] == 1) {
-                return $this->to("acl:roleList");
+                $this->to("acl:roleList");
             }
         }
 
-        return $this->display($this->data);
+        $this->display($this->data);
+        return;
     }
 
     /**
@@ -184,25 +189,28 @@ class Acl extends Admin
     function editRole()
     {
         if (empty($this->params['rid'])) {
-            return $this->to('acl');
+            $this->to('acl');
+            return;
         }
 
         $rid = (int)$this->params['rid'];
-        $role_info = $this->ACL->getRoleInfo(array('id' => $rid));
+        $role_info = $this->ACL->getRoleInfo(['id' => $rid]);
         if (empty($role_info)) {
-            return $this->to('acl');
+            $this->to('acl');
+            return;
         }
 
-        if ($this->is_post()) {
+        if ($this->isPost()) {
             $this->ACL->editRoleMenu($rid, $_POST['name'], $_POST['menu_id']);
-            return $this->to('acl:editRole', array('rid' => $this->params['rid']));
+            $this->to('acl:editRole', ['rid' => $this->params['rid']]);
+            return;
         }
 
         $menu_list = $this->ACL->initMenuList();
         $this->data['role_info'] = $role_info;
         $this->data['menu_list'] = $menu_list;
 
-        return $this->display($this->data);
+        $this->display($this->data);
     }
 
     /**
@@ -213,14 +221,14 @@ class Acl extends Admin
      */
     function delRole()
     {
-        $is_ajax = $this->is_ajax_request();
+        $is_ajax = $this->isAjax();
         $rid = $is_ajax ? (int)$_GET['rid'] : (int)$this->params['rid'];
 
         $ret = $this->ACL->delRole($rid);
         if ($is_ajax) {
-            return (int)$ret;
+            echo (int)$ret;
         } else {
-            return $this->to('acl:roleList');
+            $this->to('acl:roleList');
         }
     }
 
@@ -234,7 +242,7 @@ class Acl extends Admin
         $this->data ['u'] = $this->ADMIN->getAdminUserList();
         $this->data ['roles'] = $this->ACL->getRoleList();
 
-        if ($this->is_post()) {
+        if ($this->isPost()) {
             $error = 0;
             $a = &$_POST['a'];
             foreach ($a as $k => $v) {
@@ -272,11 +280,12 @@ class Acl extends Admin
             }
 
             if ($error == 0) {
-                return $this->to('acl:user');
+                $this->to('acl:user');
+                return;
             }
         }
 
-        return $this->display($this->data);
+        $this->display($this->data);
     }
 
     /**
@@ -299,7 +308,7 @@ class Acl extends Admin
             $SEC->unBind($user, false);
         }
 
-        return $this->to('acl:user');
+        $this->to('acl:user');
     }
 
     /**
@@ -311,7 +320,7 @@ class Acl extends Admin
     function delUser()
     {
         $uid = (int)$this->params['uid'];
-        $this->ADMIN->del(array('id' => $uid));
-        return $this->to('acl:user');
+        $this->ADMIN->del(['id' => $uid]);
+        $this->to('acl:user');
     }
 }

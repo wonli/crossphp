@@ -6,10 +6,12 @@
 
 namespace app\api\controllers;
 
+use Cross\Exception\CoreException;
 use ReflectionMethod;
 use ReflectionClass;
 
-use Cross\Exception\CoreException;
+use Cross\Exception\FrontException;
+
 use Cross\MVC\Controller;
 use Cross\Core\Annotate;
 
@@ -51,18 +53,11 @@ abstract class Api extends Controller
     protected $version;
 
     /**
-     * 接口数据
-     *
-     * @var array
-     */
-    protected $data = array();
-
-    /**
      * 接口所需参数
      *
      * @var array
      */
-    protected $api_request_params = array();
+    protected $api_request_params = [];
 
     /**
      * 默认请求类型
@@ -76,28 +71,28 @@ abstract class Api extends Controller
      *
      * @var array
      */
-    private $default_data = array('status' => 1, 'message' => '');
+    private $default_data = ['status' => 1, 'message' => ''];
 
     /**
      * 数据容器
      *
      * @var array
      */
-    private $data_container = array();
+    private $data_container = [];
 
     /**
      * 根据输入类型重置数据容器
      *
      * @var array
      */
-    private $input_data_container = array('multi_file' => true, 'file' => true);
+    private $input_data_container = ['multi_file' => true, 'file' => true];
 
     /**
      * 需要强制验证的输入数据
      *
      * @var array
      */
-    private $force_params = array();
+    private $force_params = [];
 
     /**
      * @return mixed
@@ -106,6 +101,9 @@ abstract class Api extends Controller
 
     /**
      * Api constructor.
+     *
+     * @throws FrontException
+     * @throws CoreException
      */
     function __construct()
     {
@@ -180,8 +178,10 @@ abstract class Api extends Controller
      * @param bool $filter_data 是否使用过滤器
      * @param bool $is_force_params 是否强制验证
      * @return string
+     * @throws FrontException
+     * @throws CoreException
      */
-    function getInputData($key, $filter_data = true, $is_force_params = false)
+    function getInputData(string $key, bool $filter_data = true, bool $is_force_params = false)
     {
         $value = '';
         $defaultValue = &$this->data_container[$key];
@@ -193,7 +193,7 @@ abstract class Api extends Controller
             if (!isset($this->data_container[$key]) || '' == $defaultValue) {
                 $this->data['status'] = 200100;
                 $this->data['data']['need_params'] = $key;
-                return $this->display($this->data);
+                $this->display($this->data);
             } elseif ($filter_data) {
                 $value = $this->filterInputData($key, $defaultValue);
             } else {
@@ -215,29 +215,34 @@ abstract class Api extends Controller
      *
      * @param string $key
      * @param string $value
-     * @return int|string
+     * @return string|void
+     * @throws FrontException
+     * @throws CoreException
      */
-    protected function filterInputData($key, $value)
+    protected function filterInputData(string $key, $value)
     {
         switch ($key) {
             case 'channel':
                 if (empty($value)) {
                     $this->data['status'] = 200210;
-                    return $this->display($this->data);
+                    $this->display($this->data);
+                    return;
                 }
                 break;
 
             case 'platform':
                 if (empty($value)) {
                     $this->data['status'] = 200220;
-                    return $this->display($this->data);
+                    $this->display($this->data);
+                    return;
                 }
                 break;
 
             case 'version':
                 if (empty($value)) {
                     $this->data['status'] = 200230;
-                    return $this->display($this->data);
+                    $this->display($this->data);
+                    return;
                 }
                 break;
 
@@ -254,7 +259,7 @@ abstract class Api extends Controller
      * @param string $key
      * @return string
      */
-    function getHeaderData($key)
+    function getHeaderData(string $key)
     {
         $data = $this->request->SERVER('HTTP_' . strtoupper($key));
         if (!$data && function_exists('getallheaders')) {
@@ -272,8 +277,10 @@ abstract class Api extends Controller
      * @param string $filter_name
      * @param bool $is_multi 是否是多文件
      * @return array
+     * @throws FrontException
+     * @throws CoreException
      */
-    function getFileData($key, $filter_name = 'images', &$is_multi = false)
+    function getFileData(string $key, string $filter_name = 'images', bool &$is_multi = false)
     {
         if (!empty($_FILES[$key]) && !empty($_FILES[$key]['name'])) {
             if ($filter_name == 'images') {
@@ -295,44 +302,34 @@ abstract class Api extends Controller
             }
         }
 
-        return array();
+        return [];
     }
 
     /**
-     * @param null $data
-     * @param null $method
-     * @param int $http_response_status
-     * @see parent::display()
+     * 视图
      *
+     * @param null $data
+     * @param string $method
+     * @param int $http_response_status
+     * @throws FrontException
+     * @throws CoreException
+     * @see Controller::display()
      */
-    function display($data = null, $method = null, $http_response_status = 200)
+    protected function display($data = null, string $method = null, int $http_response_status = 200): void
     {
-        $apiData = &$this->default_data;
-        if (is_numeric($data)) {
-            $apiData['status'] = $data;
-        } else if (is_array($data)) {
-            $manualMergeData = true;
-            if (isset($data['data'])) {
-                $manualMergeData = false;
-                $apiData['data'] = &$data['data'];
+        $this->response->setContentType('JSON');
+        $responseData = parent::getResponseData($data, true);
+        if ($responseData['status'] != 1) {
+            $frontException = new FrontException($responseData['message'], $responseData['status']);
+            unset($responseData['message'], $responseData['status']);
+            if (!empty($responseData)) {
+                $frontException->addExtData($responseData);
             }
 
-            foreach ($data as $k => $v) {
-                if (isset($apiData[$k])) {
-                    $apiData[$k] = $v;
-                } elseif ($manualMergeData) {
-                    $apiData['data'][$k] = $v;
-                }
-            }
-        } else {
-            $apiData['message'] = $data;
+            throw $frontException;
         }
 
-        if ($apiData['status'] != 1 && empty($apiData['message'])) {
-            $apiData['message'] = $this->getStatusMessage($apiData['status']);
-        }
-
-        $this->response->setContentType('json')->display(json_encode($apiData));
+        $this->response->display(json_encode($responseData));
     }
 
     /**
@@ -341,7 +338,7 @@ abstract class Api extends Controller
      * @param string $request_type
      * @return mixed
      */
-    private function getDataContainer($request_type)
+    private function getDataContainer(string $request_type)
     {
         switch ($request_type) {
             case 'file':
@@ -378,7 +375,7 @@ abstract class Api extends Controller
      *
      * @return array
      */
-    protected function docApiData()
+    protected function docApiData(): array
     {
         $result = [];
         $ANNOTATE = Annotate::getInstance($this->delegate);
@@ -398,7 +395,7 @@ abstract class Api extends Controller
             }
 
             //公共参数是否生效
-            $enable = array('enable' => true, 'true' => true, 'yes' => true, '1' => true);
+            $enable = ['enable' => true, 'true' => true, 'yes' => true, '1' => true];
             if (isset($classAnnotate['global_params'])) {
                 $classAnnotate['global_params'] = isset($enable[$classAnnotate['global_params']]) ? true : false;
             } else {
@@ -445,37 +442,11 @@ abstract class Api extends Controller
      * @param string $t
      * @return bool
      */
-    private function verifyDocApiToken($token, $t)
+    private function verifyDocApiToken(string $token, $t): bool
     {
         $key = $this->config->get('encrypt', 'doc');
         $localToken = md5(md5($key . $t) . $t);
         return $localToken == $token;
-    }
-
-    /**
-     * 获取消息状态内容
-     *
-     * @param int $status
-     * @return string
-     */
-    private function getStatusMessage($status)
-    {
-        static $notice = null;
-        if ($notice === null) {
-            try {
-                $notice = $this->parseGetFile('config/notice.config.php');
-            } catch (CoreException $e) {
-                $notice = [];
-            }
-        }
-
-        if (isset($notice[$status])) {
-            $message = $notice[$status];
-        } else {
-            $message = '';
-        }
-
-        return $message;
     }
 
     /**
@@ -485,8 +456,10 @@ abstract class Api extends Controller
      * @param string $tmp_file 临时文件路径
      * @param int $size
      * @return mixed
+     * @throws FrontException
+     * @throws CoreException
      */
-    private function checkUploadImage($upload_file_name, $tmp_file, $size = 3000000)
+    private function checkUploadImage(string $upload_file_name, string $tmp_file, int $size = 3000000)
     {
         $allow_image_type = array('jpeg' => 1, 'jpg' => 1, 'png' => 1);
         $origin_name_info = explode('.', $upload_file_name);
@@ -494,7 +467,7 @@ abstract class Api extends Controller
 
         if (!isset($allow_image_type[$origin_name_ext])) {
             $this->data['status'] = 200052;
-            return $this->display($this->data);
+            $this->display($this->data);
         }
 
         $image_info = @getimagesize($tmp_file);
@@ -506,17 +479,17 @@ abstract class Api extends Controller
             //验证图片类型
             if (!isset($allow_image_type[$image_type])) {
                 $this->data['status'] = 200052;
-                return $this->display($this->data);
+                $this->display($this->data);
             }
 
             //验证图片大小
             if ($image_size > $size) {
                 $this->data['status'] = 200051;
-                return $this->display($this->data);
+                $this->display($this->data);
             }
         } else {
             $this->data['status'] = 200050;
-            return $this->display($this->data);
+            $this->display($this->data);
         }
 
         return $origin_name_ext;

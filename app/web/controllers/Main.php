@@ -2,10 +2,11 @@
 /**
  * @author wonli <wonli@live.com>
  */
+
 namespace app\web\controllers;
 
-use Cross\Core\Delegate;
 use Cross\Exception\CoreException;
+use Cross\Core\Delegate;
 
 class Main extends Web
 {
@@ -19,6 +20,6 @@ class Main extends Web
         $this->data ['action'] = __FUNCTION__;
         $this->data ['version'] = Delegate::getVersion();
 
-        return $this->display($this->data);
+        $this->display($this->data);
     }
 }

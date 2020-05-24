@@ -4,7 +4,7 @@
     </div>
 
     <div class="box-body table-responsive">
-        <?= $data->render() ?>
+        <?= $this->table->render() ?>
     </div>
 
 </div>

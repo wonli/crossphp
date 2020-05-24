@@ -60,11 +60,6 @@ abstract class Admin extends Controller
     protected $ADMIN;
 
     /**
-     * @var array
-     */
-    protected $data = array('status' => 1);
-
-    /**
      * Admin constructor.
      *
      * @throws CoreException
@@ -83,7 +78,7 @@ abstract class Admin extends Controller
 
         //保存操作日志
         if ($this->saveActLog) {
-            if ($this->is_post()) {
+            if ($this->isPost()) {
                 $type = 'post';
                 $actParams = $_POST;
             } else {
@@ -91,7 +86,7 @@ abstract class Admin extends Controller
                 $actParams = $this->params;
             }
 
-            if ($this->is_ajax_request()) {
+            if ($this->isAjax()) {
                 $type = $type . '|' . 'ajax';
             }
 
@@ -174,7 +169,7 @@ abstract class Admin extends Controller
             //如果授权__call，所有方法均可访问
             $accept_action = &$all_accept_action[$controller];
             if (!isset($accept_action[$this->action]) && !isset($accept_action['__call'])) {
-                if ($this->is_ajax_request()) {
+                if ($this->isAjax()) {
                     $this->dieJson($this->getStatus(100101));
                     return;
                 } else {
@@ -193,7 +188,6 @@ abstract class Admin extends Controller
      * @param int $code
      * @param string $msg
      * @return array|string
-     * @throws CoreException
      */
     protected function getStatus($code, $msg = '')
     {
@@ -201,25 +195,6 @@ abstract class Admin extends Controller
             $msg = $this->getStatusMessage($code);
         }
         return $this->result($code, $msg);
-    }
-
-    /**
-     * 根据错误码返回错误消息内容
-     *
-     * @param int $code
-     * @return string
-     * @throws CoreException
-     */
-    protected function getStatusMessage($code)
-    {
-        $code_config = $this->parseGetFile('config::notice.config.php');
-        if (isset($code_config[$code])) {
-            $message = $code_config[$code];
-        } else {
-            $message = '未知错误 ' . $code;
-        }
-
-        return $message;
     }
 
     /**

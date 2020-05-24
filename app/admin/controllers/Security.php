@@ -44,7 +44,7 @@ class Security extends Admin
      */
     function index()
     {
-        return $this->to('security:changePassword');
+        $this->to('security:changePassword');
     }
 
     /**
@@ -78,7 +78,8 @@ class Security extends Admin
             if ($actRet['status'] != 1) {
                 $this->data['status'] = $actRet['status'];
             } else {
-                return $this->to('security:securityCard');
+                $this->to('security:securityCard');
+                return;
             }
         }
 
@@ -87,7 +88,7 @@ class Security extends Admin
             $this->data['card'] = $data[1];
         }
 
-        return $this->display($this->data);
+        $this->display($this->data);
     }
 
     /**
@@ -97,7 +98,7 @@ class Security extends Admin
      */
     function changePassword()
     {
-        if ($this->is_post()) {
+        if ($this->isPost()) {
             if ($_POST['np1'] != $_POST['np2']) {
                 $this->data['status'] = 100220;
             } else {
@@ -121,9 +122,10 @@ class Security extends Admin
     function profile()
     {
         $adminInfo = $this->ADMIN->getAdminInfo(array('id' => $this->uid));
-        if ($this->is_post()) {
+        if ($this->isPost()) {
             $this->ADMIN->update($this->uid, $_POST);
-            return $this->to('security:profile');
+            $this->to('security:profile');
+            return;
         }
 
         //判断是否有主题配置
@@ -148,18 +150,20 @@ class Security extends Admin
                         }
                     }
 
-                    return $this->to('security:profile');
+                    $this->to('security:profile');
+                    return;
                     break;
 
                 default:
-                    return $this->to('security:profile');
+                    $this->to('security:profile');
+                    return;
             }
         }
 
         $this->data['themeList'] = $tplThemeList;
         $this->data['hasTheme'] = $hasTheme;
         $this->data['admin'] = $adminInfo;
-        return $this->display($this->data);
+        $this->display($this->data);
     }
 
     /**
@@ -170,6 +174,6 @@ class Security extends Admin
     function create()
     {
         $data = $this->SEC->createTable();
-        return $this->display($data);
+        $this->display($data);
     }
 }

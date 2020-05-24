@@ -13,17 +13,17 @@ abstract class Adapter
     /**
      * @var array
      */
-    protected $struct = array();
+    protected $struct = [];
 
     /**
      * @var array
      */
-    protected $defaultTokens = array(
+    protected $defaultTokens = [
         'float' => 'float',
         'int' => 'int',
         'bool' => 'bool',
         'string' => 'string',
-    );
+    ];
 
     /**
      * Adapter constructor.

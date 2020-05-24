@@ -22,6 +22,11 @@ use lib\LogStation\LogBase;
 class DocView extends AdminView
 {
     /**
+     * @var Table
+     */
+    protected $table;
+
+    /**
      * 文档阅读页
      *
      * @param array $data
@@ -67,7 +72,8 @@ class DocView extends AdminView
         });
 
         $table->setData($data['list']);
-        $this->renderTpl('doc/setting', $table);
+        $this->table = $table;
+        $this->renderTpl('doc/setting');
     }
 
     /**

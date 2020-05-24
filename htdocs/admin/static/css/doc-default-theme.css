@@ -17,12 +17,19 @@ pre > code {
     background-color: #ffffff !important;
 }
 
+.btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:focus {
+    color: #fff;
+    background-color: #1890ff;
+    border-color: #daf5ff;
+}
+
+
 a {
-    color: #09647d;
+    color: #1890ff;
 }
 
 a:hover, a:focus {
-    color: #007396;
+    color: #1890ff;
 }
 
 .nav-title {
@@ -82,7 +89,7 @@ a:hover, a:focus {
 }
 
 .nav-item.active {
-    border-right: 2px solid #03a9f4;
+    border-right: 2px solid #1890ff;
 }
 
 .nav-item > img {
@@ -115,11 +122,11 @@ a:hover, a:focus {
 }
 
 .a-nav-menu.current > a {
-    color: #09647d;
+    color: #1890ff;
 }
 
 .a-nav-menu.current .dot:before {
-    color: #09647d;
+    color: #1890ff;
 }
 
 .navbar {
@@ -261,7 +268,7 @@ a:hover, a:focus {
     z-index: 999;
     overflow-x: hidden;
     border-right: solid #f1f1f1 1px;
-    background: #fcfcfc;
+    background: #fff;
 }
 
 .contentContainer {

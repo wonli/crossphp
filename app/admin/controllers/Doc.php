@@ -306,7 +306,7 @@ class Doc extends Admin
     {
         $data = array();
         $show_input = true;
-        if ($this->is_post()) {
+        if ($this->isPost()) {
             $show_input = false;
             $json = &$_POST['json'];
             if (!empty($json)) {
@@ -332,14 +332,16 @@ class Doc extends Admin
     {
         $doc_id = (int)$this->params['doc_id'];
         if (!$doc_id) {
-            return $this->to('doc:setting');
+            $this->to('doc:setting');
+            return;
         }
 
         $sid = (int)$this->params['sid'];
         $docInfo = $this->ADM->get($doc_id);
         $servers = &$docInfo['servers'];
         if (!isset($servers[$sid])) {
-            return $this->to('doc:setting');
+            $this->to('doc:setting');
+            return;
         }
 
         $valueData = array('sid' => $sid);
@@ -347,13 +349,13 @@ class Doc extends Admin
         if ($data == false) {
             $this->ADM->addUserData($this->u, $doc_id, ApiDocModule::KEY_HOST, $valueData);
         } else {
-            $this->ADM->updateUserData($data['id'], array(
+            $this->ADM->updateUserData($data['id'], [
                 'value' => json_encode($valueData)
-            ));
+            ]);
         }
 
         $this->data['current_sid'] = $sid;
-        return $this->dieJson($this->data);
+        $this->dieJson($this->data);
     }
 
     /**
@@ -366,10 +368,11 @@ class Doc extends Admin
     {
         $doc_id = (int)$this->params['doc_id'];
         if (!$doc_id) {
-            return $this->to('doc:setting');
+            $this->to('doc:setting');
+            return;
         }
 
-        if ($this->is_post()) {
+        if ($this->isPost()) {
             foreach ($_POST as $k => $v) {
                 switch ($k) {
                     case ApiDocModule::KEY_HEADERPARAMS:
@@ -395,7 +398,7 @@ class Doc extends Admin
             $url .= '#!' . $hash;
         }
 
-        return $this->redirect($url);
+        $this->redirect($url);
     }
 
     /**
@@ -413,15 +416,17 @@ class Doc extends Admin
      */
     function action()
     {
-        if ($this->is_post()) {
+        if ($this->isPost()) {
             $siteName = &$_POST['name'];
             $docToken = &$_POST['doc_token'];
             if (!$siteName) {
-                return $this->dieJson($this->getStatus(100703));
+                $this->dieJson($this->getStatus(100703));
+                return;
             }
 
             if (!$docToken) {
-                return $this->dieJson($this->getStatus(100701));
+                $this->dieJson($this->getStatus(100701));
+                return;
             }
 
             $servers = array();
@@ -459,14 +464,14 @@ class Doc extends Admin
                 }
             }
 
-            $saveData = array(
+            $saveData = [
                 'name' => $siteName,
                 'servers' => json_encode($servers),
                 'global_params' => json_encode($global_params),
                 'header_params' => json_encode($header_params),
                 'doc_token' => $docToken,
                 'last_update_admin' => $this->u,
-            );
+            ];
 
             $id = $this->params['id'];
             if (!empty($id)) {
@@ -474,7 +479,8 @@ class Doc extends Admin
             } else {
                 $this->ADM->add($saveData);
             }
-            return $this->to('doc:setting');
+            $this->to('doc:setting');
+            return;
         } else {
             switch ($this->params['action']) {
                 case 'edit':
@@ -483,7 +489,8 @@ class Doc extends Admin
 
                 case 'del':
                     $this->ADM->del($this->params['id']);
-                    return $this->to('doc:setting');
+                    $this->to('doc:setting');
+                    return;
                     break;
 
                 default:
@@ -491,7 +498,7 @@ class Doc extends Admin
             }
         }
 
-        return $this->display($this->data);
+        $this->display($this->data);
     }
 
     /**
@@ -615,12 +622,12 @@ class Doc extends Admin
             return $this->getStatus(100720, $url);
         }
 
-        $data = array(
+        $data = [
             'url' => $url,
             'cache_name' => $cache_file_name,
             'cache_at' => TIME,
-            'user' => $this->u,
-        );
+            'user' => $this->u
+        ];
 
         return $this->result(1, $data);
     }
