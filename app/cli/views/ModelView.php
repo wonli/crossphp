@@ -4,13 +4,12 @@ namespace app\cli\views;
 
 use Cross\Exception\CoreException;
 use Cross\Core\Helper;
-use Cross\MVC\View;
 
 /**
  * Class PropertyView
  * @package app\cli\views
  */
-class ModelView extends View
+class ModelView extends CliView
 {
     /**
      * 单个类生成

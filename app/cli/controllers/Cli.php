@@ -68,7 +68,6 @@ abstract class Cli extends Controller
     function __construct()
     {
         parent::__construct();
-        $this->view = new CliView();
 
         //处理注释配置中的参数
         $this->oriParams = &$this->params;

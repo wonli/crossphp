@@ -19,25 +19,11 @@ use Exception;
 class Model extends Cli
 {
     /**
-     * @var ModelView
-     */
-    protected $view;
-
-    /**
      * 命名空间前缀
      *
      * @var string
      */
     protected $namespacePrefix;
-
-    /**
-     * Model constructor.
-     */
-    function __construct()
-    {
-        parent::__construct();
-        $this->view = new ModelView();
-    }
 
     /**
      * 生成结构体
