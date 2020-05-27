@@ -123,6 +123,14 @@ class Doc extends Admin
                 return;
             }
 
+            $apiServer['cache_name'] = $updateStatus['message']['cache_name'];
+            $apiServer['cache_file'] = $updateStatus['message']['cache_file'];
+            $apiServer['cache_at'] = time();
+            $servers[$currentServerID] = $apiServer;
+            $this->ADM->update($data['id'], [
+                'servers' => json_encode($servers)
+            ]);
+
             $docData = Spyc::YAMLLoad($apiServer['cache_file']);
             if (!empty($docData)) {
                 $this->data['data'] = $docData;
@@ -626,6 +634,7 @@ class Doc extends Admin
             'url' => $url,
             'cache_name' => $cache_file_name,
             'cache_at' => TIME,
+            'cache_file' => $cache_file,
             'user' => $this->u
         ];
 
