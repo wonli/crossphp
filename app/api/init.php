@@ -60,7 +60,7 @@ return [
         /**
          * 服务器是否已经开启rewrite支持
          */
-        'rewrite' => true,
+        'rewrite' => false,
         /**
          * URL参数分割符
          */
