@@ -21,7 +21,14 @@ class ModelView extends CliView
     {
         $content = $this->obRenderTpl('model/default', $data);
         $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $data['namespace']);
-        $classSavePath = PROJECT_REAL_PATH . trim($namespacePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+        $savePath = &$data['model']['path'];
+        if (!empty($savePath)) {
+            $classSavePath = rtrim($savePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        } else {
+            $classSavePath = PROJECT_REAL_PATH . trim($namespacePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        }
+
         $classAbsoluteFile = $classSavePath . $data['name'] . '.php';
         if (file_exists($classAbsoluteFile)) {
             //处理用户自定义代码
@@ -118,15 +125,20 @@ class ModelView extends CliView
      * 生成数组属性
      *
      * @param array $data
+     * @param int $addSpace
      * @throws CoreException
      */
-    protected function makeArrayProperty(array $data)
+    protected function makeArrayProperty(array $data, int $addSpace = 0)
     {
         $i = 0;
+        $space = '';
+        if ($addSpace > 0) {
+            $space = str_pad($space, $addSpace, ' ');
+        }
 
         foreach ($data as $name => $value) {
             if ($i != 0) {
-                echo '        \'' . $name . '\' => ' . $this->getDefaultValue($value) . ',' . PHP_EOL;
+                echo $space . '        \'' . $name . '\' => ' . $this->getDefaultValue($value) . ',' . PHP_EOL;
             } else {
                 echo '\'' . $name . '\' => ' . $this->getDefaultValue($value) . ',' . PHP_EOL;
             }

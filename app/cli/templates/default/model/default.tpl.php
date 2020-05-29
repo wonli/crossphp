@@ -8,12 +8,22 @@ namespace <?= $data['namespace'] ?>;
     <?php $this->makeModelFields($data['mate_data']); ?>
 
     /**
+     * 主键名
+     *
+     * @var string
+     */
+    protected $pk = '<?= $data['pk'] ?>';
+
+    /**
      * 模型信息
      *
      * @var array
      */
     protected $modelInfo = [
         <?php $this->makeArrayProperty($data['model_info']) ?>
+        'connect' => [
+            <?php $this->makeArrayProperty($data['connect'], 4) ?>
+        ]
     ];
 <?php if(!empty($data['split_info'])) : ?>
 

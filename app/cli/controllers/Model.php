@@ -69,12 +69,12 @@ class Model extends Cli
     }
 
     /**
-     * @see index
-     *
      * @param string $name 指定参数
      * @param array $params
      * @throws CoreException
      * @cp_params file=main
+     * @see index
+     *
      */
     function __call($name, $params)
     {
@@ -109,7 +109,7 @@ class Model extends Cli
             $this->namespacePrefix = str_replace('/', '\\', $config['namespace']);
             if (!empty($config['models'])) {
                 foreach ($config['models'] as $modelName => $tableNameConfig) {
-                    $this->genClass($tableNameConfig, $modelName, $db, $config['type']);
+                    $this->genClass($tableNameConfig, $modelName, $db, $config['type'], $config);
                 }
             }
         }
@@ -122,10 +122,10 @@ class Model extends Cli
      * @param string $modelName
      * @param string $db
      * @param string $propertyType 生成类的类型
-     * @param array $tableConfig
+     * @param array $modelConfig
      * @throws CoreException
      */
-    private function genClass($tableNameConfig, $modelName, $db = '', $propertyType = 'class', $tableConfig = array())
+    private function genClass($tableNameConfig, $modelName, $db = '', $propertyType = 'class', $modelConfig = [])
     {
         if (empty($db)) {
             $key = ':';
@@ -204,12 +204,13 @@ class Model extends Cli
                 $tableName = $tableNameConfig;
             }
 
+            $connectConfig = $M->getLinkConfig();
             $mateData = $M->link->getMetaData($M->getPrefix($tableName));
             if (isset($field) && !isset($mateData[$field])) {
                 throw new CoreException('分表字段不存在: ' . $field);
             }
 
-            $primaryKey = &$tableConfig['primary_key'];
+            $primaryKey = &$modelConfig['primary_key'];
             if (empty($primaryKey)) {
                 foreach ($mateData as $key => $value) {
                     if ($value['primary'] && empty($primaryKey)) {
@@ -219,16 +220,21 @@ class Model extends Cli
                 }
             }
 
+            if (empty($primaryKey)) {
+                throw new CoreException('主键未设置');
+            }
+
+            $data['pk'] = $primaryKey;
             $data['type'] = $propertyType;
             $data['name'] = $modelName;
+            $data['model'] = $modelConfig;
+            $data['connect'] = $connectConfig;
             $data['mate_data'] = $mateData;
             $data['namespace'] = $namespace;
             $data['model_info'] = [
-                'mode' => $linkType . ':' . $linkName,
-                'table' => $tableName,
-                'primary_key' => $primaryKey,
-                'link_type' => $linkType,
-                'link_name' => $linkName,
+                'n' => $linkName,
+                'type' => $linkType,
+                'table' => $tableName
             ];
 
             $ret = $this->view->genClass($data);
