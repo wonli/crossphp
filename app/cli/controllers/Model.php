@@ -8,6 +8,7 @@ use Cross\Exception\CoreException;
 use Cross\Core\Loader;
 use Cross\MVC\Module;
 use Exception;
+use PDO;
 
 /**
  * 从数据库生成结构类
@@ -138,7 +139,7 @@ class Model extends Cli
             $cache[$key] = new Module($db);
         }
 
-        $allowPropertyType = array('class' => true, 'trait' => true);
+        $allowPropertyType = ['class' => true, 'trait' => true];
         if (!isset($allowPropertyType[$propertyType])) {
             $propertyType = 'class';
         }
@@ -168,40 +169,60 @@ class Model extends Cli
         }
 
         try {
+            $sequence = '';
+            $data['split_info'] = [];
             if (is_array($tableNameConfig)) {
-                $method = &$tableNameConfig['method'];
-                if (null === $method) {
-                    $method = 'hash';
+                //单独处理序号
+                if (!empty($tableNameConfig['sequence'])) {
+                    $sequence = &$tableNameConfig['sequence'];
                 }
 
-                $field = &$tableNameConfig['field'];
-                if (null === $field) {
-                    throw new CoreException('请指定分表字段: field');
+                if (!empty($tableNameConfig['split'])) {
+                    //处理分表
+                    $splitConfig = &$tableNameConfig['split'];
+                    $method = &$splitConfig['method'];
+                    if (null === $method) {
+                        $method = 'hash';
+                    }
+
+                    $field = &$splitConfig['field'];
+                    if (null === $field) {
+                        throw new CoreException('请指定分表字段: field');
+                    }
+
+                    $prefix = &$splitConfig['prefix'];
+                    if (null === $prefix) {
+                        throw new CoreException('请指定分表前缀: prefix');
+                    }
+
+                    $number = &$splitConfig['number'];
+                    if (null === $number) {
+                        $number = 32;
+                    } elseif (!is_numeric($number) || $number > 2048) {
+                        throw new CoreException('分表数量仅支持数字且不能大于2048！');
+                    }
+
+                    $data['split_info'] = [
+                        'number' => $number,
+                        'method' => $method,
+                        'field' => $field,
+                        'prefix' => $prefix,
+                    ];
+
+                    //分表时默认使用第一张表的结构
+                    $tableName = $splitConfig['prefix'] . '0';
                 }
 
-                $prefix = &$tableNameConfig['prefix'];
-                if (null === $prefix) {
-                    throw new CoreException('请指定分表前缀: prefix');
+                if (empty($tableName) && !empty($tableNameConfig['table'])) {
+                    $tableName = &$tableNameConfig['table'];
                 }
 
-                $number = &$tableNameConfig['number'];
-                if (null === $number) {
-                    $number = 32;
-                } elseif (!is_numeric($number) || $number > 2048) {
-                    throw new CoreException('分表数量仅支持数字且不能大于2048！');
-                }
-
-                $data['split_info'] = [
-                    'number' => $number,
-                    'method' => $method,
-                    'field' => $field,
-                    'prefix' => $prefix,
-                ];
-                //分表时默认使用第一张表的结构
-                $tableName = $tableNameConfig['prefix'] . '0';
             } else {
-                $data['split_info'] = [];
                 $tableName = $tableNameConfig;
+            }
+
+            if (empty($tableName)) {
+                throw new CoreException('请指定表名');
             }
 
             $connectConfig = $M->getLinkConfig();
@@ -222,6 +243,43 @@ class Model extends Cli
 
             if (empty($primaryKey)) {
                 throw new CoreException('主键未设置');
+            }
+
+            if (!empty($sequence)) {
+                $connectConfig['sequence'] = $sequence;
+            }
+
+            //处理Oracle sequence
+            if (0 === strcasecmp($linkType, 'oracle')) {
+                $sequenceName = strtoupper("auto_{$tableName}_seq");
+                if (empty($connectConfig['sequence']) && !empty($modelConfig['autoSequence'])) {
+                    //判断是否存在
+                    $sequenceSQL = "select sequence_name from all_sequences where sequence_name= '{$sequenceName}'";
+                    $hasSequences = $M->link->rawSql($sequenceSQL)
+                        ->stmt()->fetch(PDO::FETCH_ASSOC);
+
+                    if (empty($hasSequences)) {
+                        //获取表主键当前最大自增加ID值
+                        $rows = $M->link->rawSql("select max($primaryKey) inc from {$tableName}")
+                            ->stmt()->fetch(PDO::FETCH_ASSOC);
+                        $startWith = 1;
+                        if (!empty($rows['INC'])) {
+                            $startWith = $rows['INC'] + 1;
+                        }
+
+                        //创建sequence
+                        $isCreated = $M->link->rawSql("create sequence {$sequenceName}
+                        increment by 1 --每次加几
+                        start with {$startWith} --从几开始
+                        nomaxvalue  --不设置最大值
+                        nocycle cache 3")->stmt()->execute();
+                        if ($isCreated) {
+                            $connectConfig['sequence'] = $sequenceName;
+                        }
+                    } else {
+                        $connectConfig['sequence'] = $sequenceName;
+                    }
+                }
             }
 
             $data['pk'] = $primaryKey;

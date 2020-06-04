@@ -170,6 +170,7 @@ class ModelView extends CliView
                 } elseif (is_numeric($value)) {
                     return $value;
                 } else {
+                    $value = trim($value, "'");
                     return '\'' . $value . '\'';
                 }
             }
