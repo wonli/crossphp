@@ -17,7 +17,7 @@ class ModelView extends CliView
      * @param array $data
      * @return bool|int
      */
-    function genClass($data = array())
+    function genClass($data = [])
     {
         $content = $this->obRenderTpl('model/default', $data);
         $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $data['namespace']);
@@ -61,7 +61,7 @@ class ModelView extends CliView
      *
      * @param array $data
      */
-    protected function makeModelFields($data)
+    protected function makeModelFields($data): void
     {
         $i = 0;
         foreach ($data as $f => $info) {
@@ -86,8 +86,9 @@ class ModelView extends CliView
      *
      * @param string $name
      * @param string $type
+     * @return string
      */
-    protected function makeObjectName($name, $type)
+    protected function makeObjectName(string $name, string $type): string
     {
         $objs = [];
         if ($type == 'class') {
@@ -99,16 +100,16 @@ class ModelView extends CliView
         }
 
         $objs[] = $className;
-        echo implode(PHP_EOL, $objs);
+        return implode(PHP_EOL, $objs);
     }
 
     /**
      * 生成属性字段
      *
-     * @param $data
+     * @param array $data
      * @throws CoreException
      */
-    protected function makeModelInfo($data)
+    protected function makeModelInfo(array $data): void
     {
         $i = 0;
         foreach ($data as $mate_key => $mate_info) {
@@ -126,24 +127,75 @@ class ModelView extends CliView
      *
      * @param array $data
      * @param int $addSpace
+     * @param bool $inline
+     * @return string
      * @throws CoreException
      */
-    protected function makeArrayProperty(array $data, int $addSpace = 0)
+    protected function makeArrayProperty(array $data, int $addSpace = 0, bool $inline = false): string
     {
         $i = 0;
+        $result = [];
+        foreach ($data as $name => $value) {
+            $result[] = $this->makeArrayMemberInline($name, $value, $inline ? 0 : $i++, $addSpace);
+        }
+
+        if ($inline) {
+            return implode(', ', $result);
+        } else {
+            return implode(',' . PHP_EOL, $result);
+        }
+    }
+
+    /**
+     * 生成数组属性
+     *
+     * @param mixed $name
+     * @param mixed $value
+     * @param int $line
+     * @param int $addSpace
+     * @return string
+     * @throws CoreException
+     */
+    protected function makeArrayMemberInline($name, $value, int $line = 0, int $addSpace = 0): string
+    {
         $space = '';
         if ($addSpace > 0) {
             $space = str_pad($space, $addSpace, ' ');
         }
 
-        foreach ($data as $name => $value) {
-            if ($i != 0) {
-                echo $space . '        \'' . $name . '\' => ' . $this->getDefaultValue($value) . ',' . PHP_EOL;
-            } else {
-                echo '\'' . $name . '\' => ' . $this->getDefaultValue($value) . ',' . PHP_EOL;
-            }
-            $i++;
+        if (is_numeric($name)) {
+            $nameValue = $name;
+        } else {
+            $nameValue = "'" . $name . "'";
         }
+
+        if ($line != 0) {
+            return $space . $nameValue . ' => ' . $this->getDefaultValue($value);
+        } else {
+            return $nameValue . ' => ' . $this->getDefaultValue($value);
+        }
+    }
+
+    /**
+     * 生成连接配置
+     *
+     * @param array $data
+     * @return string
+     * @throws CoreException
+     */
+    protected function makeConnectInfo(array $data): string
+    {
+        $i = 0;
+        $result = [];
+        foreach ($data as $name => $value) {
+            if (is_array($value)) {
+                $result[] = sprintf("            '%s' => [%s]", $name, $this->makeArrayProperty($value, 0, true));
+            } else {
+                $result[] = $this->makeArrayMemberInline($name, $value, $i++, 12);
+            }
+        }
+
+        return implode(',' . PHP_EOL, $result) . PHP_EOL;
     }
 
     /**
@@ -168,7 +220,7 @@ class ModelView extends CliView
                 } elseif ($value == 'CURRENT_TIMESTAMP') {
                     return '\'CURRENT_TIMESTAMP\'';
                 } elseif (is_numeric($value)) {
-                    return $value;
+                    return (int)$value;
                 } else {
                     $value = trim($value, "'");
                     return '\'' . $value . '\'';

@@ -3,7 +3,7 @@
 namespace <?= $data['namespace'] ?>;
 <?php endif ?>
 
-<?php $this->makeObjectName($data['name'], $data['type']) ?>
+<?= $this->makeObjectName($data['name'], $data['type']) ?>
 {
     <?php $this->makeModelFields($data['mate_data']); ?>
 
@@ -20,9 +20,9 @@ namespace <?= $data['namespace'] ?>;
      * @var array
      */
     protected $modelInfo = [
-        <?php $this->makeArrayProperty($data['model_info']) ?>
+        <?= $this->makeArrayProperty($data['model_info'], 8) ?>,
         'connect' => [
-            <?php $this->makeArrayProperty($data['connect'], 4) ?>
+            <?= $this->makeConnectInfo($data['connect']) ?>
         ]
     ];
 <?php if(!empty($data['split_info'])) : ?>
@@ -33,7 +33,7 @@ namespace <?= $data['namespace'] ?>;
      * @var array
      */
     protected $splitConfig = [
-        <?php $this->makeArrayProperty($data['split_info']) ?>
+        <?= $this->makeArrayProperty($data['split_info'], 8) . PHP_EOL ?>
     ];
 <?php endif ?>
 
