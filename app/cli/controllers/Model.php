@@ -231,6 +231,10 @@ class Model extends Cli
                 throw new CoreException('分表字段不存在: ' . $field);
             }
 
+            if (empty($mateData)) {
+                throw new CoreException('获取数据表信息失败');
+            }
+
             $primaryKey = &$modelConfig['primary_key'];
             if (empty($primaryKey)) {
                 foreach ($mateData as $key => $value) {
