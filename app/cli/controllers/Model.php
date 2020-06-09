@@ -4,6 +4,7 @@ namespace app\cli\controllers;
 
 use app\cli\views\ModelView;
 
+use Cross\Core\Helper;
 use Cross\Exception\CoreException;
 use Cross\Core\Loader;
 use Cross\MVC\Module;
@@ -235,13 +236,18 @@ class Model extends Cli
                 throw new CoreException('获取数据表信息失败');
             }
 
-            $primaryKey = &$modelConfig['primary_key'];
-            if (empty($primaryKey)) {
-                foreach ($mateData as $key => $value) {
-                    if ($value['primary'] && empty($primaryKey)) {
-                        $primaryKey = $key;
-                        break;
+            $primaryKey = null;
+            $isOracle = (0 === strcasecmp($linkType, 'oracle'));
+            foreach ($mateData as $key => $set) {
+                if ($set['primary']) {
+                    if ($isOracle && !empty($set['default_value'])) {
+                        $dsq = preg_match("~(.*)\.\"(.*)\"\.nextval.*~", $set['default_value'], $matches);
+                        if ($dsq && !empty($matches[2])) {
+                            $sequence = &$matches[2];
+                        }
                     }
+                    $primaryKey = $key;
+                    break;
                 }
             }
 
@@ -253,36 +259,36 @@ class Model extends Cli
                 $connectConfig['sequence'] = $sequence;
             }
 
-            //处理Oracle sequence
-            if (0 === strcasecmp($linkType, 'oracle')) {
-                $sequenceName = strtoupper("auto_{$tableName}_seq");
-                if (empty($connectConfig['sequence']) && !empty($modelConfig['autoSequence'])) {
-                    //判断是否存在
-                    $sequenceSQL = "select sequence_name from all_sequences where sequence_name= '{$sequenceName}'";
-                    $hasSequences = $M->link->rawSql($sequenceSQL)
+            //处理Oracle自动序列
+            if ($isOracle && empty($connectConfig['sequence']) && !empty($modelConfig['autoSequence'])) {
+                $seqName = Helper::md10(implode('`', array_keys($mateData)));
+                $sequenceName = strtoupper("auto_{$seqName}_seq");
+
+                //判断是否存在
+                $sequenceSQL = "select sequence_name from all_sequences where sequence_name= '{$sequenceName}'";
+                $hasSequences = $M->link->rawSql($sequenceSQL)
+                    ->stmt()->fetch(PDO::FETCH_ASSOC);
+
+                if (empty($hasSequences)) {
+                    //获取表主键当前最大自增加ID值
+                    $rows = $M->link->rawSql("select max($primaryKey) inc from {$tableName}")
                         ->stmt()->fetch(PDO::FETCH_ASSOC);
+                    $startWith = 1;
+                    if (!empty($rows['INC'])) {
+                        $startWith = $rows['INC'] + 1;
+                    }
 
-                    if (empty($hasSequences)) {
-                        //获取表主键当前最大自增加ID值
-                        $rows = $M->link->rawSql("select max($primaryKey) inc from {$tableName}")
-                            ->stmt()->fetch(PDO::FETCH_ASSOC);
-                        $startWith = 1;
-                        if (!empty($rows['INC'])) {
-                            $startWith = $rows['INC'] + 1;
-                        }
-
-                        //创建sequence
-                        $isCreated = $M->link->rawSql("create sequence {$sequenceName}
+                    //创建sequence
+                    $isCreated = $M->link->rawSql("create sequence {$sequenceName}
                         increment by 1 --每次加几
                         start with {$startWith} --从几开始
                         nomaxvalue  --不设置最大值
                         nocycle cache 3")->stmt()->execute();
-                        if ($isCreated) {
-                            $connectConfig['sequence'] = $sequenceName;
-                        }
-                    } else {
+                    if ($isCreated) {
                         $connectConfig['sequence'] = $sequenceName;
                     }
+                } else {
+                    $connectConfig['sequence'] = $sequenceName;
                 }
             }
 
