@@ -27,9 +27,31 @@ use lib\LogStation\CliLog;
 abstract class Cli extends Controller
 {
     /**
+     * 命令列表
+     * <pre>
+     * 格式如下：
+     * -command=[value|true]
+     * --command=[value|true]
+     *
+     * 可以传传值，默认为true
+     * 可以在子类通过commandAlias设置别名
+     * </pre>
+     *
+     * @var []
+     */
+    protected $cliCommands;
+
+    /**
+     * 命令参数别名
+     *
+     * @var array
+     */
+    protected $commandAlias = [];
+
+    /**
      * @var string
      */
-    protected $command;
+    protected $processTitle;
 
     /**
      * 是否解析命令行参数(params1=value1 params2=value2)
@@ -53,7 +75,7 @@ abstract class Cli extends Controller
      *
      * @var array
      */
-    protected $dev = array();
+    protected $dev = [];
 
     /**
      * @var string
@@ -74,25 +96,31 @@ abstract class Cli extends Controller
         if (!empty($this->action_annotate['params'])) {
             $params = $this->action_annotate['params'];
         } else {
-            $params = array();
+            $params = [];
         }
 
         //处理$argv传递过来的参数
         if ($this->initCliParams) {
-            $i = 0;
             foreach ($this->params as $p) {
-                if ((false === strpos($p, '=')) && $i == 0) {
-                    $this->command = trim($p);
+                if (false !== strpos($p, '-')) {
+                    $cmd = trim($p, '-');
+                    if (false !== strpos($cmd, '=')) {
+                        list($cmd, $cmdArgs) = explode('=', $cmd);
+                    } else {
+                        $cmdArgs = true;
+                    }
+
+                    $this->cliCommands[$cmd] = $cmdArgs;
+                    $commandAlias = &$this->commandAlias[$cmd];
+                    if (null !== $commandAlias) {
+                        $this->cliCommands[$commandAlias] = $cmdArgs;
+                    }
                 } elseif (!empty($p) && false !== strpos($p, '=')) {
                     list($key, $value) = explode('=', $p);
                     if ($key && $value) {
                         $params[trim(trim($key, '-'))] = trim($value);
                     }
-                } else {
-                    $params[] = trim($p);
                 }
-
-                $i++;
             }
 
             $this->params = $params;
@@ -140,12 +168,15 @@ abstract class Cli extends Controller
             }
         }
 
-        $commandName = strtolower("{$this->controller}:{$this->action}");
-        if (isset($_SERVER['argv']) && !empty($_SERVER['argv'][1])) {
-            $commandName = &$_SERVER['argv'][1];
+        global $argv;
+        $processTitle = strtolower("{$this->controller}:{$this->action}");
+        if (!empty($argv[1])) {
+            $processTitle = $argv[1];
         }
 
-        $this->logger = new CliLog($commandName);
+        cli_set_process_title($processTitle);
+        $this->processTitle = $processTitle;
+        $this->logger = new CliLog($processTitle);
     }
 
     /**
@@ -159,6 +190,17 @@ abstract class Cli extends Controller
     }
 
     /**
+     * command
+     *
+     * @param string $command
+     * @return mixed
+     */
+    function command(string $command)
+    {
+        return $this->cliCommands[$command] ?? false;
+    }
+
+    /**
      * 在控制台打印消息
      *
      * @param string $message
@@ -166,13 +208,8 @@ abstract class Cli extends Controller
      */
     function consoleMsg($message, $newLine = true)
     {
-        $tip = strtolower("{$this->controller}.{$this->action}");
-        if (isset($_SERVER['argv']) && !empty($_SERVER['argv'][1])) {
-            $tip = &$_SERVER['argv'][1];
-        }
-
         if ($newLine) {
-            $msg = '(' . $tip . ') ' . $message . PHP_EOL;
+            $msg = '(' . $this->processTitle . ') ' . $message . PHP_EOL;
         } else {
             $msg = $message;
         }
