@@ -28,13 +28,11 @@ abstract class Cli extends Controller
 {
     /**
      * 命令列表
+     *
      * <pre>
      * 格式如下：
-     * -command=[value|true]
-     * --command=[value|true]
-     *
-     * 可以传传值，默认为true
-     * 可以在子类通过commandAlias设置别名
+     * --command 命令全名
+     * -c 命令简写，支持组合
      * </pre>
      *
      * @var []
@@ -44,6 +42,13 @@ abstract class Cli extends Controller
     /**
      * 命令参数别名
      *
+     * <pre>
+     * 下面三种写法等效，第一种无tips
+     * ['c' => 'clean', ‘u’ => 'update']
+     * ['c' => 'clean|清理', ‘u’ => 'update|更新']
+     * ['c' => ['command' => 'clean', 'tips' => '清理'],'u' => ['command' => 'update', 'tips' => '更新']]
+     * -cu等效 -c -u，第一个命令传--help时，显示提示信息
+     * </pre>
      * @var array
      */
     protected $commandAlias = [];
@@ -89,7 +94,15 @@ abstract class Cli extends Controller
 
     function __construct()
     {
+        global $argv;
         parent::__construct();
+        $this->processTitle = strtolower("{$this->controller}:{$this->action}");
+        if (!empty($argv[1])) {
+            $this->processTitle = $argv[1];
+        }
+
+        cli_set_process_title($this->processTitle);
+        $this->logger = new CliLog($this->processTitle);
 
         //处理注释配置中的参数
         $this->oriParams = &$this->params;
@@ -101,26 +114,50 @@ abstract class Cli extends Controller
 
         //处理$argv传递过来的参数
         if ($this->initCliParams) {
+            $defaultCommand = null;
             foreach ($this->params as $p) {
                 if (false !== strpos($p, '-')) {
-                    $cmd = trim($p, '-');
-                    if (false !== strpos($cmd, '=')) {
-                        list($cmd, $cmdArgs) = explode('=', $cmd);
+                    if ($p[1] != '-') {
+                        $cmd = trim($p, '-');
+                        for ($i = 0, $j = strlen($cmd); $i < $j; $i++) {
+                            $cmdFlag = $cmd[$i];
+                            if (!isset($this->commandAlias[$cmdFlag])) {
+                                $this->commandTips($cmdFlag);
+                                break 2;
+                            }
+
+                            $commandAlias = &$this->commandAlias[$cmdFlag];
+                            if (null !== $commandAlias && is_array($commandAlias)) {
+                                $realCmd = &$commandAlias['command'];
+                            } elseif (null !== $commandAlias && false !== strpos($commandAlias, '|')) {
+                                list($realCmd) = explode('|', $commandAlias);
+                            } elseif (null !== $commandAlias) {
+                                $realCmd = $commandAlias;
+                            } else {
+                                $realCmd = $cmd;
+                            }
+
+                            $this->cliCommands[$realCmd] = true;
+                        }
                     } else {
-                        $cmdArgs = true;
+                        $cmd = trim($p, '-');
+                        $this->cliCommands[$cmd] = true;
                     }
 
-                    $this->cliCommands[$cmd] = $cmdArgs;
-                    $commandAlias = &$this->commandAlias[$cmd];
-                    if (null !== $commandAlias) {
-                        $this->cliCommands[$commandAlias] = $cmdArgs;
+                    if (null === $defaultCommand) {
+                        $defaultCommand = $cmd;
                     }
+
                 } elseif (!empty($p) && false !== strpos($p, '=')) {
                     list($key, $value) = explode('=', $p);
                     if ($key && $value) {
                         $params[trim(trim($key, '-'))] = trim($value);
                     }
                 }
+            }
+
+            if ($defaultCommand == 'help') {
+                $this->commandTips();
             }
 
             $this->params = $params;
@@ -167,16 +204,6 @@ abstract class Cli extends Controller
                 exit(0);
             }
         }
-
-        global $argv;
-        $processTitle = strtolower("{$this->controller}:{$this->action}");
-        if (!empty($argv[1])) {
-            $processTitle = $argv[1];
-        }
-
-        cli_set_process_title($processTitle);
-        $this->processTitle = $processTitle;
-        $this->logger = new CliLog($processTitle);
     }
 
     /**
@@ -198,6 +225,52 @@ abstract class Cli extends Controller
     function command(string $command)
     {
         return $this->cliCommands[$command] ?? false;
+    }
+
+    /**
+     * 输出命令提示
+     *
+     * @param string $cmdFlag
+     */
+    protected function commandTips($cmdFlag = null)
+    {
+        if (null !== $cmdFlag) {
+            $this->consoleMsg('  Not support command: -' . $cmdFlag . PHP_EOL, false);
+        }
+
+        $commandConfig = [];
+        $commandMaxLength = 0;
+        foreach ($this->commandAlias as $s => $set) {
+            $d['s'] = $s;
+            if (is_array($set)) {
+                $d['command'] = $set['command'] ?? '';
+                $d['tips'] = $set['tips'] ?? '';
+            } elseif (false !== strpos($set, '|')) {
+                list($d['command'], $d['tips']) = explode('|', $set);
+            } else {
+                $d['command'] = $d['tips'] = $set;
+            }
+
+            $commandConfig[] = $d;
+            $commandLength = strlen($d['command']);
+            if ($commandLength > $commandMaxLength) {
+                $commandMaxLength = $commandLength;
+            }
+        }
+
+        $helperContext = [];
+        array_map(function ($d) use ($commandMaxLength, &$helperContext) {
+            $line = str_pad("--{$d['command']}", $commandMaxLength + 3, ' ', STR_PAD_LEFT);
+            $line .= ", -{$d['s']}";
+            $line .= str_pad(' ', 3, ' ');
+            $line .= $d['tips'];
+
+            $helperContext[] = $line;
+        }, $commandConfig);
+
+        $helperContext[] = PHP_EOL;
+        $this->consoleMsg(implode(PHP_EOL, $helperContext), false);
+        exit(0);
     }
 
     /**
