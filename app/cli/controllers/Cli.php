@@ -31,8 +31,8 @@ abstract class Cli extends Controller
      *
      * <pre>
      * 格式如下：
-     * --command 命令全名
-     * -c 命令简写，支持组合
+     * --command 命令全名，支持等号传值
+     * -c 命令简写，可以组合
      * </pre>
      *
      * @var []
@@ -118,7 +118,15 @@ abstract class Cli extends Controller
             foreach ($this->params as $p) {
                 if (false !== strpos($p, '-')) {
                     if ($p[1] != '-') {
-                        $cmd = trim($p, '-');
+                        $cmd = trim(trim($p, '-'));
+                        if (false !== strpos($cmd, '=')) {
+                            list($cmd, $cmdValue) = explode('=', $cmd);
+                            $cmd = trim($cmd);
+                            $cmdValue = trim($cmdValue);
+                        } else {
+                            $cmdValue = null;
+                        }
+
                         for ($i = 0, $j = strlen($cmd); $i < $j; $i++) {
                             $cmdFlag = $cmd[$i];
                             if (!isset($this->commandAlias[$cmdFlag])) {
@@ -137,11 +145,19 @@ abstract class Cli extends Controller
                                 $realCmd = $cmd;
                             }
 
-                            $this->cliCommands[$realCmd] = true;
+                            $this->cliCommands[trim($cmd)] = $cmdValue;
+                            $this->cliCommands[trim($realCmd)] = $cmdValue;
                         }
                     } else {
                         $cmd = trim($p, '-');
-                        $this->cliCommands[$cmd] = true;
+                        if (false !== strpos($cmd, '=')) {
+                            list($cmd, $cmdValue) = explode('=', $cmd);
+                            $cmdValue = trim($cmdValue);
+                        } else {
+                            $cmdValue = null;
+                        }
+
+                        $this->cliCommands[trim($cmd)] = $cmdValue;
                     }
 
                     if (null === $defaultCommand) {
@@ -220,11 +236,27 @@ abstract class Cli extends Controller
      * command
      *
      * @param string $command
+     * @param bool $getArgs
      * @return mixed
      */
-    function command(string $command)
+    function command(string $command, bool $getArgs = false)
     {
-        return $this->cliCommands[$command] ?? false;
+        if (empty($this->cliCommands)) {
+            return false;
+        }
+
+        if ($getArgs) {
+            return $this->cliCommands[$command] ?? false;
+        }
+
+        $has = array_key_exists($command, $this->cliCommands);
+        if ($has && null !== $this->cliCommands[$command]) {
+            return $this->cliCommands[$command];
+        } elseif ($has) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
