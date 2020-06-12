@@ -77,8 +77,11 @@ abstract class ApiController extends Controller
         $this->data = (new ResponseData())->getData();
 
         //API文档数据
-        if (!empty($_REQUEST['doc_token']) && !empty($_REQUEST['t'])) {
-            $isVerify = $this->verifyDocApiToken($_REQUEST['doc_token'], $_REQUEST['t']);
+        $getData = $this->request->getGetData();
+        $docToken = $getData['doc_token'] ?? null;
+        $t = $getData['t'] ?? null;
+        if ($docToken && $t) {
+            $isVerify = $this->verifyDocApiToken($docToken, $t);
             if (!$isVerify) {
                 $this->display(100700);
                 return;
@@ -215,23 +218,24 @@ abstract class ApiController extends Controller
      */
     function getFileData(string $key, string $filter_name = 'images', bool &$is_multi = false)
     {
-        if (!empty($_FILES[$key]) && !empty($_FILES[$key]['name'])) {
+        $fileData = $this->request->getFileData();
+        if (!empty($fileData[$key]) && !empty($fileData[$key]['name'])) {
             if ($filter_name == 'images') {
-                $upload_name = &$_FILES[$key]['name'];
-                $upload_tmp_name = &$_FILES[$key]['tmp_name'];
+                $upload_name = &$fileData[$key]['name'];
+                $upload_tmp_name = &$fileData[$key]['tmp_name'];
                 if (!is_array($upload_name)) {
                     $is_multi = false;
                     $ext = $this->checkUploadImage($upload_name, $upload_tmp_name);
                 } else {
-                    $ext = array();
+                    $ext = [];
                     $is_multi = true;
                     for ($i = 0, $j = count($upload_name); $i < $j; $i++) {
                         $ext[$i] = $this->checkUploadImage($upload_name[$i], $upload_tmp_name[$i]);
                     }
                 }
 
-                $_FILES[$key]['ext'] = $ext;
-                return $_FILES[$key];
+                $fileData[$key]['ext'] = $ext;
+                return $fileData[$key];
             }
         }
 
@@ -262,7 +266,7 @@ abstract class ApiController extends Controller
             throw $frontException;
         }
 
-        $this->response->display(json_encode($responseData));
+        $this->response->end(json_encode($responseData, JSON_UNESCAPED_UNICODE));
     }
 
     /**
@@ -276,14 +280,14 @@ abstract class ApiController extends Controller
         switch ($request_type) {
             case 'file':
             case 'multi_file':
-                $data_container = &$_FILES;
+                $data_container = $this->request->getFileData();
                 break;
 
             case 'post':
-                $data_container = &$_REQUEST;
+                $data_container = $this->request->getPostData();
                 if (empty($data_container)) {
                     $input = file_get_contents("php://input");
-                    $content_type = &$_SERVER['CONTENT_TYPE'];
+                    $content_type = $this->request->SERVER('CONTENT_TYPE');
                     if (0 == strcasecmp($content_type, 'application/json')) {
                         $data_container = json_decode($input, true);
                     } else {
@@ -292,12 +296,12 @@ abstract class ApiController extends Controller
                         parse_str($input, $data_container);
                     }
 
-                    $_POST = $data_container;
+                    $this->request->setPostData($data_container, true);
                 }
                 break;
 
             default:
-                $data_container = &$_REQUEST;
+                $data_container = $this->request->getGetData();
         }
 
         return $data_container;
@@ -312,10 +316,10 @@ abstract class ApiController extends Controller
     {
         $result = [];
         $ANNOTATE = Annotate::getInstance($this->delegate);
-        $controllerList = glob(__DIR__ . '/*.php');
+        $controllerList = glob(APP_PATH_DIR . $this->delegate->app_name . '/controllers/*.php');
         array_map(function ($f) use (&$result, $ANNOTATE) {
             $fileName = pathinfo($f, PATHINFO_FILENAME);
-            $classNamespace = __NAMESPACE__ . '\\' . $fileName;
+            $classNamespace = $this->delegate->getApplication()->getControllerNamespace($fileName);
             $rc = new ReflectionClass($classNamespace);
             if ($rc->isAbstract()) {
                 return;
@@ -377,6 +381,11 @@ abstract class ApiController extends Controller
      */
     private function verifyDocApiToken(string $token, $t): bool
     {
+        //10秒过期
+        if (time() - $t > 10) {
+            return false;
+        }
+
         $key = $this->config->get('encrypt', 'doc');
         $localToken = md5(md5($key . $t) . $t);
         return $localToken == $token;
