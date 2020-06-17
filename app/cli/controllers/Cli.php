@@ -116,7 +116,7 @@ abstract class Cli extends Controller
         if ($this->initCliParams) {
             $defaultCommand = null;
             foreach ($this->params as $p) {
-                if (false !== strpos($p, '-')) {
+                if (false !== strpos($p, '-') && !empty($this->commandAlias)) {
                     if ($p[1] != '-') {
                         $cmd = trim(trim($p, '-'));
                         if (false !== strpos($cmd, '=')) {
