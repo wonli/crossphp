@@ -101,8 +101,10 @@ abstract class Cli extends Controller
             $this->processTitle = $argv[1];
         }
 
-        cli_set_process_title($this->processTitle);
         $this->logger = new CliLog($this->processTitle);
+        if ('Darwin' !== PHP_OS) {
+            cli_set_process_title($this->processTitle);
+        }
 
         //处理注释配置中的参数
         $this->oriParams = &$this->params;
