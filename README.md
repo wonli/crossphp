@@ -6,7 +6,7 @@
 
 使用 composer 安装, [使用文档](http://document.crossphp.com/skeleton/ "CrossPHP")  
 
-    composer create-project ideaa/crossphp cp v1
+    composer create-project ideaa/crossphp cp ^v1
 
 ### 使用说明
 
