@@ -1,15 +1,12 @@
-#Skeleton
+### CrossPHP
+为工程而设计，API优先
 
-[CrossPHP Framework](http://git.oschina.net/ideaa/crossphp "CrossPHP") 的骨架
 
-### 安装方法
-先使用 `git clone` 代码到本地web目录
+### 安装说明
 
-	git clone https://git.oschina.net/ideaa/skeleton.git
+使用 composer 安装, [使用文档](http://document.crossphp.com/skeleton/ "CrossPHP")  
 
-[使用composer安装](docs/composer.md "使用composer安装") [使用压缩包安装](docs/source.md "使用压缩包安装")
-
-待安装完后, 通过浏览器输入地址 `http://127.0.0.1/skeleton/htdocs/web` 来访问默认的web页面
+    composer create-project ideaa/crossphp cp v1
 
 ### 使用说明
 
