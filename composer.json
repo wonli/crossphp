@@ -1,14 +1,23 @@
 {
+  "name": "ideaa/crossphp",
+  "description": "light php framework",
+  "type": "project",
+  "keywords": [
+    "framework",
+    "crossphp",
+    "web"
+  ],
+  "homepage": "http://www.crossphp.com/",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "wonli",
+      "email": "wonli@live.com"
+    }
+  ],
   "require": {
-    "ideaa/cross": "dev-dev",
-    "ext-gd": "*",
-    "ext-pdo": "*",
-    "ext-dom": "*",
-    "ext-json": "*",
-    "ext-curl": "*",
-    "ext-openssl": "*",
-    "ext-mbstring": "*",
-    "ext-fileinfo": "*"
+    "php": "^7.2.0",
+    "ideaa/cross": "dev-dev"
   },
   "repositories": {
     "packagist": {
