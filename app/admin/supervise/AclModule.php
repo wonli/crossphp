@@ -439,7 +439,7 @@ class AclModule extends AdminModule
         $add_data['pid'] = $data['pid'];
         $add_data['link'] = $data['link'];
         $add_data['name'] = empty($data['name']) ? '' : $data['name'];
-        $add_data['`order`'] = empty($data['order']) ? 0 : (int)$data['order'];
+        $add_data['order'] = empty($data['order']) ? 0 : (int)$data['order'];
         $add_data['display'] = isset($data['display']) ? $data['display'] : 0;
         $add_data['type'] = isset($data['type']) ? $data['type'] : 1;
         $data = $add_data;
