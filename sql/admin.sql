@@ -137,4 +137,4 @@ CREATE TABLE IF NOT EXISTS `cpa_doc_cache`  (
   `cache_at` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`cache_id`) USING BTREE,
   UNIQUE INDEX `doc_api_path_uindex`(`doc_id`, `api_path`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
