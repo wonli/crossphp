@@ -245,6 +245,45 @@ abstract class ApiController extends Controller
     }
 
     /**
+     * 发送状态信息
+     *
+     * @param int $status
+     * @param string $message
+     * @throws CoreException
+     * @throws FrontException
+     */
+    protected function end(int $status, string $message = null)
+    {
+        if ($status == 1) {
+            throw new FrontException('Incorrect status value!');
+        }
+
+        if (null === $message) {
+            $message = $this->getStatusMessage($status);
+        }
+
+        $this->ResponseData->setStatus($status);
+        $this->ResponseData->setMessage((string)$message);
+        $this->display($this->ResponseData);
+    }
+
+    /**
+     * 发送数据
+     *
+     * @param array $data
+     * @param string $message
+     * @throws CoreException
+     * @throws FrontException
+     */
+    protected function send(array $data = [], string $message = '')
+    {
+        $this->ResponseData->setStatus(1);
+        $this->ResponseData->setMessage($message);
+        $this->ResponseData->setData($data);
+        $this->display($this->ResponseData);
+    }
+
+    /**
      * 视图
      *
      * @param null $data
