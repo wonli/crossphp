@@ -60,8 +60,11 @@ abstract class ApiController extends Controller
     private $force_params = [];
 
     /**
-     * @return mixed
+     * @var ResponseData
      */
+    protected $ResponseData;
+
+
     abstract function index();
 
     /**
@@ -74,7 +77,7 @@ abstract class ApiController extends Controller
     {
         parent::__construct();
         $this->view = new View();
-        $this->data = (new ResponseData())->getData();
+        $this->ResponseData = ResponseData::builder();
 
         //API文档数据
         $getData = $this->request->getGetData();
@@ -99,8 +102,7 @@ abstract class ApiController extends Controller
             $request_method = $this->request->SERVER('REQUEST_METHOD');
             list($request_type) = explode(',', $annotate_api);
             if (strcasecmp($request_method, trim($request_type)) !== 0) {
-                $this->data['status'] = 200000;
-                $this->display($this->data);
+                $this->display(200000);
                 return;
             }
         }
@@ -127,9 +129,9 @@ abstract class ApiController extends Controller
                             }
 
                             if (!isset($data_container[$params])) {
-                                $this->data['status'] = 0;
-                                $this->data['message'] = "缺少参数{$params}($message)";
-                                $this->display($this->data);
+                                $this->ResponseData->setStatus(0);
+                                $this->ResponseData->setMessage("缺少参数{$params}($message)");
+                                $this->display($this->ResponseData);
                                 return;
                             }
                         }
@@ -159,9 +161,9 @@ abstract class ApiController extends Controller
 
         if (isset($this->force_params[$key]) || $is_force_params) {
             if (!isset($this->data_container[$key]) || '' == $defaultValue) {
-                $this->data['status'] = 200100;
-                $this->data['data']['need_params'] = $key;
-                $this->display($this->data);
+                $this->ResponseData->setStatus(0);
+                $this->ResponseData->setMessage("缺少参数({$key})");
+                $this->display($this->ResponseData);
             } elseif ($filter_data) {
                 $value = $this->filterInputData($key, $defaultValue);
             } else {
@@ -255,18 +257,17 @@ abstract class ApiController extends Controller
     protected function display($data = null, string $method = null, int $http_response_status = 200): void
     {
         $this->response->setContentType('JSON');
-        $responseData = parent::getResponseData($data, true);
-        if ($responseData['status'] != 1) {
-            $frontException = new FrontException($responseData['message'], $responseData['status']);
-            unset($responseData['message'], $responseData['status']);
-            if (!empty($responseData)) {
-                $frontException->addExtData($responseData);
-            }
+        if (!$data instanceof ResponseData) {
+            $data = parent::getResponseData($data);
+        }
 
+        if ($data->getStatus() != 1) {
+            $frontException = new FrontException($data->getMessage(), $data->getStatus());
+            $frontException->addResponseData($data);
             throw $frontException;
         }
 
-        $this->response->end(json_encode($responseData, JSON_UNESCAPED_UNICODE));
+        $this->response->end(json_encode($data->getData(), JSON_UNESCAPED_UNICODE));
     }
 
     /**
@@ -316,7 +317,7 @@ abstract class ApiController extends Controller
     {
         $result = [];
         $ANNOTATE = Annotate::getInstance($this->delegate);
-        $controllerList = glob(APP_PATH_DIR . $this->delegate->app_name . '/controllers/*.php');
+        $controllerList = glob(PROJECT_REAL_PATH . str_replace('\\', DIRECTORY_SEPARATOR, $this->delegate->getAppNamespace()) . '/controllers/*.php');
         array_map(function ($f) use (&$result, $ANNOTATE) {
             $fileName = pathinfo($f, PATHINFO_FILENAME);
             $classNamespace = $this->delegate->getApplication()->getControllerNamespace($fileName);
@@ -408,8 +409,7 @@ abstract class ApiController extends Controller
         $origin_name_ext = end($origin_name_info);
 
         if (!isset($allow_image_type[$origin_name_ext])) {
-            $this->data['status'] = 200052;
-            $this->display($this->data);
+            $this->display(200052);
         }
 
         $image_info = @getimagesize($tmp_file);
@@ -420,18 +420,15 @@ abstract class ApiController extends Controller
 
             //验证图片类型
             if (!isset($allow_image_type[$image_type])) {
-                $this->data['status'] = 200052;
-                $this->display($this->data);
+                $this->display(200052);
             }
 
             //验证图片大小
             if ($image_size > $size) {
-                $this->data['status'] = 200051;
-                $this->display($this->data);
+                $this->display(200051);
             }
         } else {
-            $this->data['status'] = 200050;
-            $this->display($this->data);
+            $this->display(200050);
         }
 
         return $origin_name_ext;

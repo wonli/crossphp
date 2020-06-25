@@ -2,6 +2,10 @@
 /**
  * app配置文件
  */
+
+use Cross\Interactive\ResponseData;
+use Cross\Http\Response;
+
 return [
 
     /**
@@ -21,7 +25,7 @@ return [
         /**
          * 默认响应类型
          */
-        'content_type' => 'json',
+        'content_type' => Response::getInstance()->setContentType('json')->getContentType(),
         /**
          * 指定View输出的方法,默认是HTML.
          * 如果值为JSON或XML的时候,会直接调用View中的JSON或XML方法来输出数据
@@ -40,6 +44,14 @@ return [
         'uri' => '*&9wru&!@#%#&',
         'auth' => '!@#cr@!$!21p#$%^',
         'doc' => 'Qe@#$%&qfd1!23sa',
+    ],
+
+    /**
+     * 数据交互字段配置
+     */
+    'responseData' => [
+        'status' => ResponseData::builder()->setStatusName('status'),
+        'message' => ResponseData::builder()->setMessageName('message')
     ],
 
     /**

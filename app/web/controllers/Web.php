@@ -29,8 +29,8 @@ abstract class Web extends Controller
     protected function display($data = null, string $method = null, int $http_response_status = 200): void
     {
         $responseData = parent::getResponseData($data);
-        if ($responseData['status'] != 1) {
-            throw new CoreException($responseData['message']);
+        if ($responseData->getStatus() != 1) {
+            throw new CoreException($responseData->getMessage());
         }
 
         parent::display($responseData, $method, $http_response_status);
