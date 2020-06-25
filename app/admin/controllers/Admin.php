@@ -188,6 +188,7 @@ abstract class Admin extends Controller
      * @param int $code
      * @param string $msg
      * @return array|string
+     * @throws CoreException
      */
     protected function getStatus($code, $msg = '')
     {
@@ -198,12 +199,30 @@ abstract class Admin extends Controller
     }
 
     /**
+     * 返回一个数组或JSON字符串
+     *
+     * @param int $status
+     * @param string|array $message
+     * @param bool $json_encode
+     * @return array|string
+     */
+    function result(int $status = 1, $message = '', bool $json_encode = false)
+    {
+        $result = ['status' => $status, 'message' => $message];
+        if ($json_encode) {
+            $result = json_encode($result, JSON_UNESCAPED_UNICODE);
+        }
+
+        return $result;
+    }
+
+    /**
      * 输出JSON格式消息并终止执行
      *
      * @param array $data
      */
     protected function dieJson($data)
     {
-        $this->response->setContentType('json')->displayOver(json_encode($data));
+        $this->response->setContentType('json')->end(json_encode($data, JSON_UNESCAPED_UNICODE));
     }
 }

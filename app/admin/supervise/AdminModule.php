@@ -71,5 +71,23 @@ class AdminModule extends Module
      * @var string
      */
     protected $t_security_card = 'cpa_security_card';
+
+    /**
+     * 返回一个数组或JSON字符串
+     *
+     * @param int $status
+     * @param string|array $message
+     * @param bool $json_encode
+     * @return array|string
+     */
+    function result(int $status = 1, $message = '', bool $json_encode = false)
+    {
+        $result = ['status' => $status, 'message' => $message];
+        if ($json_encode) {
+            $result = json_encode($result, JSON_UNESCAPED_UNICODE);
+        }
+
+        return $result;
+    }
 }
 
