@@ -17,7 +17,7 @@
   ],
   "require": {
     "php": "^7.2.0",
-    "ideaa/cross": "dev-dev"
+    "ideaa/cross": "^2.0.1"
   },
   "repositories": {
     "packagist": {
