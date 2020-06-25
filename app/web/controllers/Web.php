@@ -33,6 +33,6 @@ abstract class Web extends Controller
             throw new CoreException($responseData->getMessage());
         }
 
-        parent::display($responseData, $method, $http_response_status);
+        parent::display($responseData->getData(), $method, $http_response_status);
     }
 }
