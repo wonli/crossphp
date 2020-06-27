@@ -3,9 +3,9 @@
  * 数据库表生成类
  *
  * 调用方法
- * php cp model
+ * php cp model -f=配置文件名称
  * 指定配置项
- * php cp model:main
+ * php cp model:main -f=配置文件名称
  *
  * 基本配置
  * db 指定数据库名称, 与数据库配置文件中的一致

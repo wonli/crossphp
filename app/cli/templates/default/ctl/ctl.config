@@ -3,9 +3,9 @@
  * 生成控制器类配置
  *
  * 调用方法
- * php cp ctl 类名
+ * php cp ctl -c=类名 -v=是否生成视图控制器
  * 指定生成类的配置名称
- * php cp ctl:admin 类名
+ * php cp ctl:admin -c=类名 -v=是否生成视图控制器
  *
  * 基本配置
  * app app名称
