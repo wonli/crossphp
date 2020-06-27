@@ -69,7 +69,8 @@ class Ctl extends Cli
             return;
         }
 
-        if (empty($this->command)) {
+        $className = &$this->params['class'];
+        if (empty($className)) {
             $this->consoleMsg("Please specified class name!");
             return;
         }
@@ -86,15 +87,14 @@ class Ctl extends Cli
             }
         }
 
-        $this->genClass($this->command, $ctlConfig[$name]);
+        $this->genClass($className, $ctlConfig[$name]);
     }
 
     /**
-     * @see index
-     *
      * @param string $name 指定参数
      * @param array $params
      * @throws CoreException
+     * @see index
      */
     function __call($name, $params)
     {
@@ -117,7 +117,7 @@ class Ctl extends Cli
 
         //创建控制器
         $controllerName = ucfirst($className);
-        $appDir = APP_PATH_DIR . $config['app'] . DIRECTORY_SEPARATOR;
+        $appDir = PROJECT_REAL_PATH .'app' . DIRECTORY_SEPARATOR. $config['app'] . DIRECTORY_SEPARATOR;
         $controllerFile = $appDir . 'controllers' . DIRECTORY_SEPARATOR . $controllerName . '.php';
         if (file_exists($controllerFile)) {
             $this->consoleMsg("Controller {$controllerName} already exists!");
