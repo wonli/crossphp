@@ -9,12 +9,12 @@
                 </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($data['role_list'] as $r) : ?>
+                <?php foreach ($data['role_list']??[] as $r) : ?>
                     <tr>
-                        <td><?php echo $r['name'] ?></td>
+                        <td><?= $r['name'] ?></td>
                         <td>
-                            <a href="<?php echo $this->url('acl:editRole', array('rid' => $r['id'])) ?>">编辑</a>
-                            <?php echo $this->confirmUrl('acl:delRole', array('rid' => $r['id']), '删除', '确定删除该角色吗?') ?>
+                            <a href="<?= $this->url('acl:editRole', array('rid' => $r['id'])) ?>">编辑</a>
+                            <?= $this->confirmUrl('acl:delRole', array('rid' => $r['id']), '删除', '确定删除该角色吗?') ?>
                         </td>
                     </tr>
                 <?php endforeach ?>

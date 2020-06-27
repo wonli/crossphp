@@ -28,6 +28,19 @@ class AdminView extends View
     private $action_name;
 
     /**
+     * @var array
+     */
+    protected $loginInfo = [];
+
+    /**
+     * @param array $u
+     */
+    function setLoginInfo(array $u)
+    {
+        $this->loginInfo = $u;
+    }
+
+    /**
      * 输出消息
      *
      * @param $code
@@ -83,7 +96,7 @@ class AdminView extends View
      * @param array $menu
      * @param array $menu_icon
      */
-    function setMenuData($menu, $menu_icon = array())
+    function setMenuData($menu, $menu_icon = [])
     {
         $action_name = &$this->action_name;
         foreach ($menu as $name => &$m) {
@@ -93,7 +106,7 @@ class AdminView extends View
                 $child_menu_icon_config = $menu_icon_config[1];
             } else {
                 $icon = $menu_icon_config;
-                $child_menu_icon_config = array();
+                $child_menu_icon_config = [];
             }
 
             $m['icon'] = $icon;
@@ -120,7 +133,7 @@ class AdminView extends View
                     }
                 }
             } else {
-                $m['child_menu'] = array();
+                $m['child_menu'] = [];
             }
         }
 
@@ -213,6 +226,17 @@ class AdminView extends View
     }
 
     /**
+     * 获取主题风格
+     *
+     * @return string
+     * @throws CoreException
+     */
+    function getTheme()
+    {
+        return $this->getAuth('theme') ?: 'skin-black';
+    }
+
+    /**
      * 分页方法
      *
      * @param array $data
@@ -223,16 +247,16 @@ class AdminView extends View
     {
         $data['pagination_class'] = $class;
         if (!isset($data['link'])) {
-            $params = array();
+            $params = [];
             $current_controller = lcfirst($this->controller);
             $controller = "{$current_controller}:{$this->action}";
         } elseif (is_array($data['link']) && $data['link'][1]) {
             list($controller, $params) = $data['link'];
         } elseif (is_array($data['link'])) {
-            $params = array();
+            $params = [];
             $controller = $data['link'][0];
         } else {
-            $params = array();
+            $params = [];
             $controller = $data['link'];
         }
 

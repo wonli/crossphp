@@ -7,8 +7,9 @@
 
 namespace app\admin\controllers;
 
-use ReflectionException;
+use Cross\Interactive\ResponseData;
 use Cross\Exception\CoreException;
+use ReflectionException;
 use Cross\Core\Helper;
 
 use app\admin\supervise\ApiDocModule;
@@ -87,7 +88,7 @@ class Doc extends Admin
         $currentServerID = 0;
 
         $this->data['doc'] = $data;
-        $this->data['data'] = array();
+        $this->data['data'] = [];
         $this->data['doc_id'] = $doc_id;
         $this->data['user_data'] = $userData;
         $this->data['current_sid'] = $currentServerID;
@@ -117,18 +118,19 @@ class Doc extends Admin
 
             //更新文档数据
             $updateStatus = $this->getInitApiData($doc_id, $apiServer['api_addr'], $data['doc_token']);
-            if ($updateStatus['status'] != 1) {
-                $data = array_merge($this->data, $updateStatus);
+            $updateData = $updateStatus->getDataContent();
+            if ($updateStatus->getStatus() != 1) {
+                $data = array_merge($this->data, $updateData);
                 $this->display($data, 'index');
                 return;
             }
 
-            $apiServer['cache_name'] = $updateStatus['message']['cache_name'];
-            $apiServer['cache_file'] = $updateStatus['message']['cache_file'];
+            $apiServer['cache_name'] = $updateData['cache_name'];
+            $apiServer['cache_file'] = $updateData['cache_file'];
             $apiServer['cache_at'] = time();
             $servers[$currentServerID] = $apiServer;
             $this->ADM->update($data['id'], [
-                'servers' => json_encode($servers)
+                'servers' => json_encode($servers, JSON_UNESCAPED_UNICODE)
             ]);
 
             $docData = Spyc::YAMLLoad($apiServer['cache_file']);
@@ -149,12 +151,12 @@ class Doc extends Admin
     function initApiData()
     {
         $status = 1;
-        $apiAddr = &$_REQUEST['api_addr'];
+        $apiAddr = $this->request->getRequestData()['api_addr'];
         if (empty($apiAddr)) {
             $status = 100711;
         }
 
-        $docToken = &$_REQUEST['doc_token'];
+        $docToken = $this->request->getRequestData()['doc_token'];
         if (empty($docToken)) {
             $status = 100701;
         }
@@ -166,12 +168,12 @@ class Doc extends Admin
         }
 
         $updateStatus = $this->getInitApiData(0, $apiAddr, $docToken);
-        if ($updateStatus['status'] != 1) {
+        if ($updateStatus->getStatus() != 1) {
             $this->display($updateStatus, 'JSON');
             return;
         }
 
-        $this->data['data'] = $updateStatus['message'];
+        $this->data['data'] = $updateStatus->getDataContent();
         $this->display($this->data, 'JSON');
     }
 
@@ -183,11 +185,12 @@ class Doc extends Admin
      */
     function codeSegment()
     {
-        $docId = &$_POST['doc_id'];
-        $method = &$_POST['method'];
-        $params = &$_POST['params'];
-        $apiUrl = &$_POST['api'];
-        $apiPath = &$_POST['path'];
+        $postData = $this->request->getPostData();
+        $docId = &$postData['doc_id'];
+        $method = &$postData['method'];
+        $params = &$postData['params'];
+        $apiUrl = &$postData['api'];
+        $apiPath = &$postData['path'];
 
         $data = $this->getApiCurlData($docId, $apiUrl, $method, $params);
         if (!empty($data) && is_array($data)) {
@@ -238,7 +241,7 @@ class Doc extends Admin
         }
 
         $params = [];
-        foreach ($_REQUEST as $k => $v) {
+        foreach ($this->request->getRequestData() as $k => $v) {
             if (!isset($this->params[$k])) {
                 $params[$k] = $v;
             }
@@ -271,9 +274,9 @@ class Doc extends Admin
      * @return array|mixed
      * @throws CoreException
      */
-    function getApiCurlData($docId, $apiUrl, $method, &$params = array())
+    function getApiCurlData($docId, $apiUrl, $method, &$params = [])
     {
-        $headerParams = array();
+        $headerParams = [];
         if (!empty($docId)) {
             $doc = $this->ADM->get($docId);
             if (!empty($doc['header_params'])) {
@@ -312,11 +315,12 @@ class Doc extends Admin
      */
     function generator()
     {
-        $data = array();
+        $data = [];
         $show_input = true;
         if ($this->isPost()) {
             $show_input = false;
-            $json = &$_POST['json'];
+            $postData = $this->request->getPostData();
+            $json = &$postData['json'];
             if (!empty($json)) {
                 $json = str_replace(["\r\n", "\r", "\n"], "", $json);
                 if (false !== ($inputData = json_decode($json, true)) && is_array($inputData)) {
@@ -380,8 +384,9 @@ class Doc extends Admin
             return;
         }
 
+        $postData = $this->request->getPostData();
         if ($this->isPost()) {
-            foreach ($_POST as $k => $v) {
+            foreach ($postData as $k => $v) {
                 switch ($k) {
                     case ApiDocModule::KEY_HEADERPARAMS:
                     case ApiDocModule::KEY_GLOBALPARAMS:
@@ -400,7 +405,7 @@ class Doc extends Admin
             }
         }
 
-        $hash = &$_POST['hash'];
+        $hash = &$postData['hash'];
         $url = $this->view->url("doc:{$doc_id}");
         if ($hash) {
             $url .= '#!' . $hash;
@@ -425,8 +430,9 @@ class Doc extends Admin
     function action()
     {
         if ($this->isPost()) {
-            $siteName = &$_POST['name'];
-            $docToken = &$_POST['doc_token'];
+            $postData = $this->request->getPostData();
+            $siteName = &$postData['name'];
+            $docToken = &$postData['doc_token'];
             if (!$siteName) {
                 $this->dieJson($this->getStatus(100703));
                 return;
@@ -437,8 +443,8 @@ class Doc extends Admin
                 return;
             }
 
-            $servers = array();
-            $devs = &$_POST['dev'];
+            $servers = [];
+            $devs = &$postData['dev'];
             if (!empty($devs)) {
                 foreach ($devs as $d) {
                     if (!empty($d['cache_name']) && !empty($d['api_addr'])) {
@@ -448,8 +454,8 @@ class Doc extends Admin
                 }
             }
 
-            $global_params = array();
-            $global = $_POST['global'];
+            $global_params = [];
+            $global = $postData['global'];
             if (!empty($global)) {
                 foreach ($global as $g) {
                     $key = trim($g['key']);
@@ -460,8 +466,8 @@ class Doc extends Admin
                 }
             }
 
-            $header_params = array();
-            $header = $_POST['header'];
+            $header_params = [];
+            $header = $postData['header'];
             if (!empty($header)) {
                 foreach ($header as $g) {
                     $key = trim($g['key']);
@@ -474,9 +480,9 @@ class Doc extends Admin
 
             $saveData = [
                 'name' => $siteName,
-                'servers' => json_encode($servers),
-                'global_params' => json_encode($global_params),
-                'header_params' => json_encode($header_params),
+                'servers' => json_encode($servers, JSON_UNESCAPED_UNICODE),
+                'global_params' => json_encode($global_params, JSON_UNESCAPED_UNICODE),
+                'header_params' => json_encode($header_params, JSON_UNESCAPED_UNICODE),
                 'doc_token' => $docToken,
                 'last_update_admin' => $this->u,
             ];
@@ -502,7 +508,7 @@ class Doc extends Admin
                     break;
 
                 default:
-                    $this->data['data'] = array();
+                    $this->data['data'] = [];
             }
         }
 
@@ -533,10 +539,10 @@ class Doc extends Admin
      * @param int $docId
      * @param string $apiAddr
      * @param string $docToken
-     * @return array|string
+     * @return ResponseData
      * @throws CoreException
      */
-    protected function getInitApiData($docId, $apiAddr, $docToken)
+    protected function getInitApiData($docId, $apiAddr, $docToken): ResponseData
     {
         $requestParams = http_build_query([
             'doc_token' => md5(md5($docToken . TIME) . TIME),
@@ -546,16 +552,16 @@ class Doc extends Admin
         $url = $apiAddr . '?' . $requestParams;
         $response = Helper::curlRequest($url);
         if (($responseData = json_decode($response, true)) === false) {
-            return $this->getStatus(100705, $url);
+            return $this->responseData(100705, ['url' => $url]);
         }
 
         $responseData['api_url'] = $url;
         if (empty($responseData['status']) || $responseData['status'] != 1) {
-            return $this->getStatus(100705, $responseData);
+            return $this->responseData(100705, ['responseData' => $responseData]);
         }
 
         if (empty($responseData['data'])) {
-            return $this->getStatus(100706, $responseData);
+            return $this->responseData(100706, ['responseData' => $responseData]);
         }
 
         $data = &$responseData['data'];
@@ -627,7 +633,7 @@ class Doc extends Admin
         $ret = file_put_contents($cache_file, $a);
 
         if (!$ret) {
-            return $this->getStatus(100720, $url);
+            return $this->responseData(100720, ['url' => $url]);
         }
 
         $data = [
@@ -638,6 +644,6 @@ class Doc extends Admin
             'user' => $this->u
         ];
 
-        return $this->result(1, $data);
+        return $this->responseData(1, $data);
     }
 }

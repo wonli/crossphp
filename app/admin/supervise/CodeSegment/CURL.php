@@ -43,14 +43,14 @@ class CURL
      *
      * @var array
      */
-    protected $params = array();
+    protected $params = [];
 
     /**
      * 附加的header参数
      *
      * @var array
      */
-    protected $headerParams = array();
+    protected $headerParams = [];
 
 
     /**

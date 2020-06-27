@@ -20,18 +20,18 @@
                 </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($data['u'] as $u) : ?>
+                <?php foreach ($data['u']??[] as $u) : ?>
                     <tr>
                         <td>
-                            <p class="form-control-static"><?php echo $u['id'] ?></p>
+                            <p class="form-control-static"><?= $u['id'] ?></p>
                         </td>
                         <td>
                             <input type="text" class="form-control"
-                                   name="a[<?php echo $u['id'] ?>][name]" value="<?php echo $u['name'] ?>"/>
+                                   name="a[<?= $u['id'] ?>][name]" value="<?= $u['name'] ?>"/>
                         </td>
                         <td>
                             <input type="text" class="form-control"
-                                   name="a[<?php echo $u['id'] ?>][password]" value="<?php echo $u['password'] ?>"/>
+                                   name="a[<?= $u['id'] ?>][password]" value="<?= $u['password'] ?>"/>
                         </td>
                         <td>
                             <?php $this->statusCheckbox($u['id'], $u['t']) ?>

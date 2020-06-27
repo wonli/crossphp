@@ -6,6 +6,7 @@
 namespace app\admin\supervise;
 
 use Cross\Exception\CoreException;
+use Cross\Interactive\ResponseData;
 
 /**
  * 密保卡
@@ -26,7 +27,7 @@ class SecurityModule extends AdminModule
     {
         $str_x = '123456789';
         $str_y = 'ABCEDEGHI';
-        $code = array();
+        $code = [];
 
         for ($i = 0; $i < 9; $i++) {
             for ($k = 0; $k < 9; $k++) {
@@ -43,16 +44,16 @@ class SecurityModule extends AdminModule
      * 绑定密保卡
      *
      * @param $bind_user
-     * @return int
+     * @return ResponseData
      * @throws CoreException
      */
-    function bindCard($bind_user)
+    function bindCard($bind_user): ResponseData
     {
         $card_data = $this->makeSecurityCode();
         $is_bind = $this->checkBind($bind_user);
 
         if ($is_bind) {
-            return $this->result(100500);
+            return $this->responseData(100500);
         } else {
             $data = array(
                 'card_data' => $card_data,
@@ -60,11 +61,11 @@ class SecurityModule extends AdminModule
             );
 
             $card_id = $this->link->add($this->t_security_card, $data);
-            if ($card_id) {
-                return $this->result(1);
+            if (false !== $card_id) {
+                return $this->responseData(1);
             }
 
-            return $this->result(100501);
+            return $this->responseData(100501);
         }
     }
 
@@ -72,27 +73,23 @@ class SecurityModule extends AdminModule
      * 更新密保卡
      *
      * @param string $bind_user
-     * @return int
+     * @return ResponseData
      * @throws CoreException
      */
-    function updateCard($bind_user)
+    function updateCard($bind_user): ResponseData
     {
         $card_data = self::makeSecurityCode();
         $is_bind = $this->checkBind($bind_user);
 
         if ($is_bind) {
-            $data = array(
-                'card_data' => $card_data,
-            );
-
-            $status = $this->link->update($this->t_security_card, $data, array('bind_user' => $bind_user));
+            $status = $this->link->update($this->t_security_card, ['card_data' => $card_data], ['bind_user' => $bind_user]);
             if ($status !== false) {
-                return $this->result(1);
+                return $this->responseData(1);
             } else {
-                return $this->result(100502);
+                return $this->responseData(100502);
             }
         } else {
-            return $this->result(100503);
+            return $this->responseData(100503);
         }
     }
 
@@ -101,29 +98,29 @@ class SecurityModule extends AdminModule
      *
      * @param string $bind_user
      * @param bool $check_usc
-     * @return bool
+     * @return ResponseData
      * @throws CoreException
      */
-    function unBind($bind_user, $check_usc = true)
+    function unBind($bind_user, bool $check_usc = true): ResponseData
     {
         $is_bind = $this->checkBind($bind_user);
         if ($is_bind) {
-            if($check_usc) {
+            if ($check_usc) {
                 $AU = new AdminUserModule();
                 $ai = $AU->getAdminInfo(array('name' => $bind_user));
                 if ($ai['usc'] != 1) {
-                    return $this->result(100521);
+                    return $this->responseData(100521);
                 }
             }
 
             $del_status = $this->link->del($this->t_security_card, array('bind_user' => $bind_user));
             if ($del_status) {
-                return $this->result(1);
+                return $this->responseData(1);
             } else {
-                return $this->result(100520);
+                return $this->responseData(100520);
             }
         } else {
-            return $this->result(100503);
+            return $this->responseData(100503);
         }
     }
 
@@ -148,21 +145,21 @@ class SecurityModule extends AdminModule
      * 返回密保卡数据
      *
      * @param $bind_user
-     * @return int
+     * @return ResponseData
      * @throws CoreException
      */
-    function securityData($bind_user)
+    function securityData($bind_user): ResponseData
     {
         $is_bind = $this->checkBind($bind_user);
         if ($is_bind) {
             $data = $this->getSecurityData($bind_user);
             if ($data[0] != -1) {
-                return $this->result(1, $data[1]);
+                return $this->responseData(1, $data[1]);
             } else {
-                return $this->result(100510);
+                return $this->responseData(100510);
             }
         } else {
-            return $this->result(100503);
+            return $this->responseData(100503);
         }
     }
 
@@ -170,75 +167,74 @@ class SecurityModule extends AdminModule
      * 输出密保卡图片
      *
      * @param $bind_user
-     * @return array|string|bool
+     * @return void|ResponseData
      * @throws CoreException
      */
     function makeSecurityCardImage($bind_user)
     {
         $is_bind = $this->checkBind($bind_user);
         if (!$is_bind) {
-            return $this->result(100503);
+            return $this->responseData(100503);
         }
 
         $data = $this->securityData($bind_user);
-        if ($data['status'] != 1) {
-            return $this->result($data['status']);
-        } else {
-            $data = $data['message'];
-            $im = imagecreatetruecolor(520, 520);
-            // 设置背景为白色
-            imagefilledrectangle($im, 31, 31, 520, 520, 0xFFFFFF);
+        if ($data->getStatus() != 1) {
+            return $data;
+        }
 
-            $front = 5;
-            $_space = 50;
-            $_margin = 20;
+        $data = $data->getDataContent();
+        $im = imagecreatetruecolor(520, 520);
+        // 设置背景为白色
+        imagefilledrectangle($im, 31, 31, 520, 520, 0xFFFFFF);
 
-            $_y = $_x = $_i = 0;
-            if (is_array($data)) {
-                $color = imagecolorallocate($im, 45, 45, 45);
-                $color2 = imagecolorallocate($im, 205, 205, 205);
+        $front = 5;
+        $_space = 50;
+        $_margin = 20;
 
-                imageline($im, $_x + 30, 0, $_x + 30, 480, $color);
-                imageline($im, 0, 0, 0, 480, $color);
+        $_y = $_x = $_i = 0;
+        if (is_array($data)) {
+            $color = imagecolorallocate($im, 45, 45, 45);
+            $color2 = imagecolorallocate($im, 205, 205, 205);
 
-                imageline($im, 0, $_y + 30, 480, $_x + 30, $color);
-                imageline($im, 0, 0, 480, 0, $color);
+            imageline($im, $_x + 30, 0, $_x + 30, 480, $color);
+            imageline($im, 0, 0, 0, 480, $color);
 
-                foreach ($data as $y => $c) {
-                    ++$_i;
+            imageline($im, 0, $_y + 30, 480, $_x + 30, $color);
+            imageline($im, 0, 0, 480, 0, $color);
 
-                    imagestring($im, $front, $_margin - 10, $_y + $_space, $y, 0xFFBB00);
-                    imagestring($im, $front, $_x + $_space, $_margin - 10, $_i, 0xFFBB00);
+            foreach ($data as $y => $c) {
+                ++$_i;
 
-                    $code_location = 0;
-                    $_x = $_y += $_space;
-                    foreach ($c as $code_index => $code) {
-                        if ($_i == $code_index) {
-                            $char_color = 0x009933;
-                        } else {
-                            $char_color = 0x666666;
-                        }
+                imagestring($im, $front, $_margin - 10, $_y + $_space, $y, 0xFFBB00);
+                imagestring($im, $front, $_x + $_space, $_margin - 10, $_i, 0xFFBB00);
 
-                        $code_location += $_space;
-                        imagestring($im, $front, $code_location, $_y, $code, $char_color);
+                $code_location = 0;
+                $_x = $_y += $_space;
+                foreach ($c as $code_index => $code) {
+                    if ($_i == $code_index) {
+                        $char_color = 0x009933;
+                    } else {
+                        $char_color = 0x666666;
                     }
 
-                    imageline($im, $_x + 30, 0, $_x + 30, 480, $color);
-                    imageline($im, 0, $_y + 30, 480, $_x + 30, $color);
-
+                    $code_location += $_space;
+                    imagestring($im, $front, $code_location, $_y, $code, $char_color);
                 }
 
-                imagestring($im, $front, 350, $_y + 46, "power by crossphp", 0xCCCCCC);
+                imageline($im, $_x + 30, 0, $_x + 30, 480, $color);
+                imageline($im, 0, $_y + 30, 480, $_x + 30, $color);
 
-                imageline($im, 519, 519, 500, 520, $color2);
-                imageline($im, 519, 519, 520, 500, $color2);
             }
 
-            header('Content-Type: image/png');
-            header('Content-Disposition: attachment; filename=' . ucfirst($bind_user) . '_SecurityCard.png');
-            imagepng($im);
-            return true;
+            imagestring($im, $front, 350, $_y + 46, "power by crossphp", 0xCCCCCC);
+
+            imageline($im, 519, 519, 500, 520, $color2);
+            imageline($im, 519, 519, 520, 500, $color2);
         }
+
+        header('Content-Type: image/png');
+        header('Content-Disposition: attachment; filename=' . ucfirst($bind_user) . '_SecurityCard.png');
+        imagepng($im);
     }
 
     /**
@@ -283,7 +279,7 @@ class SecurityModule extends AdminModule
 
         if ($is_bind) {
             $data = $this->link->get($this->t_security_card, '*', array('bind_user' => $bind_user));
-            return array($data['ext_time'], json_decode($data['card_data'], true));
+            return [$data['ext_time'], json_decode($data['card_data'], true)];
         }
 
         return false;
@@ -317,12 +313,13 @@ class SecurityModule extends AdminModule
      * 生成密保卡数据
      *
      * @param bool $is_serialize
-     * @internal param $
      * @return array|string
+     * @internal param $
      */
-    private function makeSecurityCode($is_serialize = true)
+    private
+    function makeSecurityCode($is_serialize = true)
     {
-        $security = array();
+        $security = [];
         $str = '3456789ABCDEFGHJKMNPQRSTUVWXY';
 
         for ($k = 65; $k < 74; $k++) {

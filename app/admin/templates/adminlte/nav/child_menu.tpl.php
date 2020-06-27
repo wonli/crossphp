@@ -22,10 +22,10 @@
                 $class = 'active';
             }
             ?>
-            <li class="<?php echo $class ?>">
-                <a href="<?php echo $link ?>" target="<?php echo $target ?>">
-                    <i class="<?php echo $icon ?>"></i>
-                    <?php echo $m['name'] ?>
+            <li class="<?= $class ?>">
+                <a href="<?= $link ?>" target="<?= $target ?>">
+                    <i class="<?= $icon ?>"></i>
+                    <?= $m['name'] ?>
                 </a>
             </li>
             <?php

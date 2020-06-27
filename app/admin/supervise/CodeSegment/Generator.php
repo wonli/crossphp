@@ -19,7 +19,7 @@ class Generator
     function run(array $data, $s = false)
     {
         if (is_array($data)) {
-            $struct = array();
+            $struct = [];
             $this->getStruct($data, $struct);
             if ($s) {
                 return $struct;
@@ -42,7 +42,7 @@ class Generator
      * @param array $data
      * @param array $struct
      */
-    private function getStruct(array $data, &$struct = array())
+    private function getStruct(array $data, &$struct = [])
     {
         if (!empty($data)) {
             if (!$this->isAssoc($data)) {
@@ -67,7 +67,7 @@ class Generator
                         }
                     }
 
-                    $child = array();
+                    $child = [];
                     $this->getStruct($data2, $child);
 
                     if ($is_list) {
@@ -79,7 +79,7 @@ class Generator
                     }
 
                 } else if (is_array($value) && empty($value)) {
-                    $struct[$key] = array();
+                    $struct[$key] = [];
                 } else {
                     if ($value === '') {
                         $type = 'string';
@@ -107,7 +107,7 @@ class Generator
      * @param array $list
      * @param array $data
      */
-    private function getArrayMaxMember(array $list, &$data = array())
+    private function getArrayMaxMember(array $list, &$data = [])
     {
         if (!empty($list)) {
             foreach ($list as $a) {
@@ -145,7 +145,7 @@ class Generator
      */
     private function isAssoc(array $data)
     {
-        if (array() === $data) return false;
+        if ([] === $data) return false;
         return array_keys($data) !== range(0, count($data) - 1);
     }
 }

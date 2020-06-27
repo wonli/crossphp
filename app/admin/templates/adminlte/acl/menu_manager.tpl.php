@@ -28,14 +28,14 @@ $customMenuNamePrefix = sprintf('customMenu[%s][0]', $menu['id']);
                         <tr>
                             <td>
                                 <p class="form-control-static">
-                                    <?php echo $this->e($set, 'id', '+') ?>
+                                    <?= $this->e($set, 'id', '+') ?>
                                 </p>
-                                <input type="hidden" name="<?php echo $namePrefix ?>[id]"
-                                       value="<?php echo $this->e($set, 'id') ?>">
+                                <input type="hidden" name="<?= $namePrefix ?>[id]"
+                                       value="<?= $this->e($set, 'id') ?>">
                             </td>
                             <td>
-                                <input type="text" class="form-control" name="<?php echo $namePrefix ?>[name]"
-                                       value="<?php echo $this->e($set, 'name') ?>"/>
+                                <input type="text" class="form-control" name="<?= $namePrefix ?>[name]"
+                                       value="<?= $this->e($set, 'name') ?>"/>
                             </td>
                             <td>
                                 <?php
@@ -53,13 +53,13 @@ $customMenuNamePrefix = sprintf('customMenu[%s][0]', $menu['id']);
                             </td>
                             <td>
                                 <p class="form-control-static text-center">
-                                    <input type="checkbox" name="<?php echo $namePrefix ?>[display]"
+                                    <input type="checkbox" name="<?= $namePrefix ?>[display]"
                                            <?php if (isset($set["display"]) && $set["display"] == 1) : ?>checked<?php endif; ?>/>
                                 </p>
                             </td>
                             <td>
-                                <input type="text" class="form-control" name="<?php echo $namePrefix ?>[order]"
-                                       value="<?php echo $this->e($set, 'order') ?>"/>
+                                <input type="text" class="form-control" name="<?= $namePrefix ?>[order]"
+                                       value="<?= $this->e($set, 'order') ?>"/>
                             </td>
                             <td>
                                 <p class="form-control-static">
@@ -104,20 +104,20 @@ $customMenuNamePrefix = sprintf('customMenu[%s][0]', $menu['id']);
                 } ?>
 
                 <tr>
-                    <td>+<input type="hidden" name="<?php echo $customMenuNamePrefix ?>[type]" value="2"></td>
+                    <td>+<input type="hidden" name="<?= $customMenuNamePrefix ?>[type]" value="2"></td>
                     <td>
-                        <input type="text" class="form-control" name="<?php echo $customMenuNamePrefix ?>[name]"/>
+                        <input type="text" class="form-control" name="<?= $customMenuNamePrefix ?>[name]"/>
                     </td>
                     <td>
-                        <input type="text" class="form-control" name="<?php echo $customMenuNamePrefix ?>[link]"/>
+                        <input type="text" class="form-control" name="<?= $customMenuNamePrefix ?>[link]"/>
                     </td>
                     <td>
                         <p class="form-control-static text-center">
-                            <input type="checkbox" name="<?php echo $customMenuNamePrefix ?>[display]"/>
+                            <input type="checkbox" name="<?= $customMenuNamePrefix ?>[display]"/>
                         </p>
                     </td>
                     <td>
-                        <input type="text" class="form-control" name="<?php echo $customMenuNamePrefix ?>[order]"/>
+                        <input type="text" class="form-control" name="<?= $customMenuNamePrefix ?>[order]"/>
                     </td>
                     <td>
                         <p class="form-control-static">自定义菜单</p>

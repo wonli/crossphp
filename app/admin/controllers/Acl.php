@@ -58,12 +58,13 @@ class Acl extends Admin
     {
         $id = (int)$this->params['id'];
         if ($this->isPost()) {
-            if (!empty($_POST['menu'])) {
-                $this->ACL->saveMenu($_POST['menu']);
+            $postData = $this->request->getPostData();
+            if (!empty($postData['menu'])) {
+                $this->ACL->saveMenu($postData['menu']);
             }
 
-            if (!empty($_POST['customMenu'])) {
-                $this->ACL->saveMenu($_POST['customMenu']);
+            if (!empty($postData['customMenu'])) {
+                $this->ACL->saveMenu($postData['customMenu']);
             }
 
             $this->returnReferer();
@@ -89,12 +90,13 @@ class Acl extends Admin
     function navManager()
     {
         if ($this->isPost()) {
-            if (!empty($_POST['addNav'])) {
-                $this->ACL->saveNav($_POST['addNav']);
+            $postData = $this->request->getPostData();
+            if (!empty($postData['addNav'])) {
+                $this->ACL->saveNav($postData['addNav']);
             }
 
-            if (!empty($_POST['nav'])) {
-                $this->ACL->saveNav($_POST['nav']);
+            if (!empty($postData['nav'])) {
+                $this->ACL->saveNav($postData['nav']);
             }
 
             $this->to('acl:navManager');
@@ -139,24 +141,24 @@ class Acl extends Admin
     function addRole()
     {
         $menu_list = $this->ACL->initMenuList();
-
         if ($this->isPost()) {
-            if (!empty($_POST['name']) && !empty($_POST['menu_id'])) {
-                $menu_set = $_POST ['menu_id'];
-                $ret = $this->ACL->saveRoleMenu($_POST['name'], $menu_set);
+            $postData = $this->request->getPostData();
+            if (!empty($postData['name']) && !empty($postData['menu_id'])) {
+                $menu_set = $postData ['menu_id'];
+                $ret = $this->ACL->saveRoleMenu($postData['name'], $menu_set);
 
-                if ($ret['status'] == 1) {
+                if ($ret->getStatus() == 1) {
                     $this->to('acl:roleList');
                     return;
                 } else {
-                    $data ['status'] = $ret['status'];
+                    $data['status'] = $ret['status'];
                 }
             } else {
-                $this->data ['status'] = 100670;
+                $this->data['status'] = 100670;
             }
         }
 
-        $this->data ['menu_list'] = $menu_list;
+        $this->data['menu_list'] = $menu_list;
         $this->display($this->data);
     }
 
@@ -169,8 +171,9 @@ class Acl extends Admin
     {
         $this->data ['role_list'] = $this->ACL->getRoleList();
         if ($this->isPost()) {
-            $ret = $this->ACL->editRoleMenu($_POST['rid'], $_POST['name'], $_POST['menu_id']);
-            if ($ret['status'] == 1) {
+            $postData = $this->request->getPostData();
+            $ret = $this->ACL->editRoleMenu($postData['rid'] ?? '', $postData['name'] ?? '', $postData['menu_id'] ?? '');
+            if ($ret->getStatus() == 1) {
                 $this->to("acl:roleList");
             }
         }
@@ -201,7 +204,8 @@ class Acl extends Admin
         }
 
         if ($this->isPost()) {
-            $this->ACL->editRoleMenu($rid, $_POST['name'], $_POST['menu_id']);
+            $postData = $this->request->getPostData();
+            $this->ACL->editRoleMenu($rid, $postData['name'] ?? '', $postData['menu_id'] ?? '');
             $this->to('acl:editRole', ['rid' => $this->params['rid']]);
             return;
         }
@@ -222,7 +226,7 @@ class Acl extends Admin
     function delRole()
     {
         $is_ajax = $this->isAjax();
-        $rid = $is_ajax ? (int)$_GET['rid'] : (int)$this->params['rid'];
+        $rid = $is_ajax ? (int)$this->request->getGetData()['rid'] : (int)$this->params['rid'];
 
         $ret = $this->ACL->delRole($rid);
         if ($is_ajax) {
@@ -244,8 +248,10 @@ class Acl extends Admin
 
         if ($this->isPost()) {
             $error = 0;
-            $a = &$_POST['a'];
+            $postData = $this->request->getPostData();
+            $a = $postData['a'] ?? [];
             foreach ($a as $k => $v) {
+                $ret = $this->getResponseData(1);
                 if (isset($v['t']) && ($v['t'] == 'on' || $v['t'] == 1)) {
                     $v['t'] = 1;
                 } else {
@@ -261,20 +267,19 @@ class Acl extends Admin
                 if (0 == strcmp($k, '+')) {
                     if (!empty($v ['name']) && !empty($v ['password'])) {
                         $ret = $this->ADMIN->addAdmin($v);
-                    } else {
-                        $ret['status'] = 1;
                     }
                 } else {
                     if (!empty($v['name'])) {
                         $ret = $this->ADMIN->update($k, $v);
                     } else {
-                        $ret = $this->ADMIN->del(array('id' => $k));
+                        $ret = $this->ADMIN->del(['id' => $k]);
                     }
                 }
 
-                if ($ret['status'] != 1) {
+                $status = $ret->getStatus();
+                if ($status != 1) {
                     $error++;
-                    $this->data['status'] = $ret['status'];
+                    $this->data['status'] = $status;
                     break;
                 }
             }

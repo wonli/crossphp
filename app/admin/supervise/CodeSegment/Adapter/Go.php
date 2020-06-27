@@ -51,7 +51,7 @@ class Go extends Adapter
     protected function doGen($data, &$code = '', $name = 'Result')
     {
         $i = $j = 65;
-        $json = array();
+        $json = [];
         foreach ($data as $n => $tree) {
             if ($tree['type'] == 'properties') {
                 $json[] = $tree['segment']['json'];

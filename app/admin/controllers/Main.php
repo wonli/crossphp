@@ -55,14 +55,15 @@ class Main extends Controller
     {
         $data['status'] = 1;
         if ($this->isPost()) {
-            if (isset($_POST['user']) && isset($_POST['pwd']) && isset($_POST['v']) && isset($_POST['vv'])) {
-                $check_ret = $this->ADMIN->checkAdmin($_POST['user'], $_POST['pwd'], $_POST['v'], $_POST['vv']);
-                if ($check_ret['status'] == 1) {
-                    $_SESSION['u'] = $check_ret['message'];
+            $postData = $this->request->getPostData();
+            if (isset($postData['user']) && isset($postData['pwd']) && isset($postData['v']) && isset($postData['vv'])) {
+                $check_ret = $this->ADMIN->checkAdmin($postData['user'], $postData['pwd'], $postData['v'], $postData['vv']);
+                if ($check_ret->getStatus() == 1) {
+                    $this->setAuth('u', $check_ret->getDataContent());
                     $this->to('panel');
                     return;
                 } else {
-                    $data['status'] = $check_ret['status'];
+                    $data['status'] = $check_ret->getStatus();
                 }
             } else {
                 $data['status'] = 100230;
@@ -81,8 +82,7 @@ class Main extends Controller
      */
     function logout()
     {
-        $_SESSION = array();
-        session_destroy();
+        $this->setAuth('u', '');
         $this->to();
     }
 }

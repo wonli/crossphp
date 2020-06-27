@@ -17,7 +17,7 @@ class Result
     public $reasone;
     public $code = 1;
 
-    public $data = array();
+    public $data = [];
 
     /**
      * @param mixed $reasone

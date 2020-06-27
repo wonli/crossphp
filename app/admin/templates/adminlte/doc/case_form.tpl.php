@@ -95,7 +95,7 @@ $formFields = &$data['params'];
 
                                                     case 'select':
                                                         if (!empty($options)) {
-                                                            $selectOptions = array();
+                                                            $selectOptions = [];
                                                             $options = explode(' ', trim($options));
                                                             foreach ($options as $op) {
                                                                 list($opValue, $opTxt) = explode('-', $op);

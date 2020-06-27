@@ -1,14 +1,14 @@
-<?php echo $this->makeFileAnnotate($data['author'], $data['name']) ?>
+<?= $this->makeFileAnnotate($data['author'], $data['name']) ?>
 
 
-namespace <?php echo $data['namespace'] ?>;
+namespace <?= $data['namespace'] ?>;
 
 use Cross\Exception\CoreException;
-<?php echo $this->makeUse($data['use']); ?>
+<?= $this->makeUse($data['use']); ?>
 
 
-<?php echo $this->makeClassAnnotate($data['name'], $data['namespace']) ?>
-class <?php echo $data['name'] ?> extends <?php echo $data['extends'] . PHP_EOL ?>
+<?= $this->makeClassAnnotate($data['name'], $data['namespace']) ?>
+class <?= $data['name'] ?> extends <?= $data['extends'] . PHP_EOL ?>
 {
     /**
      * 默认方法

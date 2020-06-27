@@ -32,7 +32,7 @@ if(!empty($data['data'])) {
     $data['struct'] = '';
     $current_tab_name = '';
 } else {
-    $data = array();
+    $data = [];
 }
 ?>
 <div class="modal-dialog modal-lg" role="document">
@@ -40,7 +40,7 @@ if(!empty($data['data'])) {
         <div class="modal-header">
             <?php if($isTransform): ?>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <a href="<?php echo $this->url('doc:generator') ?>">
+                    <a href="<?= $this->url('doc:generator') ?>">
                         <span aria-hidden="true">&times;</span>
                     </a>
                 </button>
@@ -82,8 +82,8 @@ if(!empty($data['data'])) {
                             $lng_class_name = $lng_name_map[$name];
                         }
                         ?>
-                        <div class="<?php echo $class ?>" id="<?php echo $name ?>">
-                            <pre><code class="<?php echo $lng_class_name ?>"><?php echo htmlentities($d) ?></code></pre>
+                        <div class="<?= $class ?>" id="<?= $name ?>">
+                            <pre><code class="<?= $lng_class_name ?>"><?= htmlentities($d) ?></code></pre>
                         </div>
                         <?php
                     }
@@ -91,14 +91,14 @@ if(!empty($data['data'])) {
                 ?>
             </div>
             <?php else : ?>
-            <div><?php echo $emptyTip ?></div>
+            <div><?= $emptyTip ?></div>
             <?php endif ?>
         </div>
     </div>
 </div>
 <script>
     $(document).ready(function () {
-        $('#curl').JSONView(<?php echo $curlData ?>, {collapsed: false});
-        $('#struct').JSONView(<?php echo $structData ?>, {collapsed: false});
+        $('#curl').JSONView(<?= $curlData ?>, {collapsed: false});
+        $('#struct').JSONView(<?= $structData ?>, {collapsed: false});
     });
 </script>

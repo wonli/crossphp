@@ -3,14 +3,14 @@
         <tr>
             <td></td>
             <?php for ($i = 1; $i <= 9; $i++) : ?>
-                <td class="g"><?php echo $i ?></td>
+                <td class="g"><?= $i ?></td>
             <?php endfor ?>
         </tr>
         <?php foreach ($data as $k => $v) : ?>
             <tr>
-                <td class="g"><?php echo $k ?></td>
+                <td class="g"><?= $k ?></td>
                 <?php for ($i = 1; $i <= 9; $i++) : ?>
-                    <td class="b"><?php echo $v[$i] ?></td>
+                    <td class="b"><?= $v[$i] ?></td>
                 <?php endfor ?>
             </tr>
         <?php endforeach ?>

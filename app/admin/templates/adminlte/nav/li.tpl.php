@@ -12,11 +12,11 @@ if ($data['child_node_num'] > 0) {
 }
 ?>
 
-<li class="<?php echo $data['class'] ?>">
-    <a href="<?php echo $data['link'] ?>" target="<?php echo $data['target'] ?>">
-        <i class="<?php echo $data['icon_name'] ?>"></i>
-        <span><?php echo $data['name'] ?></span>
-        <?php echo $add_icon ?>
+<li class="<?= $data['class'] ?>">
+    <a href="<?= $data['link'] ?>" target="<?= $data['target'] ?>">
+        <i class="<?= $data['icon_name'] ?>"></i>
+        <span><?= $data['name'] ?></span>
+        <?= $add_icon ?>
     </a>
 
     <?php

@@ -11,9 +11,9 @@
                                 角色名称
                             </div>
                             <input type="text" class="form-control" name="name" id=""
-                                   value="<?php echo $data['role_info']['name'] ?>"/>
+                                   value="<?= $data['role_info']['name'] ?>"/>
                         </div>
-                        <input type="hidden" name="rid" value="<?php echo $data['role_info']['id'] ?>"/>
+                        <input type="hidden" name="rid" value="<?= $data['role_info']['id'] ?>"/>
                     </td>
                 </tr>
 

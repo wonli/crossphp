@@ -31,7 +31,7 @@ class DocView extends AdminView
      *
      * @param array $data
      */
-    function index($data = array())
+    function index($data = [])
     {
         $this->set(array(
             'layer' => 'doc',
@@ -43,7 +43,7 @@ class DocView extends AdminView
      *
      * @param array $data
      */
-    function setting($data = array())
+    function setting($data = [])
     {
         $table = new Table();
         $table->addHead('name', '名称', '100px');
@@ -81,7 +81,7 @@ class DocView extends AdminView
      *
      * @param array $data
      */
-    function codeSegment($data = array())
+    function codeSegment($data = [])
     {
         $this->set(array(
             'load_layer' => false,
@@ -93,7 +93,7 @@ class DocView extends AdminView
     /**
      * @param array $data
      */
-    function curlRequest($data = array())
+    function curlRequest($data = [])
     {
         $this->set(array(
             'layer' => 'doc_response',
@@ -105,7 +105,7 @@ class DocView extends AdminView
     /**
      * @param array $data
      */
-    function generator($data = array())
+    function generator($data = [])
     {
         $this->set(array(
             'layer' => 'generator',
@@ -124,7 +124,7 @@ class DocView extends AdminView
      *
      * @param array $data
      */
-    function action($data = array())
+    function action($data = [])
     {
         $this->renderTpl('doc/save', $data['data']);
     }
@@ -134,7 +134,7 @@ class DocView extends AdminView
      *
      * @param array $data
      */
-    function makeDevServerNode($data = array())
+    function makeDevServerNode($data = [])
     {
         $this->renderTpl('doc/dev_server_node', $data);
     }
@@ -144,7 +144,7 @@ class DocView extends AdminView
      *
      * @param array $data
      */
-    function makeParamsNode($data = array())
+    function makeParamsNode($data = [])
     {
         $this->renderTpl('doc/params_node', $data);
     }
@@ -157,14 +157,12 @@ class DocView extends AdminView
      */
     function makeAddButton($t = 'global')
     {
-        $a = self::htmlTag('a', [
+        return self::htmlTag('a', [
             't' => $t,
             'href' => 'javascript:void(0)',
             'class' => 'addParams btn btn-default',
             '@content' => self::htmlTag('i', ['class' => 'fa fa-plus'])
         ]);
-
-        return $a;
     }
 
     /**
@@ -227,8 +225,8 @@ class DocView extends AdminView
     {
         $data = $this->data['doc'];
         ?>
-        <a class="navbar-brand" href="" title="生成时间 <?php echo $data['last_update_time'] ?>">
-            <?php echo $data['name'] ?>
+        <a class="navbar-brand" href="" title="生成时间 <?= $data['last_update_time'] ?>">
+            <?= $data['name'] ?>
         </a>
         <button id="menuSwitch" type="button" class="menu-switch visible-lg visible-md visible-sm">
             <span class="icon-bar"></span>

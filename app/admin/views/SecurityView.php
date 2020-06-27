@@ -19,7 +19,7 @@ class SecurityView extends AdminView
      *
      * @param array $data
      */
-    function securityCard(array $data = array())
+    function securityCard(array $data = [])
     {
         if (!empty($data['card'])) {
             $this->renderTpl('security/bind_notice');
@@ -33,7 +33,7 @@ class SecurityView extends AdminView
      *
      * @param array $data
      */
-    function profile(array $data = array())
+    function profile(array $data = [])
     {
         $this->renderTpl('security/profile', $data);
     }
@@ -43,7 +43,7 @@ class SecurityView extends AdminView
      *
      * @param $data
      */
-    function changePassword(array $data = array())
+    function changePassword(array $data = [])
     {
         $this->renderTpl('security/change_password', $data);
     }

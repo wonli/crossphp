@@ -19,7 +19,7 @@ class AclView extends AdminView
      *
      * @param $data
      */
-    function index(array $data = array())
+    function index(array $data = [])
     {
         if (!empty($data['menu_list'])) {
             $this->renderTpl('acl/index', $data['menu_list']);
@@ -33,7 +33,7 @@ class AclView extends AdminView
      *
      * @param $data
      */
-    function editMenu(array $data = array())
+    function editMenu(array $data = [])
     {
         $menu = &$data['menu_list'];
         $methodList = &$menu['method'];
@@ -47,7 +47,7 @@ class AclView extends AdminView
      *
      * @param array $data
      */
-    function navManager(array $data = array())
+    function navManager(array $data = [])
     {
         $data['displayConfig'] = array(1 => '');
         $this->renderTpl('acl/nav_manager', $data);
@@ -58,11 +58,11 @@ class AclView extends AdminView
      *
      * @param $data
      */
-    function addRole(array $data = array())
+    function addRole(array $data = [])
     {
         $this->renderTpl("acl/add_role", array(
             'menu_list' => $data['menu_list'],
-            'menu_select' => array(),
+            'menu_select' => [],
         ));
     }
 
@@ -71,7 +71,7 @@ class AclView extends AdminView
      *
      * @param $data
      */
-    function editRole(array $data = array())
+    function editRole(array $data = [])
     {
         $data['menu_select'] = explode(',', $data['role_info']['behavior']);
         $this->renderTpl('acl/role_edit', $data);
@@ -82,7 +82,7 @@ class AclView extends AdminView
      *
      * @param $data
      */
-    function roleList(array $data = array())
+    function roleList(array $data = [])
     {
         if (!empty($data['role_list'])) {
             $this->renderTpl('acl/role_list', $data);
@@ -96,7 +96,7 @@ class AclView extends AdminView
      *
      * @param $data
      */
-    function user(array $data = array())
+    function user(array $data = [])
     {
         if (empty($data['roles'])) {
             $this->text('请先添加角色');
@@ -115,7 +115,7 @@ class AclView extends AdminView
     {
         $role_data = &$this->data['roles'];
         if (!empty($role_data)) {
-            $role_option = array();
+            $role_option = [];
             array_walk($role_data, function ($r) use (&$role_option) {
                 $role_option[$r['id']] = $r['name'];
             });

@@ -75,8 +75,9 @@ class Security extends Admin
         }
 
         if (!empty($actRet)) {
-            if ($actRet['status'] != 1) {
-                $this->data['status'] = $actRet['status'];
+            $status = $actRet->getStatus();
+            if ($status != 1) {
+                $this->data['status'] = $status;
             } else {
                 $this->to('security:securityCard');
                 return;
@@ -98,13 +99,14 @@ class Security extends Admin
      */
     function changePassword()
     {
+        $postData = $this->request->getPostData();
         if ($this->isPost()) {
-            if ($_POST['np1'] != $_POST['np2']) {
+            if (0 !== strcmp($postData['np1'], $postData['np2'])) {
                 $this->data['status'] = 100220;
             } else {
-                $is_right = $this->ADMIN->checkPassword($this->u, $_POST['op']);
+                $is_right = $this->ADMIN->checkPassword($this->u, $postData['op']);
                 if ($is_right) {
-                    $this->ADMIN->updatePassword($this->u, $_POST['np1']);
+                    $this->ADMIN->updatePassword($this->u, $postData['np1']);
                 } else {
                     $this->data['status'] = 100221;
                 }
@@ -123,7 +125,7 @@ class Security extends Admin
     {
         $adminInfo = $this->ADMIN->getAdminInfo(array('id' => $this->uid));
         if ($this->isPost()) {
-            $this->ADMIN->update($this->uid, $_POST);
+            $this->ADMIN->update($this->uid, $this->request->getPostData());
             $this->to('security:profile');
             return;
         }
@@ -133,7 +135,7 @@ class Security extends Admin
         $tplDir = $this->config->get('sys', 'default_tpl_dir');
 
         $hasTheme = false;
-        $tplThemeList = array();
+        $tplThemeList = [];
         if (isset($themeConfig[$tplDir])) {
             $hasTheme = true;
             $tplThemeList = &$themeConfig[$tplDir];
@@ -146,13 +148,13 @@ class Security extends Admin
                     if ($hasTheme && $theme) {
                         $useTheme = &$tplThemeList['themes'][$theme];
                         if ($useTheme && !empty($useTheme['class'])) {
-                            $this->ADMIN->update($this->uid, array('theme' => $useTheme['class']));
+                            $this->ADMIN->update($this->uid, ['theme' => $useTheme['class']]);
+                            $this->setAuth('theme', $useTheme['class']);
                         }
                     }
 
                     $this->to('security:profile');
                     return;
-                    break;
 
                 default:
                     $this->to('security:profile');

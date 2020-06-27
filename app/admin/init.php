@@ -13,7 +13,7 @@ return [
          * 默认支持 COOKIE 和 SESSION, 也可以指定为自定义的类
          * 如: '\lib\MysqlSession' 或 new \lib\MysqlSession()
          */
-        'auth' => 'COOKIE',
+        'auth' => 'session',
         /**
          * 默认的template路径
          */

@@ -95,7 +95,7 @@ abstract class Adapter
                     $data = $data['[list]'];
                 }
 
-                $item = array();
+                $item = [];
                 $this->gen1($data, $item);
 
                 $result[$name] = array(

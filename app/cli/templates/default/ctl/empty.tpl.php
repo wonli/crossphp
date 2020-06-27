@@ -1,1 +1,1 @@
-<?php echo $data['path'].' - ' . $data['author'] .' - ' .  date('Y-m-d H:i:s') . PHP_EOL ;
+<?= $data['path'].' - ' . $data['author'] .' - ' .  date('Y-m-d H:i:s') . PHP_EOL ;

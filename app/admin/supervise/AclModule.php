@@ -6,6 +6,7 @@
 namespace app\admin\supervise;
 
 use Cross\Exception\CoreException;
+use Cross\Interactive\ResponseData;
 use PDO;
 
 use ReflectionException;
@@ -38,11 +39,7 @@ class AclModule extends AdminModule
             'link' => $link
         ));
 
-        if ($menu_id) {
-            return $this->result(1, "保存成功");
-        } else {
-            return $this->result(-1, "保存失败,请联系管理员");
-        }
+        return false !== $menu_id ? true : false;
     }
 
     /**
@@ -54,7 +51,7 @@ class AclModule extends AdminModule
      */
     function delNav($nav_id)
     {
-        return $this->delNavByCondition(array('id = ? or pid = ?', array($nav_id, $nav_id)));
+        return $this->delNavByCondition(['id = ? or pid = ?', [$nav_id, $nav_id]]);
     }
 
     /**
@@ -67,15 +64,15 @@ class AclModule extends AdminModule
     function initMenuList()
     {
         //排除的类名称(基类,登录类等)
-        $ingot_controller = array(
+        $ingot_controller = [
             'Cross\MVC\Controller',
             'Cross\Core\FrameBase',
             'app\admin\controllers\Admin',
             'app\admin\controllers\Main'
-        );
+        ];
 
         //要过滤的类方法
-        $ingot_action = array(
+        $ingot_action = [
             '__construct',
             '__destruct',
             '__toString',
@@ -89,13 +86,13 @@ class AclModule extends AdminModule
             '__set_state',
             '__debug_info',
             '__get'
-        );
+        ];
 
         //一级导航菜单
         $menu_list = $this->getMenuList(0);
         foreach ($menu_list as & $m) {
             //获取子菜单数据及整理菜单格式
-            $c_menu_list = array();
+            $c_menu_list = [];
             $c_menu_data = $this->getMenuList($m['id']);
             foreach ($c_menu_data as $cm) {
                 $c_menu_list[$cm['link']] = $cm;
@@ -103,7 +100,7 @@ class AclModule extends AdminModule
 
             if ($m['type'] == 1) {
                 //控制器文件物理路径
-                $m['method'] = array();
+                $m['method'] = [];
                 $controller_name = ucfirst($m['link']);
                 $controller_file = $this->getFilePath("app::controllers/{$controller_name}.php");
                 if (file_exists($controller_file)) {
@@ -125,7 +122,6 @@ class AclModule extends AdminModule
                     }
 
                     foreach ($method as $mm) {
-
                         if ($mm->class != $fullName) {
                             continue;
                         }
@@ -139,7 +135,7 @@ class AclModule extends AdminModule
                             if (isset($c_menu_list[$mm->name])) {
                                 $m['method'][$mm->name] = $c_menu_list[$mm->name];
                             } else {
-                                $add_data = array();
+                                $add_data = [];
                                 $this->addClassMethodMenu(lcfirst($controller_name), $mm->name, $add_data);
                                 $m['method'][$mm->name] = $add_data;
                             }
@@ -170,7 +166,7 @@ class AclModule extends AdminModule
             ->from("{$this->t_acl_menu} where id={$id} union all select * from {$this->t_acl_menu} where pid={$id}")
             ->stmt()->fetchAll(PDO::FETCH_ASSOC);
 
-        $main = $child = array();
+        $main = $child = [];
         if (!empty($data)) {
             foreach ($data as $d) {
                 if ($d['id'] == $id) {
@@ -197,9 +193,9 @@ class AclModule extends AdminModule
      */
     function getChildMenuData($pid)
     {
-        return $this->link->getAll($this->t_acl_menu, '*', array(
+        return $this->link->getAll($this->t_acl_menu, '*', [
             'pid' => $pid
-        ));
+        ]);
     }
 
     /**
@@ -216,17 +212,17 @@ class AclModule extends AdminModule
                 continue;
             }
 
-            $data = array(
+            $data = [
                 'name' => $p['name'],
                 'link' => $p['link'],
                 'pid' => !empty($p['pid']) ? (int)$p['pid'] : 0,
                 'type' => !empty($p['type']) ? (int)$p['type'] : 1,
                 '`order`' => !empty($p['order']) ? (int)$p['order'] : 0,
                 'display' => !empty($p['display']) ? (int)$p['display'] : 0
-            );
+            ];
 
             if (isset($p['id'])) {
-                $this->link->update($this->t_acl_menu, $data, array('id' => $p['id']));
+                $this->link->update($this->t_acl_menu, $data, ['id' => $p['id']]);
             } else {
                 $this->link->add($this->t_acl_menu, $data);
             }
@@ -278,14 +274,14 @@ class AclModule extends AdminModule
      */
     function getMenu()
     {
-        $menu_list = array();
-        $count = $this->link->get($this->t_acl_menu, 'count(1) cnt', array('pid' => 0));
+        $menu_list = [];
+        $count = $this->link->get($this->t_acl_menu, 'count(1) cnt', ['pid' => 0]);
 
         if (!$count['cnt'] || $count['cnt'] == 0) {
             $this->initMenu4controllers();
         }
 
-        $menu = $this->link->getAll($this->t_acl_menu, '*', array('pid' => 0), '`order` ASC');
+        $menu = $this->link->getAll($this->t_acl_menu, '*', ['pid' => 0], '`order` ASC');
         array_map(function ($m) use (&$menu_list) {
             $menu_list[$m['link']] = $m;
         }, $menu);
@@ -302,8 +298,8 @@ class AclModule extends AdminModule
      */
     function getNavChildMenu($nav_menu)
     {
-        $pidMaps = array();
-        $allChildMenu = $this->getMenuByCondition(array('pid' => array('<>', 0)));
+        $pidMaps = [];
+        $allChildMenu = $this->getMenuByCondition(['pid' => ['<>', 0]]);
         if (!empty($allChildMenu)) {
             array_map(function ($m) use (&$pidMaps) {
                 $pidMaps[$m['pid']][] = $m;
@@ -311,7 +307,7 @@ class AclModule extends AdminModule
         }
 
         array_walk($nav_menu, function (&$m) use ($pidMaps) {
-            $m['child_menu'] = array();
+            $m['child_menu'] = [];
             if (isset($pidMaps[$m['id']])) {
                 $m['child_menu'] = $pidMaps[$m['id']];
             }
@@ -345,11 +341,11 @@ class AclModule extends AdminModule
     function saveMenu(array $menu)
     {
         //已经保存在数据库中的菜单
-        $menu_list = array();
+        $menu_list = [];
         $menu_data = $this->getMenuList();
         foreach ($menu_data as $m) {
             if ($m['pid'] == 0) {
-                $menu_list[$m['id']] = array();
+                $menu_list[$m['id']] = [];
             }
         }
 
@@ -372,23 +368,23 @@ class AclModule extends AdminModule
                         if (empty($change_value['link'])) {
                             $this->delNav($id);
                         } else {
-                            $update = array(
+                            $update = [
                                 'name' => $name,
                                 'link' => $link,
                                 '`order`' => $order,
                                 'display' => $display,
-                            );
-                            $this->link->update($this->t_acl_menu, $update, array('id' => $id));
+                            ];
+                            $this->link->update($this->t_acl_menu, $update, ['id' => $id]);
                         }
                     } else {
-                        $add_data = array(
+                        $add_data = [
                             'pid' => $pid,
                             'type' => $type,
                             'name' => $name,
                             'link' => $link,
                             'order' => $order,
                             'display' => $display
-                        );
+                        ];
 
                         $this->addAclMenuFunction($add_data);
                     }
@@ -405,12 +401,12 @@ class AclModule extends AdminModule
      * @param array $menu_data
      * @throws CoreException
      */
-    function addClassMethodMenu($class, $method, &$menu_data = array())
+    function addClassMethodMenu($class, $method, &$menu_data = [])
     {
-        $class_menu_pid = $this->link->get($this->t_acl_menu, 'id', array(
+        $class_menu_pid = $this->link->get($this->t_acl_menu, 'id', [
             'pid' => 0,
             'link' => lcfirst($class),
-        ));
+        ]);
 
         if (!empty($class_menu_pid['id'])) {
             $add_data['pid'] = $class_menu_pid['id'];
@@ -439,7 +435,7 @@ class AclModule extends AdminModule
         $add_data['pid'] = $data['pid'];
         $add_data['link'] = $data['link'];
         $add_data['name'] = empty($data['name']) ? '' : $data['name'];
-        $add_data['order'] = empty($data['order']) ? 0 : (int)$data['order'];
+        $add_data['`order`'] = empty($data['order']) ? 0 : (int)$data['`order`'];
         $add_data['display'] = isset($data['display']) ? $data['display'] : 0;
         $add_data['type'] = isset($data['type']) ? $data['type'] : 1;
         $data = $add_data;
@@ -478,7 +474,7 @@ class AclModule extends AdminModule
      */
     function delRole($rid)
     {
-        return $this->link->del($this->t_role, array('id' => $rid));
+        return $this->link->del($this->t_role, ['id' => $rid]);
     }
 
     /**
@@ -486,32 +482,32 @@ class AclModule extends AdminModule
      *
      * @param string $menu_name
      * @param array $data
-     * @return array|string
+     * @return ResponseData
      * @throws CoreException
      */
-    function saveRoleMenu($menu_name, $data)
+    function saveRoleMenu($menu_name, $data): ResponseData
     {
         if (!$menu_name) {
-            return $this->result(100610);
+            return $this->responseData(100610);
         }
 
         if (empty($data)) {
-            return $this->result(100620);
+            return $this->responseData(100620);
         }
 
         $save_data ['name'] = $menu_name;
         $save_data ['behavior'] = implode($data, ',');
-        $role_info = $this->link->get($this->t_role, '*', array('name' => $menu_name));
+        $role_info = $this->link->get($this->t_role, '*', ['name' => $menu_name]);
         if ($role_info) {
-            return $this->result(100630);
+            return $this->responseData(100630);
         }
 
         $rid = $this->link->add($this->t_role, $save_data);
         if ($rid) {
-            return $this->result(1, $rid);
+            return $this->responseData(1, ['rid' => $rid]);
         }
 
-        return $this->result(100640);
+        return $this->responseData(100640);
     }
 
     /**
@@ -520,13 +516,13 @@ class AclModule extends AdminModule
      * @param int $rid
      * @param string $menu_name
      * @param array $data
-     * @return array|string
+     * @return ResponseData
      * @throws CoreException
      */
-    function editRoleMenu($rid, $menu_name, $data)
+    function editRoleMenu($rid, $menu_name, $data): ResponseData
     {
         if (!$menu_name) {
-            return $this->result(100610);
+            return $this->responseData(100610);
         }
 
         $save_data ['name'] = $menu_name;
@@ -536,18 +532,18 @@ class AclModule extends AdminModule
             $save_data['behavior'] = trim(implode($data, ','));
         }
 
-        $role_info = $this->link->get($this->t_role, '*', array('id' => $rid));
+        $role_info = $this->link->get($this->t_role, '*', ['id' => $rid]);
         if (!$role_info) {
-            return $this->result(100650);
+            return $this->responseData(100650);
         }
 
         $rid = $role_info['id'];
-        $status = $this->link->update($this->t_role, $save_data, array('id' => $rid));
+        $status = $this->link->update($this->t_role, $save_data, ['id' => $rid]);
         if ($status !== false) {
-            return $this->result(1, $rid);
+            return $this->responseData(1, ['rid' => $rid]);
         }
 
-        return $this->result(100660);
+        return $this->responseData(100660);
     }
 
     /**
@@ -559,7 +555,7 @@ class AclModule extends AdminModule
      */
     function getMenuInfo($id)
     {
-        return $this->link->get($this->t_acl_menu, '*', array('id' => (int)$id));
+        return $this->link->get($this->t_acl_menu, '*', ['id' => (int)$id]);
     }
 
     /**
@@ -571,7 +567,7 @@ class AclModule extends AdminModule
      */
     function getMenuList($pid = null)
     {
-        $condition = array();
+        $condition = [];
         if (null !== $pid) {
             $condition['pid'] = $pid;
         }
@@ -587,13 +583,13 @@ class AclModule extends AdminModule
      * @throws CoreException
      * @throws ReflectionException
      */
-    function getNavList(&$un_save_menu = array())
+    function getNavList(array &$un_save_menu = [])
     {
-        $result = array();
+        $result = [];
         $controllers_lists = $this->scanControllers();
-        $saved_menus = $this->getMenuByCondition(array('pid' => 0), '`order` ASC, type ASC');
+        $saved_menus = $this->getMenuByCondition(['pid' => 0], '`order` ASC, type ASC');
 
-        $saved_menu_link_hash = array();
+        $saved_menu_link_hash = [];
         array_map(function ($m) use (&$saved_menu_link_hash, &$result) {
             $result[$m['id']] = $m;
             $saved_menu_link_hash[$m['link']] = true;
@@ -617,7 +613,7 @@ class AclModule extends AdminModule
      */
     function getChildMenu($pid)
     {
-        return $this->getMenuByCondition(array('pid' => $pid));
+        return $this->getMenuByCondition(['pid' => $pid]);
     }
 
     /**
@@ -632,7 +628,7 @@ class AclModule extends AdminModule
     {
         $result = $this->link->getAll($this->t_acl_menu, '*', $condition, $order);
         if (empty($result)) {
-            $result = array();
+            $result = [];
         }
 
         return $result;
@@ -659,7 +655,7 @@ class AclModule extends AdminModule
      */
     private function scanControllers($hashMap = false)
     {
-        $nav_data = array();
+        $nav_data = [];
         $controller_file = $this->getFilePath('app::controllers');
         foreach (glob(rtrim($controller_file, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*.php') as $f) {
             $fi = pathinfo($f);
@@ -674,11 +670,11 @@ class AclModule extends AdminModule
                 $display = 0;
             }
 
-            $ori_nav_data = array(
+            $ori_nav_data = [
                 'name' => $class_name,
                 'link' => $menuName,
                 'display' => $display
-            );
+            ];
 
             if ($hashMap) {
                 $nav_data[$ori_nav_data['link']] = $ori_nav_data;
@@ -689,5 +685,4 @@ class AclModule extends AdminModule
 
         return $nav_data;
     }
-
 }

@@ -32,9 +32,9 @@ class ApiDocModule extends AdminModule
      */
     function get($id)
     {
-        $data = $this->link->get($this->t_api_doc, '*', array(
+        $data = $this->link->get($this->t_api_doc, '*', [
             'id' => $id,
-        ));
+        ]);
 
         if (!empty($data)) {
             $servers = &$data['servers'];
@@ -46,13 +46,13 @@ class ApiDocModule extends AdminModule
             if (!empty($data['global_params'])) {
                 $data['global_params'] = json_decode($data['global_params'], true);
             } else {
-                $data['global_params'] = array();
+                $data['global_params'] = [];
             }
 
             if (!empty($data['header_params'])) {
                 $data['header_params'] = json_decode($data['header_params'], true);
             } else {
-                $data['header_params'] = array();
+                $data['header_params'] = [];
             }
         }
 
@@ -66,7 +66,7 @@ class ApiDocModule extends AdminModule
      * @return bool|mixed
      * @throws CoreException
      */
-    function add($data = array())
+    function add($data = [])
     {
         return $this->link->add($this->t_api_doc, $data);
     }
@@ -81,9 +81,9 @@ class ApiDocModule extends AdminModule
      */
     function update($id, $data)
     {
-        return $this->link->update($this->t_api_doc, $data, array(
+        return $this->link->update($this->t_api_doc, $data, [
             'id' => (int)$id,
-        ));
+        ]);
     }
 
     /**
@@ -105,13 +105,13 @@ class ApiDocModule extends AdminModule
                         if (!empty($dd['global_params'])) {
                             $dd['global_params'] = json_decode($dd['global_params'], true);
                         } else {
-                            $dd['global_params'] = array();
+                            $dd['global_params'] = [];
                         }
 
                         if (!empty($dd['header_params'])) {
                             $dd['header_params'] = json_decode($dd['header_params'], true);
                         } else {
-                            $dd['header_params'] = array();
+                            $dd['header_params'] = [];
                         }
                     });
                 }
@@ -129,18 +129,18 @@ class ApiDocModule extends AdminModule
      */
     function del($id)
     {
-        $data = $this->link->get($this->t_api_doc, '*', array(
+        $data = $this->link->get($this->t_api_doc, '*', [
             'id' => $id,
-        ));
+        ]);
 
         if (!empty($data)) {
-            $this->link->del($this->t_api_doc, array(
+            $this->link->del($this->t_api_doc, [
                 'id' => $id
-            ));
+            ]);
 
-            $this->link->del($this->t_api_doc_data, array(
+            $this->link->del($this->t_api_doc_data, [
                 'doc_id' => $id
-            ));
+            ]);
 
             $data = json_decode($data['servers'], true);
             foreach ($data as $d) {
@@ -159,11 +159,11 @@ class ApiDocModule extends AdminModule
      */
     function getAllUserData($u, $doc_id)
     {
-        $result = array();
-        $data = $this->link->getAll($this->t_api_doc_data, '*', array(
+        $result = [];
+        $data = $this->link->getAll($this->t_api_doc_data, '*', [
             'u' => $u,
             'doc_id' => $doc_id,
-        ));
+        ]);
 
         if (!empty($data)) {
             array_walk($data, function ($d) use (&$result) {
@@ -186,11 +186,11 @@ class ApiDocModule extends AdminModule
      */
     function getUserData($u, $doc_id, $name)
     {
-        $data = $this->link->get($this->t_api_doc_data, '*', array(
+        $data = $this->link->get($this->t_api_doc_data, '*', [
             'u' => $u,
             'doc_id' => $doc_id,
             'name' => $name,
-        ));
+        ]);
 
         if (!empty($data)) {
             $data['value'] = json_decode($data['value'], true);
@@ -211,12 +211,12 @@ class ApiDocModule extends AdminModule
      */
     function addUserData($u, $doc_id, $name, array $value)
     {
-        $data = array(
+        $data = [
             'u' => $u,
             'doc_id' => $doc_id,
             'name' => $name,
             'value' => json_encode($value),
-        );
+        ];
 
         return $this->link->add($this->t_api_doc_data, $data);
     }
@@ -260,11 +260,9 @@ class ApiDocModule extends AdminModule
      */
     function getCacheData($doc_id)
     {
-        $data = $this->link->select('api_path, api_response')
+        return $this->link->select('api_path, api_response')
             ->from($this->t_api_doc_cache)->where(['doc_id' => $doc_id])
-            ->stmt()->fetchAll(PDO::FETCH_GROUP| PDO::FETCH_KEY_PAIR);
-
-        return $data;
+            ->stmt()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_KEY_PAIR);
     }
 
     /**
@@ -277,9 +275,9 @@ class ApiDocModule extends AdminModule
      */
     function updateUserData($id, array $data)
     {
-        return $this->link->update($this->t_api_doc_data, $data, array(
+        return $this->link->update($this->t_api_doc_data, $data, [
             'id' => (int)$id
-        ));
+        ]);
     }
 
     /**

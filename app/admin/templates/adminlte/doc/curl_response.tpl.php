@@ -98,9 +98,9 @@ if (!empty($data) && isset($data['curl']) && is_array($data['curl'])) {
     </div>
 </div>
 
-<link href="<?php echo $this->res('libs/jquery/jquery.jsonview.min.css') ?>" rel="stylesheet">
-<script src="<?php echo $this->res('libs/jquery/3.2.1/jquery.min.js') ?>"></script>
-<script src="<?php echo $this->res('libs/jquery/jquery.jsonview.min.js') ?>"></script>
+<link href="<?= $this->res('libs/jquery/jquery.jsonview.min.css') ?>" rel="stylesheet">
+<script src="<?= $this->res('libs/jquery/3.2.1/jquery.min.js') ?>"></script>
+<script src="<?= $this->res('libs/jquery/jquery.jsonview.min.js') ?>"></script>
 <script>
     $(document).ready(function () {
         <?php if($jsonView): ?>

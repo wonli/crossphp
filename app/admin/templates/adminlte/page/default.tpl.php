@@ -18,7 +18,7 @@ if (!empty($data)) {
             $attr = array('class' => 'active');
         } else {
             $data['params']['p'] = $i;
-            $attr = array();
+            $attr = [];
             $href = $this->url($data['controller'], $data['params']) . $data['anchor'];
         }
         $page_content .= $this->wrap('li', $attr)->a($i, $href);

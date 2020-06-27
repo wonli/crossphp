@@ -26,7 +26,7 @@ class MainView extends AdminView
      *
      * @param array $data
      */
-    function login(array $data = array())
+    function login(array $data = [])
     {
         $this->renderTpl("main/index", $data);
     }

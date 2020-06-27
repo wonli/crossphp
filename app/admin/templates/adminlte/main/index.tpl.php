@@ -10,9 +10,9 @@
 <div class="form-group has-feedback">
     <div class="input-group">
         <div class="input-group-btn">
-            <button type="button" class="btn btn-default"><?php echo $data['v'] ?></button>
+            <button type="button" class="btn btn-default"><?= $data['v'] ?></button>
         </div>
-        <input type="hidden" name="v" value="<?php echo $data['v'] ?>">
+        <input type="hidden" name="v" value="<?= $data['v'] ?>">
         <input type="text" class="form-control" name="vv" placeholder="密保卡坐标对应的值">
     </div>
 </div>
