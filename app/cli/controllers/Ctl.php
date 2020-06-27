@@ -23,6 +23,14 @@ use Exception;
 class Ctl extends Cli
 {
     /**
+     * @var array
+     */
+    protected $commandAlias = [
+        'c' => 'class|类名称',
+        'v' => 'viewCtl|是否生成视图控制器',
+    ];
+
+    /**
      * @var string
      */
     protected $ctlConfigName = 'config::ctl.config.php';
@@ -69,9 +77,9 @@ class Ctl extends Cli
             return;
         }
 
-        $className = &$this->params['class'];
+        $className = $this->command('class');
         if (empty($className)) {
-            $this->consoleMsg("Please specified class name!");
+            $this->commandTips();
             return;
         }
 
@@ -117,7 +125,7 @@ class Ctl extends Cli
 
         //创建控制器
         $controllerName = ucfirst($className);
-        $appDir = PROJECT_REAL_PATH .'app' . DIRECTORY_SEPARATOR. $config['app'] . DIRECTORY_SEPARATOR;
+        $appDir = PROJECT_REAL_PATH . 'app' . DIRECTORY_SEPARATOR . $config['app'] . DIRECTORY_SEPARATOR;
         $controllerFile = $appDir . 'controllers' . DIRECTORY_SEPARATOR . $controllerName . '.php';
         if (file_exists($controllerFile)) {
             $this->consoleMsg("Controller {$controllerName} already exists!");
@@ -141,7 +149,14 @@ class Ctl extends Cli
 
         //创建视图控制器
         $tplName = '';
-        if ($config['makeViewController']) {
+        $makeViewController = $this->command('viewController');
+        if ($makeViewController) {
+            $makeViewController = $this->getBooleanValueFromString($makeViewController);
+        } else {
+            $makeViewController = &$config['makeViewController'];
+        }
+
+        if ($makeViewController) {
             $viewControllerName = "{$controllerName}View";
             $config['viewControllerName'] = $viewControllerName;
             $config['viewControllerNamespace'] = 'app\\' . $config['app'] . '\\views';

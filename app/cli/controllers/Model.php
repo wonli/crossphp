@@ -21,6 +21,13 @@ use PDO;
 class Model extends Cli
 {
     /**
+     * @var array
+     */
+    protected $commandAlias = [
+        'f' => 'file|model配置文件名称(默认main)'
+    ];
+
+    /**
      * 命名空间前缀
      *
      * @var string
@@ -30,13 +37,12 @@ class Model extends Cli
     /**
      * 生成结构体
      *
-     * @cp_params file=main
      * @param string $name
      * @throws CoreException
      */
     function index($name = '')
     {
-        $fileName = &$this->params['file'];
+        $fileName = $this->command('file', true) ?: 'main';
         $configName = "config::{$fileName}.model.php";
         $propertyFile = $this->getFilePath($configName);
         if (!file_exists($propertyFile)) {
