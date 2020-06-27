@@ -118,13 +118,13 @@ class Doc extends Admin
 
             //更新文档数据
             $updateStatus = $this->getInitApiData($doc_id, $apiServer['api_addr'], $data['doc_token']);
-            $updateData = $updateStatus->getDataContent();
             if ($updateStatus->getStatus() != 1) {
-                $data = array_merge($this->data, $updateData);
+                $data = array_merge($this->data, $updateStatus->getData());
                 $this->display($data, 'index');
                 return;
             }
 
+            $updateData = $updateStatus->getDataContent();
             $apiServer['cache_name'] = $updateData['cache_name'];
             $apiServer['cache_file'] = $updateData['cache_file'];
             $apiServer['cache_at'] = time();
@@ -169,7 +169,7 @@ class Doc extends Admin
 
         $updateStatus = $this->getInitApiData(0, $apiAddr, $docToken);
         if ($updateStatus->getStatus() != 1) {
-            $this->display($updateStatus, 'JSON');
+            $this->display($updateStatus->getData(), 'JSON');
             return;
         }
 
