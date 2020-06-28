@@ -64,7 +64,6 @@ abstract class ApiController extends Controller
      */
     protected $ResponseData;
 
-
     abstract function index();
 
     /**
@@ -80,7 +79,7 @@ abstract class ApiController extends Controller
         $this->ResponseData = ResponseData::builder();
 
         //API文档数据
-        $getData = $this->request->getGetData();
+        $getData = $this->delegate->getRequest()->getGetData();
         $docToken = $getData['doc_token'] ?? null;
         $t = $getData['t'] ?? null;
         if ($docToken && $t) {
@@ -99,7 +98,7 @@ abstract class ApiController extends Controller
         $request_type = &$this->request_type;
         $annotate_api = &$this->action_annotate['api'];
         if (!empty($annotate_api)) {
-            $request_method = $this->request->SERVER('REQUEST_METHOD');
+            $request_method = $this->delegate->getRequest()->SERVER('REQUEST_METHOD');
             list($request_type) = explode(',', $annotate_api);
             if (strcasecmp($request_method, trim($request_type)) !== 0) {
                 $this->display(200000);
@@ -199,7 +198,7 @@ abstract class ApiController extends Controller
      */
     function getHeaderData(string $key)
     {
-        $data = $this->request->SERVER('HTTP_' . strtoupper($key));
+        $data = $this->delegate->getRequest()->SERVER('HTTP_' . strtoupper($key));
         if (!$data && function_exists('getallheaders')) {
             $headers = getallheaders();
             $data = &$headers[$key];
@@ -220,7 +219,7 @@ abstract class ApiController extends Controller
      */
     function getFileData(string $key, string $filter_name = 'images', bool &$is_multi = false)
     {
-        $fileData = $this->request->getFileData();
+        $fileData = $this->delegate->getRequest()->getFileData();
         if (!empty($fileData[$key]) && !empty($fileData[$key]['name'])) {
             if ($filter_name == 'images') {
                 $upload_name = &$fileData[$key]['name'];
@@ -295,7 +294,7 @@ abstract class ApiController extends Controller
      */
     protected function display($data = null, string $method = null, int $http_response_status = 200): void
     {
-        $this->response->setContentType('JSON');
+        $this->delegate->getResponse()->setContentType('JSON');
         if (!$data instanceof ResponseData) {
             $data = parent::getResponseData($data);
         }
@@ -306,7 +305,7 @@ abstract class ApiController extends Controller
             throw $frontException;
         }
 
-        $this->response->end(json_encode($data->getData(), JSON_UNESCAPED_UNICODE));
+        $this->delegate->getResponse()->end(json_encode($data->getData(), JSON_UNESCAPED_UNICODE));
     }
 
     /**
@@ -320,14 +319,14 @@ abstract class ApiController extends Controller
         switch ($request_type) {
             case 'file':
             case 'multi_file':
-                $data_container = $this->request->getFileData();
+                $data_container = $this->delegate->getRequest()->getFileData();
                 break;
 
             case 'post':
-                $data_container = $this->request->getPostData();
+                $data_container = $this->delegate->getRequest()->getPostData();
                 if (empty($data_container)) {
                     $input = file_get_contents("php://input");
-                    $content_type = $this->request->SERVER('CONTENT_TYPE');
+                    $content_type = $this->delegate->getRequest()->SERVER('CONTENT_TYPE');
                     if (0 == strcasecmp($content_type, 'application/json')) {
                         $data_container = json_decode($input, true);
                     } else {
@@ -336,12 +335,12 @@ abstract class ApiController extends Controller
                         parse_str($input, $data_container);
                     }
 
-                    $this->request->setPostData($data_container, true);
+                    $this->delegate->getRequest()->setPostData($data_container, true);
                 }
                 break;
 
             default:
-                $data_container = $this->request->getGetData();
+                $data_container = $this->delegate->getRequest()->getGetData();
         }
 
         return $data_container;
@@ -426,7 +425,7 @@ abstract class ApiController extends Controller
             return false;
         }
 
-        $key = $this->config->get('encrypt', 'doc');
+        $key = $this->getConfig()->get('encrypt', 'doc');
         $localToken = md5(md5($key . $t) . $t);
         return $localToken == $token;
     }
