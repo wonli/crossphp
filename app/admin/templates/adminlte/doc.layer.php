@@ -47,65 +47,6 @@
         </div>
     </div>
 </div>
-
-<div class="mainContainer">
-    <?php $this->docData() ?>
-</div>
-
-<div id="goTop"><i class="glyphicon glyphicon-circle-arrow-up"></i></div>
-<div id="fold" status="0"><i class="glyphicon glyphicon-info-sign"></i></div>
-
-<div class="modal fade" id="commonModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form class="form-horizontal"
-                  action="<?= $this->url('doc:saveCommonParams', array('doc_id' => $this->data['doc_id'])) ?>"
-                  method="post">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">公共参数配置</h4>
-                </div>
-                <div class="modal-body">
-                    <ul id="paramsTab" class="nav nav-tabs">
-                        <li class="active">
-                            <a href="#globalParams" data-toggle="tab">公共参数</a>
-                        </li>
-                        <li>
-                            <a href="#headerParams" data-toggle="tab">Header参数</a>
-                        </li>
-                    </ul>
-                    <div id="paramsTabContent" class="tab-content" style="margin-top:15px">
-                        <div class="tab-pane fade in active" id="globalParams">
-                            <div class="form-group">
-                                <div class="col-xs-3">表单字段名</div>
-                                <div class="col-xs-6">值</div>
-                                <div class="col-xs-3">名称</div>
-                            </div>
-                            <?php $this->formParams('global_params') ?>
-                        </div>
-                        <div class="tab-pane fade" id="headerParams">
-                            <div class="form-group">
-                                <div class="col-xs-3">参数名</div>
-                                <div class="col-xs-6">值</div>
-                                <div class="col-xs-3">名称</div>
-                            </div>
-                            <?php $this->formParams('header_params') ?>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <input type="hidden" class="hash-flag" name="hash">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="submit" class="btn btn-primary">保存配置</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<div class="modal fade fadeIn" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
-     id="codeSegmentModal"></div>
-<div id="mask"></div>
 <script>
     function apiActionList(action, o) {
         var targetId = action + '_action_list', target = $('#' + targetId);
@@ -172,7 +113,66 @@
             apiClassList(contentID);
         }
     }
+</script>
+<div class="mainContainer">
+    <?php $this->docData() ?>
+</div>
 
+<div id="goTop"><i class="glyphicon glyphicon-circle-arrow-up"></i></div>
+<div id="fold" status="0"><i class="glyphicon glyphicon-info-sign"></i></div>
+
+<div class="modal fade" id="commonModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form class="form-horizontal"
+                  action="<?= $this->url('doc:saveCommonParams', array('doc_id' => $this->data['doc_id'])) ?>"
+                  method="post">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">公共参数配置</h4>
+                </div>
+                <div class="modal-body">
+                    <ul id="paramsTab" class="nav nav-tabs">
+                        <li class="active">
+                            <a href="#globalParams" data-toggle="tab">公共参数</a>
+                        </li>
+                        <li>
+                            <a href="#headerParams" data-toggle="tab">Header参数</a>
+                        </li>
+                    </ul>
+                    <div id="paramsTabContent" class="tab-content" style="margin-top:15px">
+                        <div class="tab-pane fade in active" id="globalParams">
+                            <div class="form-group">
+                                <div class="col-xs-3">表单字段名</div>
+                                <div class="col-xs-6">值</div>
+                                <div class="col-xs-3">名称</div>
+                            </div>
+                            <?php $this->formParams('global_params') ?>
+                        </div>
+                        <div class="tab-pane fade" id="headerParams">
+                            <div class="form-group">
+                                <div class="col-xs-3">参数名</div>
+                                <div class="col-xs-6">值</div>
+                                <div class="col-xs-3">名称</div>
+                            </div>
+                            <?php $this->formParams('header_params') ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" class="hash-flag" name="hash">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary">保存配置</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade fadeIn" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
+     id="codeSegmentModal"></div>
+<div id="mask"></div>
+<script>
     $(function () {
         var docId = '<?= $this->e($this->data, 'doc_id', '') ?>';
         var hashContent = window.location.hash.substring(2);

@@ -88,14 +88,12 @@ class Doc extends Admin
         $currentServerID = 0;
 
         $this->data['doc'] = $data;
-        $this->data['data'] = [];
         $this->data['doc_id'] = $doc_id;
         $this->data['user_data'] = $userData;
         $this->data['current_sid'] = $currentServerID;
 
         if (empty($servers)) {
             $this->display($this->data, 'index');
-            return;
         } else {
             if (isset($servers[$userServerID])) {
                 $currentServerID = $userServerID;
@@ -139,7 +137,6 @@ class Doc extends Admin
             }
 
             $this->display($this->data, 'index');
-            return;
         }
     }
 
@@ -151,12 +148,12 @@ class Doc extends Admin
     function initApiData()
     {
         $status = 1;
-        $apiAddr = $this->request->getRequestData()['api_addr'];
+        $apiAddr = $this->delegate->getRequest()->getRequestData()['api_addr'];
         if (empty($apiAddr)) {
             $status = 100711;
         }
 
-        $docToken = $this->request->getRequestData()['doc_token'];
+        $docToken = $this->delegate->getRequest()->getRequestData()['doc_token'];
         if (empty($docToken)) {
             $status = 100701;
         }
@@ -185,7 +182,7 @@ class Doc extends Admin
      */
     function codeSegment()
     {
-        $postData = $this->request->getPostData();
+        $postData = $this->delegate->getRequest()->getPostData();
         $docId = &$postData['doc_id'];
         $method = &$postData['method'];
         $params = &$postData['params'];
@@ -241,7 +238,7 @@ class Doc extends Admin
         }
 
         $params = [];
-        foreach ($this->request->getRequestData() as $k => $v) {
+        foreach ($this->delegate->getRequest()->getRequestData() as $k => $v) {
             if (!isset($this->params[$k])) {
                 $params[$k] = $v;
             }
@@ -319,7 +316,7 @@ class Doc extends Admin
         $show_input = true;
         if ($this->isPost()) {
             $show_input = false;
-            $postData = $this->request->getPostData();
+            $postData = $this->delegate->getRequest()->getPostData();
             $json = &$postData['json'];
             if (!empty($json)) {
                 $json = str_replace(["\r\n", "\r", "\n"], "", $json);
@@ -384,7 +381,7 @@ class Doc extends Admin
             return;
         }
 
-        $postData = $this->request->getPostData();
+        $postData = $this->delegate->getRequest()->getPostData();
         if ($this->isPost()) {
             foreach ($postData as $k => $v) {
                 switch ($k) {
@@ -430,7 +427,7 @@ class Doc extends Admin
     function action()
     {
         if ($this->isPost()) {
-            $postData = $this->request->getPostData();
+            $postData = $this->delegate->getRequest()->getPostData();
             $siteName = &$postData['name'];
             $docToken = &$postData['doc_token'];
             if (!$siteName) {
@@ -555,13 +552,21 @@ class Doc extends Admin
             return $this->responseData(100705, ['url' => $url]);
         }
 
+        $rdb = ResponseData::builder();
+        if (!empty($responseData)) {
+            $rdb->updateInfoProperty($responseData);
+            $rdb->setData($responseData);
+        }
+
+        $responseData = $rdb->getDataContent();
         $responseData['api_url'] = $url;
-        if (empty($responseData['status']) || $responseData['status'] != 1) {
-            return $this->responseData(100705, ['responseData' => $responseData]);
+        $status = $rdb->getStatus();
+        if ($status != 1) {
+            return $this->responseData(100705, $responseData);
         }
 
         if (empty($responseData['data'])) {
-            return $this->responseData(100706, ['responseData' => $responseData]);
+            return $this->responseData(100706, $responseData);
         }
 
         $data = &$responseData['data'];

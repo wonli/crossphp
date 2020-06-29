@@ -173,6 +173,7 @@ a:hover, a:focus {
 
 .case-title {
     font-size: 18px;
+    white-space: nowrap;
 }
 
 .case-title > .badge {
@@ -283,7 +284,6 @@ a:hover, a:focus {
 .form-container-wrap {
     flex: 1;
     display: flex;
-    justify-content: center;
 }
 
 .form-container {
