@@ -6,7 +6,7 @@
     </tr>
     </thead>
     <tbody>
-    <?php foreach ($data['menu_list'] as $l) : ?>
+    <?php foreach ($data['menu_list'] ?? [] as $l) : ?>
         <tr>
             <td>
                 <div class="checkbox">

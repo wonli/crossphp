@@ -60,10 +60,12 @@ class AclView extends AdminView
      */
     function addRole(array $data = [])
     {
-        $this->renderTpl("acl/add_role", array(
-            'menu_list' => $data['menu_list'],
-            'menu_select' => [],
-        ));
+        if (!empty($data['menu_list'])) {
+            $this->renderTpl("acl/add_role", [
+                'menu_list' => $data['menu_list'],
+                'menu_select' => [],
+            ]);
+        }
     }
 
     /**

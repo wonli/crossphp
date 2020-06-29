@@ -24,10 +24,10 @@
     <header class="main-header">
         <a href="" class="logo">
             <span class="logo-mini">
-                <img src="<?= $this->res("images/mini_logo.png") ?>" alt="logo" />
+                <img src="<?= $this->res("images/mini_logo.png") ?>" alt="logo"/>
             </span>
             <span class="logo-lg">
-                <img src="<?= $this->res("images/logo.png") ?>" alt="logo" />
+                <img src="<?= $this->res("images/logo.png") ?>" alt="logo"/>
                 <b>CP</b>Admin
             </span>
         </a>
@@ -84,14 +84,8 @@
         </section>
 
         <section class="content">
-            <?php if ($this->data['status'] != 1) : ?>
-                <div class="callout callout-info">
-                    <h4>提示!</h4>
-                    <?php $this->notice($this->data['status'], '%s'); ?>
-                </div>
-            <?php endif ?>
-
-            <?= isset($content) ? $content : ''; ?>
+            <?php $this->noticeBlock() ?>
+            <?= $content ?? '' ?>
         </section>
     </div>
 </div>
@@ -113,7 +107,7 @@
     NProgress.start();
     $(function () {
         var body = $('body');
-        if($(document).width() > 767) {
+        if ($(document).width() > 767) {
             if (store.get('collapse')) {
                 body.addClass('sidebar-collapse');
             } else {

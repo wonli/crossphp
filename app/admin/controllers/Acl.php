@@ -7,6 +7,7 @@
 namespace app\admin\controllers;
 
 use Cross\Exception\CoreException;
+use Cross\Exception\FrontException;
 
 use app\admin\supervise\SecurityModule;
 use app\admin\supervise\AclModule;
@@ -137,6 +138,7 @@ class Acl extends Admin
      *
      * @throws CoreException
      * @throws ReflectionException
+     * @throws FrontException
      */
     function addRole()
     {
@@ -151,10 +153,12 @@ class Acl extends Admin
                     $this->to('acl:roleList');
                     return;
                 } else {
-                    $data['status'] = $ret['status'];
+                    $this->end($ret['status']);
+                    return;
                 }
             } else {
-                $this->data['status'] = 100670;
+                $this->end(100670);
+                return;
             }
         }
 
@@ -279,7 +283,7 @@ class Acl extends Admin
                 $status = $ret->getStatus();
                 if ($status != 1) {
                     $error++;
-                    $this->data['status'] = $status;
+                    $this->end($status);
                     break;
                 }
             }

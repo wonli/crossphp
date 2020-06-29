@@ -7,6 +7,7 @@
 namespace app\admin\views;
 
 use Cross\Exception\CoreException;
+use Cross\Interactive\ResponseData;
 use Cross\MVC\View;
 
 /**
@@ -38,6 +39,22 @@ class AdminView extends View
     function setLoginInfo(array $u)
     {
         $this->loginInfo = $u;
+    }
+
+    /**
+     * @throws CoreException
+     */
+    function noticeBlock()
+    {
+        $statusName = ResponseData::builder()->getStatusName();
+        if ($this->data[$statusName] != 1) {
+            ?>
+            <div class="callout callout-info">
+                <h4>提示!</h4>
+                <?php $this->notice($this->data[$statusName], '%s'); ?>
+            </div>
+            <?php
+        }
     }
 
     /**

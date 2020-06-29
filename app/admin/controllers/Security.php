@@ -9,6 +9,7 @@ namespace app\admin\controllers;
 use app\admin\supervise\SecurityModule;
 
 use Cross\Exception\CoreException;
+use Cross\Exception\FrontException;
 use ReflectionException;
 
 /**
@@ -51,7 +52,7 @@ class Security extends Admin
      * 密保卡
      *
      * @cp_params act=preview
-     * @throws CoreException
+     * @throws CoreException|FrontException
      */
     function securityCard()
     {
@@ -77,7 +78,8 @@ class Security extends Admin
         if (!empty($actRet)) {
             $status = $actRet->getStatus();
             if ($status != 1) {
-                $this->data['status'] = $status;
+                $this->end($status);
+                return;
             } else {
                 $this->to('security:securityCard');
                 return;
@@ -96,23 +98,27 @@ class Security extends Admin
      * 更改密码
      *
      * @throws CoreException
+     * @throws FrontException
      */
     function changePassword()
     {
         $postData = $this->request->getPostData();
         if ($this->isPost()) {
             if (0 !== strcmp($postData['np1'], $postData['np2'])) {
-                $this->data['status'] = 100220;
+                $this->end(100220);
+                return;
             } else {
                 $is_right = $this->ADMIN->checkPassword($this->u, $postData['op']);
                 if ($is_right) {
                     $this->ADMIN->updatePassword($this->u, $postData['np1']);
                 } else {
-                    $this->data['status'] = 100221;
+                    $this->end(100221);
+                    return;
                 }
             }
         }
-        $this->display($this->data);
+
+        $this->display();
     }
 
     /**
