@@ -93,13 +93,14 @@ class AdminUserModule extends AdminModule
     /**
      * 管理员列表
      *
+     * @param array $page
      * @return mixed
      * @throws CoreException
      */
-    function getAdminUserList()
+    function getAdminUserList(&$page = ['p' => 1, 'limit' => 10])
     {
-        return $this->link->getAll("{$this->t_admin} a LEFT JOIN {$this->t_security_card} s ON a.name=s.bind_user",
-            'a.*, s.id bind_id', ['a.rid' => ['>', 0]]);
+        return $this->link->find("{$this->t_admin} a LEFT JOIN {$this->t_security_card} s ON a.name=s.bind_user",
+            'a.*, s.id bind_id', ['a.rid' => ['>', 0]], $page);
     }
 
     /**

@@ -243,11 +243,19 @@ class Acl extends Admin
     /**
      * 管理员列表
      *
+     * @cp_params p=1
      * @throws CoreException
+     * @throws FrontException
      */
     function user()
     {
-        $this->data ['u'] = $this->ADMIN->getAdminUserList();
+        $page = [
+            'p' => $this->params['p'],
+            'limit' => 10,
+        ];
+
+        $this->data ['u'] = $this->ADMIN->getAdminUserList($page);
+        $this->data ['page'] = $page;
         $this->data ['roles'] = $this->ACL->getRoleList();
 
         if ($this->isPost()) {

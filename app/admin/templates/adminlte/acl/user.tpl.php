@@ -86,7 +86,8 @@
             </table>
         </div>
         <div class="box-footer">
-            <input class="btn btn-primary" type="submit" value="保存"/>
+            <input class="btn btn-primary pull-left" type="submit" value="保存"/>
+            <?= $this->page($this->data['page'], 'pagination pagination-sm no-margin pull-right') ?>
         </div>
     </div>
 </form>
