@@ -48,48 +48,57 @@
     </div>
 </div>
 <script>
-    function apiActionList(action, o) {
-        var targetId = action + '_action_list', target = $('#' + targetId);
-        target.show();
+    function getTestCase(groupKey, id) {
+        var hashData = getHashData()
+        if (hashData.category !== groupKey) {
+            apiClassList(groupKey);
+        }
 
-        $('.a-nav-menu').each(function () {
-            $(this).removeClass('current');
-        });
-        $(o).parent().addClass('current');
+        var lid = layer.load();
+        $.get('<?= $this->url('doc:makeTestForm') ?>', {'id': id}, function (d) {
+            showFormOrTestCase(true, d)
+            layer.close(lid)
+        })
 
-        var className = action.split('_')[0], classID = className + 'ActionList', menuID = className + 'MenuList';
-        $('#' + classID).show();
-        $('#' + menuID).show();
-        $('#' + action + ' .cache-panel').show();
+        window.location.hash = '!' + groupKey + '/' + id
+    }
 
-        window.location.hash = '!' + action;
-        $('.action-list-container').each(function () {
-            var id = $(this).attr('id');
-            if (id != action) {
-                $('#' + id).hide();
-            } else {
-                $('#' + id).show();
+    function showFormOrTestCase(showForm, content) {
+        if (showForm) {
+            $('#testForm').show()
+            if (content) {
+                $('#testForm').html(content)
             }
-        });
 
-        $('.action-form').each(function () {
-            var id = $(this).attr('id');
-            if (id != targetId) {
-                $('#' + id).hide();
-            }
-        });
+            $('#contentContainer').hide()
+        } else {
+            $('#testForm').hide()
+            $('#contentContainer').show()
+        }
+    }
 
-        $('html, body').animate({scrollTop: 0}, 5);
-        $('.leftContainer').hide();
-        $('#mask').hide();
+    function getHashData() {
+        var localHash = window.location.hash.substring(2);
+        if (localHash) {
+            var hashData = localHash.split('/')
+            return {"category": hashData[0], "id": hashData[1] ? hashData[1] : null}
+        }
+
+        return {};
     }
 
     function apiClassList(className) {
-        var classID = className + 'MenuList', target = $('#' + classID);
+        var classID = 'category' + className, target = $('#' + classID);
         target.toggle();
         if (target.is(':visible')) {
             target.addClass('current');
-            window.location.hash = '!' + className;
+            var hData = getHashData(), hashData = '';
+            if (hashData.id) {
+                hashData = className + '/' + hData.id
+            } else {
+                hashData = className
+            }
+            window.location.hash = '!' + hashData;
         } else {
             target.removeClass('current');
             window.location.hash = '';
@@ -98,24 +107,26 @@
         // target.parent().addClass("current").siblings().removeClass("current");
         $('.menu-list').each(function () {
             var id = $(this).attr('id');
-            if (id != classID) {
+            if (id !== classID) {
                 $('#' + id).removeClass('.current').hide();
             }
         });
     }
-
-    function showContent(contentID) {
-        if (contentID.indexOf('_') > 0) {
-            var hashInfo = contentID.split('_');
-            apiClassList(hashInfo[0]);
-            apiActionList(contentID, $('.' + contentID));
-        } else {
-            apiClassList(contentID);
-        }
-    }
 </script>
 <div class="mainContainer">
-    <?php $this->docData() ?>
+    <div id="leftContainerWrap">
+        <div class="leftContainer navbar-collapse collapse">
+            <div class="menuContainer scroll">
+                <?= $this->docCategory() ?>
+            </div>
+        </div>
+    </div>
+    <div class="rightContainer">
+        <div id="testForm"></div>
+        <div id="contentContainer" class="contentContainer">
+            <?= $this->docApiList() ?>
+        </div>
+    </div>
 </div>
 
 <div id="goTop"><i class="glyphicon glyphicon-circle-arrow-up"></i></div>
@@ -174,12 +185,9 @@
 <div id="mask"></div>
 <script>
     $(function () {
-        var docId = '<?= $this->e($this->data, 'doc_id', '') ?>';
-        var hashContent = window.location.hash.substring(2);
-        if (hashContent) {
-            hashContent = decodeURI(hashContent);
-            $('.hash-flag').val(hashContent);
-            showContent(hashContent);
+        var docId = '<?= $this->e($this->data, 'doc_id', '') ?>', hashData = getHashData();
+        if (hashData.category) {
+            apiClassList(hashData.category)
         }
 
         $('#collapseBtn').on('click', function () {
@@ -212,41 +220,22 @@
             });
         });
 
-        $('.gen-code-flag').on('click', function () {
-            var f = $(this).closest('form'),
-                path = f.attr('data-api-path'),
-                apiUrl = f.attr('data-api-url'),
-                method = f.attr('data-api-method'),
-                fParams = f.serializeArray(),
-                params = {};
+        $(document).on("click", ".gen-code-flag", function () {
+            var apiId = $(this).attr('api-id'),
+                fParams = $(this).closest('form').serialize();
 
-            layer.load();
-            if (fParams.length > 0) {
-                for (var i in fParams) {
-                    if (fParams.hasOwnProperty(i)) {
-                        var d = fParams[i];
-                        params[d.name] = d.value;
-                    }
-                }
-            }
-
-            var p = {"params": params, "method": method, "api": apiUrl, "path": path, "doc_id": docId};
-            $.post('<?= $this->url('doc:codeSegment') ?>', p, function (d) {
-                $('#codeSegmentModal').html(d).modal('toggle');
-                layer.closeAll();
-            });
+            window.location.href = '<?= $this->url('doc:curlRequest') ?>' + '?' + fParams + '&id=' + apiId;
         });
 
         $('#fold').click(function () {
             if ($(this).attr('status') == 0) {
-                $('.action-list-container').show();
-
-                $('.cache-panel').hide();
-                $('.action-form').hide();
-                $('.menu-list').hide();
-                $(this).attr('status', 1);
+                showFormOrTestCase(false)
+                $('.cache-panel').hide()
+                $('.action-form').hide()
+                $('.menu-list').hide()
+                $(this).attr('status', 1)
             } else {
-                showContent(hashContent);
+                apiClassList(true);
                 $(this).attr('status', 0);
             }
         });

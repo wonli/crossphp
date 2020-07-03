@@ -28,14 +28,12 @@ class DocView extends AdminView
 
     /**
      * 文档阅读页
-     *
-     * @param array $data
      */
-    function index($data = [])
+    function index( )
     {
-        $this->set(array(
+        $this->set([
             'layer' => 'doc',
-        ));
+        ]);
     }
 
     /**
@@ -74,6 +72,46 @@ class DocView extends AdminView
         $table->setData($data['list']);
         $this->table = $table;
         $this->renderTpl('doc/setting');
+    }
+
+    /**
+     * 文档分类
+     */
+    function docCategory()
+    {
+        foreach($this->data['category'] ?? [] as $category => $d) {
+            $this->renderTpl('doc/leftCategory', $d);
+        }
+    }
+
+    /**
+     * 生成api列表
+     */
+    function docApiList()
+    {
+        foreach($this->data['data']??[] as $d) {
+            ?>
+            <div class="row">
+                    <div class="col-md-12 case-title" style="margin:10px 0">
+                        <span class="badge"><?= $d['api_method'] ?? 'post' ?></span>
+                        <a href="javascript:void(0)" onclick="getTestCase('<?= $d['group_key'] ?>', '<?= $d['id'] ?>')">
+                            <?= $d['api_name']??'' ?>
+                        </a>
+                        <span class="hidden-xs">(<?= $d['api_path'] ?>)</span>
+                    </div>
+                </div>
+            <?php
+        }
+    }
+
+    /**
+     * 生成测试表单
+     * @param array $data
+     */
+    function makeTestForm($data = [])
+    {
+        $this->set(['load_layer' => false]);
+        $this->renderTpl('doc/case_form', $data);
     }
 
     /**
@@ -295,8 +333,8 @@ class DocView extends AdminView
      */
     function globalParams()
     {
-        $userData = &$this->data['user_data']['global_params'];
-        $global_params = &$this->data['doc']['global_params'];
+        $userData = $this->data['user']['global_params']??[];
+        $global_params = $this->data['doc']['global_params']??[];
         if (!empty($global_params)) {
             foreach ($global_params as $field => $name) {
                 $userValue = '';
@@ -369,44 +407,38 @@ class DocView extends AdminView
     /**
      * 获取接口请求地址
      *
-     * @param array $data
      * @return string
      * @throws CoreException
      */
-    function getApiActionUrl($data)
+    function getApiActionUrl()
     {
-        if (empty($data)) {
-            return '';
-        }
-
-        $headerParams = &$this->data['doc']['header_params'];
+        $headerParams = $this->data['doc']['header_params']??[];
         if (empty($headerParams)) {
-            return $this->data['api_host'] . '/' . ltrim($data['requestPath'], '/');
+            return  ($this->data['doc']['current_server']['api_addr'] ?? '') . $this->data['api']['api_path'] ?? '';
         }
 
         return $this->url('doc:curlRequest', [
-            'ugp' => $data['useGlobalParams'],
-            'method' => $data['method'],
-            'doc_id' => $this->data['doc']['id'],
-            'host' => urlencode($this->data['api_host']),
-            'path' => urlencode($data['requestPath'])
+            'ugp' => $this->data['api']['global_params']??[],
+            'method' => $this->data['api']['api_method']??'get',
+            'doc_id' => $this->data['doc']['id']??0,
+            'host' => urlencode($this->data['doc']['current_server']['api_addr']??''),
+            'path' => urlencode($this->data['api']['api_path']??'')
         ]);
     }
 
     /**
-     * 获取接口请求地址
+     * 获取接口请求方法
      *
-     * @param array $data
      * @return string
      */
-    function getApiActionMethod( $data )
+    function getApiActionMethod( )
     {
-        $headerParams = &$this->data['doc']['header_params'];
+        $headerParams = $this->data['user']['global_params'] ?? [];
         if (empty($headerParams)) {
-            return $data['method'];
+            return $this->data['api']['api_method'];
         }
 
-        return 'POST';
+        return $this->data['api']['api_method']??'POST';
     }
 
     /**

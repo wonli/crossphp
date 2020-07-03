@@ -2,6 +2,9 @@
 /**
  * app配置文件
  */
+
+use Cross\Interactive\ResponseData;
+
 return [
 
     /**
@@ -39,7 +42,13 @@ return [
         'uri' => '*&9wru&!@#%#&',
         'auth' => '!@#cr@!$!21p#$%^'
     ],
-
+    /**
+     * 约定接口返回数据字段名
+     */
+    'responseData' => [
+        'code' => ResponseData::builder()->setStatusName('code'),
+        'msg' => ResponseData::builder()->setMessageName('msg')
+    ],
     /**
      * 关于url的配置
      */

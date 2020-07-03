@@ -29,16 +29,9 @@ $isChecked = isset($data['is_default']) ? true : false;
                value="<?= $this->e($data, 'cache_at') ?>">
         <input type="hidden" name="dev[<?= $id ?>][user]" class="user" value="<?= $this->e($data, 'user') ?>">
         <?php
-        $cache_name = $this->e($data, 'cache_name', '');
-        if (!empty($cache_name)) {
-            echo $this->a('更新数据', 'javascript:void(0)', array(
-                'class' => 'btn btn-success get-data-flag'
-            ));
-        } else {
-            echo $this->a('获取数据', 'javascript:void(0)', array(
-                'class' => 'btn btn-primary get-data-flag'
-            ));
-        }
+        echo $this->a('更新数据', 'javascript:void(0)', array(
+            'class' => 'btn btn-success get-data-flag'
+        ));
         ?>
         <a class="btn btn-warning del-node-flag">删除</a>
     </td>

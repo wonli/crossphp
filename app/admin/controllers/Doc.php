@@ -7,17 +7,21 @@
 
 namespace app\admin\controllers;
 
+use app\admin\supervise\Model\ApiDoc;
+use app\admin\supervise\Model\ApiDocData;
+use app\admin\supervise\Model\ApiDocUser;
+
+use Cross\Exception\DBConnectException;
+use Cross\Exception\FrontException;
 use Cross\Interactive\ResponseData;
 use Cross\Exception\CoreException;
-use ReflectionException;
 use Cross\Core\Helper;
 
 use app\admin\supervise\ApiDocModule;
 use app\admin\supervise\CodeSegment\CURL;
 use app\admin\supervise\CodeSegment\Generator;
 use app\admin\views\DocView;
-
-use lib\Spyc;
+use ReflectionException;
 
 
 /**
@@ -72,7 +76,7 @@ class Doc extends Admin
     /**
      * @param $doc_id
      * @param $args
-     * @throws CoreException
+     * @throws CoreException|DBConnectException
      */
     function __call($doc_id, $args)
     {
@@ -122,20 +126,18 @@ class Doc extends Admin
                 return;
             }
 
-            $updateData = $updateStatus->getDataContent();
-            $apiServer['cache_name'] = $updateData['cache_name'];
-            $apiServer['cache_file'] = $updateData['cache_file'];
-            $apiServer['cache_at'] = time();
-            $servers[$currentServerID] = $apiServer;
-            $this->ADM->update($data['id'], [
-                'servers' => json_encode($servers, JSON_UNESCAPED_UNICODE)
-            ]);
-
-            $docData = Spyc::YAMLLoad($apiServer['cache_file']);
+            $docCategory = [];
+            $docData = (new ApiDocData())->getAll([], 'id, group_key, group_name, api_path, api_name, api_method, enable_mock');
             if (!empty($docData)) {
-                $this->data['data'] = $docData;
+                foreach ($docData as $d) {
+                    $docCategory[$d['group_key']]['group_key'] = $d['group_key'];
+                    $docCategory[$d['group_key']]['group_name'] = $d['group_name'];
+                    $docCategory[$d['group_key']]['children'][] = $d;
+                }
             }
 
+            $this->data['data'] = $docData;
+            $this->data['category'] = $docCategory;
             $this->display($this->data, 'index');
         }
     }
@@ -143,7 +145,7 @@ class Doc extends Admin
     /**
      * 初始化api接口数据
      *
-     * @throws CoreException
+     * @throws CoreException|DBConnectException
      */
     function initApiData()
     {
@@ -164,7 +166,8 @@ class Doc extends Admin
             return;
         }
 
-        $updateStatus = $this->getInitApiData(0, $apiAddr, $docToken);
+        $docId = $this->params['id'] ?? 0;
+        $updateStatus = $this->getInitApiData($docId, $apiAddr, $docToken);
         if ($updateStatus->getStatus() != 1) {
             $this->display($updateStatus->getData(), 'JSON');
             return;
@@ -179,82 +182,62 @@ class Doc extends Admin
      *
      * @cp_display codeSegment
      * @throws CoreException
+     * @throws DBConnectException
+     * @throws FrontException
      */
     function codeSegment()
     {
         $postData = $this->delegate->getRequest()->getPostData();
-        $docId = &$postData['doc_id'];
-        $method = &$postData['method'];
+        $apiId = &$postData['apiId'];
         $params = &$postData['params'];
-        $apiUrl = &$postData['api'];
-        $apiPath = &$postData['path'];
 
-        $data = $this->getApiCurlData($docId, $apiUrl, $method, $params);
+        $data = $this->getApiCurlData($apiId, $params);
         if (!empty($data) && is_array($data)) {
             $g = (new Generator())->run($data);
-            if (!empty($g['struct'])) {
-                (new ApiDocModule())->saveCache($docId, $apiPath, $g['struct']);
+            if (!empty($g)) {
+                $Add = new ApiDocData();
+                $Add->id = $apiId;
+                $Add->api_response_struct = json_encode($g['struct']);
+                $Add->update();
+                $this->data['data'] = $g;
             }
-
-            $this->data['data'] = $g;
         } else {
             $this->data['data'] = [];
         }
-        $this->data['curl_params'] = [
-            'url' => $apiUrl,
-            'method' => $method,
-            'params' => $params
-        ];
 
         $this->display($this->data);
     }
 
     /**
-     * @cp_params host, path, doc_id, method=post
      * @throws CoreException
+     * @throws DBConnectException
+     * @throws FrontException
      */
     function curlRequest()
     {
-        $host = $this->params['host'];
-        if (empty($host)) {
-            $this->to('doc');
-            return;
-        } else {
-            $host = urldecode($host);
+        $apiId = $this->params['id'] ?? 0;
+        if (empty($apiId)) {
+            throw new FrontException('获取文档信息失败');
         }
 
-        $path = $this->params['path'];
-        if (empty($path)) {
-            $this->to('doc');
-            return;
-        } else {
-            $path = urldecode($path);
-        }
-
-        $docId = $this->params['doc_id'];
-        if (empty($docId)) {
-            $this->to('doc');
-            return;
-        }
-
-        $params = [];
-        foreach ($this->delegate->getRequest()->getRequestData() as $k => $v) {
-            if (!isset($this->params[$k])) {
-                $params[$k] = $v;
-            }
-        }
-
-        $apiUrl = rtrim($host, '/') . '/' . ltrim($path, '/');
-        $curlData = $this->getApiCurlData($docId, $apiUrl, $this->params['method'], $params);
+        unset($this->params['id']);
+        $params = $this->params;
+        $curlData = $this->getApiCurlData($apiId, $params, $serverInfo);
         $g = (new Generator())->run($curlData);
         if (!empty($g['struct'])) {
-            (new ApiDocModule())->saveCache($docId, $path, $g['struct']);
+            if (!empty($g)) {
+                $Add = new ApiDocData();
+                $Add->id = $apiId;
+                $Add->api_response_struct = json_encode($g['struct']);
+                $Add->update();
+                $this->data['data'] = $g;
+            }
         }
 
         $this->data['data'] = $g;
         $this->data['curl_params'] = [
-            'url' => $apiUrl,
-            'method' => $this->params['method'],
+            'url' => $serverInfo['apiUrl'],
+            'method' => $serverInfo['method'],
             'params' => $params
         ];
 
@@ -264,33 +247,48 @@ class Doc extends Admin
     /**
      * 发起curl请求
      *
-     * @param string $docId
-     * @param string $apiUrl
-     * @param string $method
+     * @param string $apiId
      * @param array $params
+     * @param array $serverInfo
      * @return array|mixed
      * @throws CoreException
+     * @throws DBConnectException
+     * @throws FrontException
      */
-    function getApiCurlData($docId, $apiUrl, $method, &$params = [])
+    function getApiCurlData($apiId, &$params = [], &$serverInfo = [])
     {
         $headerParams = [];
-        if (!empty($docId)) {
-            $doc = $this->ADM->get($docId);
-            if (!empty($doc['header_params'])) {
-                $Api = new ApiDocModule();
-                $userData = $Api->getAllUserData($this->u, $docId);
-                if (!empty($userData['header_params'])) {
-                    foreach ($userData['header_params'] as $k => $v) {
-                        $headerParams[] = sprintf("%s: %s", $k, $v);
-                    }
-                }
+        $Api = new ApiDocData();
+        $Api->id = $apiId;
+        $apiData = $Api->get();
+        if (empty($apiData)) {
+            throw new FrontException('获取api数据失败');
+        }
 
-                if (!empty($userData['global_params'])) {
-                    $params = array_merge($params, $userData['global_params']);
+        $docId = $apiData['doc_id'];
+        $doc = $this->ADM->get($docId);
+        $Api = new ApiDocModule();
+        $userData = $Api->getAllUserData($this->u, $docId);
+        if (!empty($doc['header_params'])) {
+            if (!empty($userData['header_params'])) {
+                foreach ($userData['header_params'] as $k => $v) {
+                    $headerParams[] = sprintf("%s: %s", $k, $v);
                 }
+            }
+
+            if (!empty($userData['global_params'])) {
+                $params = array_merge($params, $userData['global_params']);
             }
         }
 
+        $sid = $userData['host']['sid'] ?? 0;
+        $method = $apiData['api_method'] ?? 'POST';
+        $server = $doc['servers'][$sid] ?? [];
+        if (empty($server)) {
+            throw new FrontException('获取Server信息失败');
+        }
+
+        $apiUrl = rtrim($server['api_addr'], '/') . '/' . $apiData['api_path'];
         $curlData = (new CURL())->setUrl($apiUrl)
             ->setParams($params)
             ->setHeaderParams($headerParams)
@@ -301,6 +299,13 @@ class Doc extends Admin
         if (!is_array($data)) {
             return $curlData;
         }
+
+        $serverInfo = [
+            'sid' => $sid,
+            'method' => $method,
+            'apiUrl' => $apiUrl,
+            'docId' => $docId
+        ];
 
         return $data;
     }
@@ -412,6 +417,50 @@ class Doc extends Admin
     }
 
     /**
+     * 生成测试表单
+     *
+     * @cp_params id
+     * @throws CoreException|DBConnectException
+     * @throws FrontException
+     */
+    function makeTestForm()
+    {
+        $id = $this->params['id'];
+        $apiDocData = new ApiDocData();
+        $apiDocData->id = $id;
+        $apiData = $apiDocData->get();
+        if (empty($apiData)) {
+            throw new FrontException('获取API数据失败');
+        } else {
+            $apiData['api_params'] = json_decode($apiData['api_params'], true);
+            $this->data['api'] = $apiData;
+        }
+
+        $UserDoc = new ApiDocUser();
+        $UserDoc->doc_id = $apiDocData->doc_id;
+        $userData = $UserDoc->getAll();
+        $ud = [];
+        foreach ($userData as &$d) {
+            $ud[$d['name']] = json_decode($d['value'], true);
+            $d['value'] = json_decode($d['value'], true);
+        }
+        $this->data['user'] = $ud;
+
+        $Doc = new ApiDoc();
+        $Doc->id = $apiDocData->doc_id;
+        $docInfo = $Doc->get();
+        $docInfo['servers'] = json_decode($docInfo['servers'], true);
+        $docInfo['global_params'] = json_decode($docInfo['global_params'], true);
+        $docInfo['header_params'] = json_decode($docInfo['header_params'], true);
+
+        $sid = $ud['host']['sid'] ?? 0;
+        $docInfo['current_server'] = $docInfo['servers'][$sid];
+        $this->data['doc'] = $docInfo;
+
+        $this->display($this->data);
+    }
+
+    /**
      * @throws CoreException
      */
     function setting()
@@ -444,7 +493,7 @@ class Doc extends Admin
             $devs = &$postData['dev'];
             if (!empty($devs)) {
                 foreach ($devs as $d) {
-                    if (!empty($d['cache_name']) && !empty($d['api_addr'])) {
+                    if (!empty($d['api_addr'])) {
                         $d['api_addr'] = rtrim($d['api_addr'], '/');
                         $servers[] = $d;
                     }
@@ -538,6 +587,7 @@ class Doc extends Admin
      * @param string $docToken
      * @return ResponseData
      * @throws CoreException
+     * @throws DBConnectException
      */
     protected function getInitApiData($docId, $apiAddr, $docToken): ResponseData
     {
@@ -569,83 +619,51 @@ class Doc extends Admin
             return $this->responseData(100706, $responseData);
         }
 
-        $data = &$responseData['data'];
-        $cache_file_name = md5($apiAddr);
-
-        //获取缓存数据
-        $api_cache = [];
-        if ($docId != 0) {
-            $api_cache = (new ApiDocModule())->getCacheData($docId);
-        }
-
-        $result = [];
-        foreach ($data as $k => $d) {
-            $actions = [];
+        foreach ($responseData['data'] as $groupKey => $d) {
+            $adc = new ApiDocData();
+            $adc->doc_id = $docId;
+            $adc->group_key = $groupKey;
+            $adc->group_name = $d['api_spec'] ?? $groupKey;
+            $adc->global_params = (int)$d['global_params'];
+            $adc->update_at = time();
             if (!empty($d['methods'])) {
-                foreach ($d['methods'] as $act => $m) {
-                    if (!empty($m['api'])) {
-                        $api = explode(',', $m['api']);
-                        $api = array_map('trim', $api);
-
-                        $method = [
-                            'class' => $k,
-                            'action' => $act,
-                            'method' => $api[0],
-                            'requestPath' => $api[1],
-                            'useGlobalParams' => $m['global_params'],
-                        ];
-
-                        if (isset($api_cache[$method['requestPath']])) {
-                            $method['apiCache'] = $api_cache[$method['requestPath']];
-                        } else {
-                            $method['apiCache'] = '';
-                        }
-
-                        $apiParams = [];
-                        if (!empty($m['request'])) {
-                            if (isset($m['request'])) {
-                                if (!empty($m['request'])) {
-                                    $request = explode(',', $m['request']);
-                                    foreach ($request as $r) {
-                                        $rParams = explode("\n", $r);
-                                        foreach ($rParams as $f) {
-                                            @list($dd['field'], $dd['label'], $dd['required']) = explode('|', $f);
-                                            $dd = array_map('trim', $dd);
-                                            $apiParams[$dd['field']] = [
-                                                'label' => $dd['label'],
-                                                'required' => (bool)$dd['required'],
-                                            ];
-                                        }
-                                    }
-                                }
-                            }
-                            $method['params'] = $apiParams;
-                        }
-
-                        $actions[$api[2]] = $method;
+                foreach ($d['methods'] as $apiName => $apiData) {
+                    $adc->api_name = $apiName;
+                    if (!empty($apiData['api'])) {
+                        $api = explode(',', $apiData['api']);
+                        @list($method, $path, $name) = array_map('trim', $api);
+                        $adc->api_method = $method ?: '';
+                        $adc->api_path = $path ?: '';
+                        $adc->api_name = $name ?: $apiName;
+                    } else {
+                        continue;
                     }
+
+                    if (!empty($apiData['request'])) {
+                        $apiRequest = [];
+                        $request = explode(',', $apiData['request']);
+                        $request = array_map('trim', $request);
+                        foreach ($request as $n) {
+                            @list($a['field'], $a['label'], $a['required']) = array_map('trim', explode('|', $n));
+                            $apiRequest[] = $a;
+                        }
+
+                        $adc->api_params = json_encode($apiRequest, JSON_UNESCAPED_UNICODE);
+                    }
+
+                    if (!empty($apiData['global_params'])) {
+                        $adc->global_params = $apiData['global_params'];
+                    }
+
+                    $adc->update_user = $this->u;
+                    $adc->updateOrAdd();
                 }
             }
-
-            if (!empty($actions)) {
-                $apiSpec = !empty($d['api_spec']) ? $d['api_spec'] : $k;
-                $result[$apiSpec] = $actions;
-            }
-        }
-
-        $a = Spyc::YAMLDump($result);
-        $cache_file = $this->yamlFileCachePath . "/{$cache_file_name}.yaml";
-        $ret = file_put_contents($cache_file, $a);
-
-        if (!$ret) {
-            return $this->responseData(100720, ['url' => $url]);
         }
 
         $data = [
             'url' => $url,
-            'cache_name' => $cache_file_name,
             'cache_at' => TIME,
-            'cache_file' => $cache_file,
             'user' => $this->u
         ];
 

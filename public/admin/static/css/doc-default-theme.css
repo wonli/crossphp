@@ -178,6 +178,7 @@ a:hover, a:focus {
 
 .case-title > .badge {
     padding: 8px;
+    width: 40px;
 }
 
 .menu-list > div {

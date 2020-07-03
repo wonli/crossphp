@@ -4,43 +4,42 @@
  * case_form.tpl.php
  */
 
+$name = $data['api']['api_name'] ?? '';
+$action = $data['api']['api_path'] ?? '';
+$method = $data['api']['api_method'] ?? '';
 
-$action = &$data['requestPath'];
-$apiUrl = $this->data['api_host'] . $action;
+$apiId = $data['api']['id'] ?? '';
+$apiUrl = ($data['doc']['current_server']['api_addr'] ?? '') . $action;
 
-$useGlobalParams = &$data['useGlobalParams'];
-
-$list_container_id = $data['class'] . '_' . $data['action'];
-$formFields = &$data['params'];
+$useGlobalParams = $data['user']['global_params'] ?? [];
+$formFields = $data['api']['api_params'] ?? [];
 ?>
-<div class="action-list-container" id="<?= $list_container_id; ?>">
+<div class="action-list-container">
     <div class="form-container-wrap">
         <div class="form-container">
             <form class="form-inline" data-toggle="validator" role="form" target="_blank"
-                  method="<?= $this->getApiActionMethod($data) ?>"
-                  data-api-method="<?= $data['method'] ?>"
+                  method="<?= $this->getApiActionMethod($data??[]) ?>"
+                  data-api-method="<?= $method ?>"
                   data-api-path="<?= $action ?>"
                   data-api-url="<?= $apiUrl ?>"
-                  action="<?= $this->getApiActionUrl($data) ?>" enctype="multipart/form-data">
+                  action="<?= $this->getApiActionUrl($data??[]) ?>" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-md-12 case-title" style="margin:10px 0">
-                        <span class="badge"><?= $data['method'] ?></span>
-                        <a href="javascript:void(0)" onclick="apiActionList('<?= $list_container_id; ?>')">
+                        <span class="badge"><?= $method ?></span>
+                        <a href="javascript:void(0)">
                             <?= $action ?>
                         </a>
-                        <span class="hidden-xs">
-                    (<?= $data['name'] ?>)
-                </span>
+                        <span class="hidden-xs">(<?= $name ?>)</span>
                     </div>
                 </div>
 
-                <div class="action-form" id="<?= $list_container_id ?>_action_list" style="display: none">
+                <div class="action-form">
                     <div class="row" style="margin-top:10px;">
                         <div class="col-md-12">
                             <div class="form-group" style="width:100%;margin-bottom:20px">
                                 <div class="input-group input-group-lg" style="width:100%">
                                     <span class="input-group-addon" style="width:1%">
-                                        <?= strtoupper($data['method']) ?>
+                                        <?= strtoupper($method) ?>
                                     </span>
                                     <input type="text" class="form-control request-action"
                                            value="<?= $action ?>"
@@ -63,6 +62,7 @@ $formFields = &$data['params'];
                                         <?php
                                         if (!empty($formFields)) {
                                             foreach ($formFields as $name => $field) {
+                                                $name = $field['field'];
                                                 if (false !== strpos($name, ':')) {
                                                     @list($field_name, $input_type) = explode(':', $name);
                                                     $options = $field['label'];
@@ -170,7 +170,7 @@ $formFields = &$data['params'];
                                 </div>
                                 <div class="panel-footer">
                                     <button type="submit" class="btn btn-primary">试一试</button>
-                                    <button type="button" class="gen-code-flag btn btn-success">代码片段</button>
+                                    <button type="button" api-id="<?= $apiId ?>" class="gen-code-flag btn btn-success">CURL</button>
                                 </div>
                             </div>
                         </div>
@@ -178,10 +178,6 @@ $formFields = &$data['params'];
                 </div>
             </form>
         </div>
-    </div>
-
-    <div class="visible-lg cache-container">
-        <?= $this->cacheData($data['apiCache']) ?>
     </div>
 </div>
 

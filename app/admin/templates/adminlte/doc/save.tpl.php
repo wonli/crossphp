@@ -178,19 +178,19 @@
                 return;
             }
 
-            $.post('<?= $this->url('doc:initApiData') ?>', {
+            $.post('<?= $this->url('doc:initApiData', $this->params) ?>', {
                 api_addr: api_addr,
                 doc_token: doc_token
             }, function (d) {
                 console.log(d);
-                if (!d.status) {
+                if (!d.code) {
                     layer.msg('返回数据出错, 请联系技术部');
-                } else if (d.status !== 1) {
+                } else if (d.code !== 1) {
                     var msg = '';
-                    if (typeof d.message !== 'string') {
+                    if (typeof d.msg !== 'string') {
                         msg = JSON.stringify(d.message, null, 2);
                     } else {
-                        msg = d.message;
+                        msg = d.msg;
                     }
 
                     layer.msg(msg, {

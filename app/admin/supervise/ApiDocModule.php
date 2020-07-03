@@ -138,7 +138,7 @@ class ApiDocModule extends AdminModule
                 'id' => $id
             ]);
 
-            $this->link->del($this->t_api_doc_data, [
+            $this->link->del($this->t_api_doc_user, [
                 'doc_id' => $id
             ]);
 
@@ -160,7 +160,7 @@ class ApiDocModule extends AdminModule
     function getAllUserData($u, $doc_id)
     {
         $result = [];
-        $data = $this->link->getAll($this->t_api_doc_data, '*', [
+        $data = $this->link->getAll($this->t_api_doc_user, '*', [
             'u' => $u,
             'doc_id' => $doc_id,
         ]);
@@ -186,7 +186,7 @@ class ApiDocModule extends AdminModule
      */
     function getUserData($u, $doc_id, $name)
     {
-        $data = $this->link->get($this->t_api_doc_data, '*', [
+        $data = $this->link->get($this->t_api_doc_user, '*', [
             'u' => $u,
             'doc_id' => $doc_id,
             'name' => $name,
@@ -218,7 +218,7 @@ class ApiDocModule extends AdminModule
             'value' => json_encode($value),
         ];
 
-        return $this->link->add($this->t_api_doc_data, $data);
+        return $this->link->add($this->t_api_doc_user, $data);
     }
 
     /**
@@ -233,7 +233,7 @@ class ApiDocModule extends AdminModule
     function saveCache($doc_id, $api_path, array $struct_data)
     {
         $api_path = '/' . ltrim($api_path, '/');
-        $cacheInfo = $this->link->get($this->t_api_doc_cache, 'cache_id', [
+        $cacheInfo = $this->link->get($this->t_api_doc_data, 'cache_id', [
             'doc_id' => $doc_id,
             'api_path' => $api_path,
         ]);
@@ -243,11 +243,11 @@ class ApiDocModule extends AdminModule
         $data['api_response'] = json_encode($struct_data);
         $data['cache_at'] = TIME;
         if (!empty($cacheInfo)) {
-            return $this->link->update($this->t_api_doc_cache, $data, [
+            return $this->link->update($this->t_api_doc_data, $data, [
                 'cache_id' => $cacheInfo['cache_id']
             ]);
         } else {
-            return $this->link->add($this->t_api_doc_cache, $data);
+            return $this->link->add($this->t_api_doc_data, $data);
         }
     }
 
@@ -261,7 +261,7 @@ class ApiDocModule extends AdminModule
     function getCacheData($doc_id)
     {
         return $this->link->select('api_path, api_response')
-            ->from($this->t_api_doc_cache)->where(['doc_id' => $doc_id])
+            ->from($this->t_api_doc_data)->where(['doc_id' => $doc_id])
             ->stmt()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_KEY_PAIR);
     }
 
@@ -275,7 +275,7 @@ class ApiDocModule extends AdminModule
      */
     function updateUserData($id, array $data)
     {
-        return $this->link->update($this->t_api_doc_data, $data, [
+        return $this->link->update($this->t_api_doc_user, $data, [
             'id' => (int)$id
         ]);
     }
