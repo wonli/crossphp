@@ -21,9 +21,7 @@ namespace <?= $data['namespace'] ?>;
      */
     protected $modelInfo = [
         <?= $this->makeArrayProperty($data['model_info'], 8) ?>,
-        'connect' => [
-            <?= $this->makeConnectInfo($data['connect']) ?>
-        ]
+        'config' => __DIR__ . '/<?= ltrim($data['db_config_path'], '/') ?>'
     ];
 <?php if(!empty($data['split_info'])) : ?>
 

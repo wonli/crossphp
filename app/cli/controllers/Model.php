@@ -232,6 +232,25 @@ class Model extends Cli
                 throw new CoreException('请指定表名');
             }
 
+            $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $modelConfig['namespace']);
+            $savePath = &$data['model']['path'];
+            if (!empty($savePath)) {
+                $genPath = rtrim($savePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+            } else {
+                $genPath = PROJECT_REAL_PATH . trim($namespacePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+            }
+
+            //配置文件路径
+            $configPath = $this->delegate->getConfig()->get('path', 'config');
+            $configRelativePath = $this->getRelativePath($genPath, $configPath);
+
+            //配置文件名称
+            $dbConfigFile = $this->getConfig()->get('sys', 'db_config');
+            if (!$dbConfigFile) {
+                $dbConfigFile = 'db.config.php';
+            }
+
+            $configFileRelativePath = $configRelativePath . $dbConfigFile;
             $connectConfig = $M->getLinkConfig();
             $mateData = $M->link->getMetaData($M->getPrefix($tableName));
             if (isset($field) && !isset($mateData[$field])) {
@@ -261,17 +280,13 @@ class Model extends Cli
                 throw new CoreException('主键未设置');
             }
 
-            if (!empty($sequence)) {
-                $connectConfig['sequence'] = $sequence;
-            }
-
             //处理Oracle自动序列
-            if ($isOracle && empty($connectConfig['sequence']) && !empty($modelConfig['autoSequence'])) {
+            if ($isOracle && empty($sequence) && !empty($modelConfig['autoSequence'])) {
                 $seqName = Helper::md10(implode('`', array_keys($mateData)));
-                $sequenceName = strtoupper("auto_{$seqName}_seq");
+                $sequence = strtoupper("auto_{$seqName}_seq");
 
                 //判断是否存在
-                $sequenceSQL = "select sequence_name from all_sequences where sequence_name= '{$sequenceName}'";
+                $sequenceSQL = "select sequence_name from all_sequences where sequence_name= '{$sequence}'";
                 $hasSequences = $M->link->rawSql($sequenceSQL)
                     ->stmt()->fetch(PDO::FETCH_ASSOC);
 
@@ -285,16 +300,14 @@ class Model extends Cli
                     }
 
                     //创建sequence
-                    $isCreated = $M->link->rawSql("create sequence {$sequenceName}
+                    $isCreated = $M->link->rawSql("create sequence {$sequence}
                         increment by 1 --每次加几
                         start with {$startWith} --从几开始
                         nomaxvalue  --不设置最大值
                         nocycle cache 3")->stmt()->execute();
-                    if ($isCreated) {
-                        $connectConfig['sequence'] = $sequenceName;
+                    if (!$isCreated) {
+                        $sequence = '';
                     }
-                } else {
-                    $connectConfig['sequence'] = $sequenceName;
                 }
             }
 
@@ -305,10 +318,13 @@ class Model extends Cli
             $data['connect'] = $connectConfig;
             $data['mate_data'] = $mateData;
             $data['namespace'] = $namespace;
+            $data['gen_path'] = $genPath;
+            $data['db_config_path'] = $configFileRelativePath;
             $data['model_info'] = [
                 'n' => $linkName,
                 'type' => $linkType,
-                'table' => $tableName
+                'table' => $tableName,
+                'sequence' => $sequence
             ];
 
             $ret = $this->view->genClass($data);
@@ -321,5 +337,39 @@ class Model extends Cli
         } catch (Exception $e) {
             $this->consoleMsg("{$propertyType}::{$namespace}\\{$modelName} [失败 : !! " . $e->getMessage() . ']');
         }
+    }
+
+    /**
+     * 计算相对路径
+     *
+     * @param string $from
+     * @param string $to
+     * @return string
+     */
+    function getRelativePath(string $from, string $to): string
+    {
+        $from = is_dir($from) ? rtrim($from, '\/') . '/' : $from;
+        $to = is_dir($to) ? rtrim($to, '\/') . '/' : $to;
+        $from = str_replace('\\', '/', $from);
+        $to = str_replace('\\', '/', $to);
+
+        $from = explode('/', $from);
+        $to = explode('/', $to);
+        $relPath = $to;
+        foreach ($from as $depth => $dir) {
+            if ($dir === $to[$depth]) {
+                array_shift($relPath);
+            } else {
+                $remaining = count($from) - $depth;
+                if ($remaining > 1) {
+                    $padLength = (count($relPath) + $remaining - 1) * -1;
+                    $relPath = array_pad($relPath, $padLength, '..');
+                    break;
+                } else {
+                    $relPath[0] = './' . $relPath[0];
+                }
+            }
+        }
+        return implode('/', $relPath);
     }
 }
