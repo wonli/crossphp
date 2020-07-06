@@ -11,6 +11,7 @@ $method = $data['api']['api_method'] ?? '';
 $apiId = $data['api']['id'] ?? '';
 $apiUrl = ($data['doc']['current_server']['api_addr'] ?? '') . $action;
 
+$headerParams = $data['doc']['header_params'] ?? [];
 $useGlobalParams = $data['user']['global_params'] ?? [];
 $formFields = $data['api']['api_params'] ?? [];
 ?>
@@ -18,18 +19,18 @@ $formFields = $data['api']['api_params'] ?? [];
     <div class="form-container-wrap">
         <div class="form-container">
             <form class="form-inline" data-toggle="validator" role="form" target="_blank"
-                  method="<?= $this->getApiActionMethod($data??[]) ?>"
+                  method="<?= $this->getApiActionMethod($data ?? []) ?>"
                   data-api-method="<?= $method ?>"
                   data-api-path="<?= $action ?>"
                   data-api-url="<?= $apiUrl ?>"
-                  action="<?= $this->getApiActionUrl($data??[]) ?>" enctype="multipart/form-data">
+                  action="<?= $this->getApiActionUrl($data ?? []) ?>" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-md-12 case-title" style="margin:10px 0">
                         <span class="badge"><?= $method ?></span>
-                        <a href="javascript:void(0)">
+                        <a class="api-url-name" href="javascript:void(0)">
                             <?= $action ?>
                         </a>
-                        <span class="hidden-xs">(<?= $name ?>)</span>
+                        <span class="api-name hidden-xs">(<?= $name ?>)</span>
                     </div>
                 </div>
 
@@ -169,8 +170,12 @@ $formFields = $data['api']['api_params'] ?? [];
                                     </div>
                                 </div>
                                 <div class="panel-footer">
-                                    <button type="submit" class="btn btn-primary">试一试</button>
-                                    <button type="button" api-id="<?= $apiId ?>" class="gen-code-flag btn btn-success">CURL</button>
+                                    <?php if (empty($headerParams)) : ?>
+                                        <button type="submit" class="btn btn-primary">试一试</button>
+                                    <?php endif ?>
+                                    <button type="button" api-id="<?= $apiId ?>" class="gen-code-flag btn btn-success">
+                                        CURL
+                                    </button>
                                 </div>
                             </div>
                         </div>
