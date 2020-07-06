@@ -78,7 +78,7 @@ if (!empty($data) && isset($data['curl']) && is_array($data['curl'])) {
         </div>
         <div id="ori" class="response-segment">
             <label for="response-textarea"></label>
-            <div><?= $content ?></div>
+            <div style="word-break: break-all"><?= $content ?></div>
         </div>
         <div id="struct" class="response-segment">
             <pre>
