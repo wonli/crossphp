@@ -166,7 +166,7 @@ class Doc extends Admin
             return;
         }
 
-        $docId = $this->params['id'] ?? 0;
+        $docId = $this->params['id'] ?: 0;
         $updateStatus = $this->getInitApiData($docId, $apiAddr, $docToken);
         if ($updateStatus->getStatus() != 1) {
             $this->display($updateStatus->getData(), 'JSON');
@@ -215,12 +215,12 @@ class Doc extends Admin
      */
     function curlRequest()
     {
-        $apiId = $this->params['id'] ?? 0;
+        $apiId = $this->params['doc_-_api-_-id'] ?? 0;
         if (empty($apiId)) {
             throw new FrontException('获取文档信息失败');
         }
 
-        unset($this->params['id']);
+        unset($this->params['doc_-_api-_-id']);
         $params = $this->params;
         $curlData = $this->getApiCurlData($apiId, $params, $serverInfo);
         $g = (new Generator())->run($curlData);
@@ -471,7 +471,7 @@ class Doc extends Admin
 
     /**
      * @cp_params action=add, id
-     * @throws CoreException
+     * @throws CoreException|DBConnectException
      */
     function action()
     {
@@ -537,8 +537,10 @@ class Doc extends Admin
             if (!empty($id)) {
                 $this->ADM->update($id, $saveData);
             } else {
-                $this->ADM->add($saveData);
+                $id = $this->ADM->add($saveData);
             }
+
+            (new ApiDocData())->update(['doc_id' => 0], ['doc_id' => $id]);
             $this->to('doc:setting');
             return;
         } else {
