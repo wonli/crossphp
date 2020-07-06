@@ -20,15 +20,7 @@ class ModelView extends CliView
     function genClass($data = [])
     {
         $content = $this->obRenderTpl('model/default', $data);
-        $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $data['namespace']);
-
-        $savePath = &$data['model']['path'];
-        if (!empty($savePath)) {
-            $classSavePath = rtrim($savePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        } else {
-            $classSavePath = PROJECT_REAL_PATH . trim($namespacePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        }
-
+        $classSavePath = $data['gen_path'];
         $classAbsoluteFile = $classSavePath . $data['name'] . '.php';
         if (file_exists($classAbsoluteFile)) {
             //处理用户自定义代码
