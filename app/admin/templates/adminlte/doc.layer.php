@@ -222,9 +222,18 @@
 
         $(document).on("click", ".gen-code-flag", function () {
             var apiId = $(this).attr('api-id'),
+                apiPath = $(this).closest('form').find('.api-url-name').html().trim(),
+                apiName = $(this).closest('form').find('.api-name').html().trim(),
                 fParams = $(this).closest('form').serialize();
 
-            window.location.href = '<?= $this->url('doc:curlRequest') ?>' + '?' + fParams + '&id=' + apiId;
+            layer.open({
+                type: 2,
+                title: apiPath + apiName,
+                shadeClose: true,
+                shade: 0.8,
+                area: ['72%', '80%'],
+                content: '<?= $this->url('doc:curlRequest') ?>' + '?' + fParams + '&doc_-_api-_-id=' + apiId
+            });
         });
 
         $('#fold').click(function () {
