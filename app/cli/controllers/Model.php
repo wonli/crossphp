@@ -233,9 +233,8 @@ class Model extends Cli
             }
 
             $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $modelConfig['namespace']);
-            $savePath = &$data['model']['path'];
-            if (!empty($savePath)) {
-                $genPath = rtrim($savePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+            if (!empty($modelConfig['path'])) {
+                $genPath = rtrim($modelConfig['path'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
             } else {
                 $genPath = PROJECT_REAL_PATH . trim($namespacePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
             }
