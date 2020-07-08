@@ -250,7 +250,6 @@ class Model extends Cli
             }
 
             $configFileRelativePath = $configRelativePath . $dbConfigFile;
-            $connectConfig = $M->getLinkConfig();
             $mateData = $M->link->getMetaData($M->getPrefix($tableName));
             if (isset($field) && !isset($mateData[$field])) {
                 throw new CoreException('分表字段不存在: ' . $field);
@@ -314,7 +313,6 @@ class Model extends Cli
             $data['type'] = $propertyType;
             $data['name'] = $modelName;
             $data['model'] = $modelConfig;
-            $data['connect'] = $connectConfig;
             $data['mate_data'] = $mateData;
             $data['namespace'] = $namespace;
             $data['gen_path'] = $genPath;
