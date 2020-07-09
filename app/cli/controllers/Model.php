@@ -171,7 +171,7 @@ class Model extends Cli
         }
 
         if (empty($namespace)) {
-            $this->consoleMsg("请为 {$propertyType}::{$modelName} 指定命名空间");
+            $this->consoleMsg("Please specify {$propertyType}::{$modelName} Specifying namespaces");
             return;
         }
 
@@ -194,19 +194,19 @@ class Model extends Cli
 
                     $field = &$splitConfig['field'];
                     if (null === $field) {
-                        throw new CoreException('请指定分表字段: field');
+                        throw new CoreException('Please specify the sub-table fields');
                     }
 
                     $prefix = &$splitConfig['prefix'];
                     if (null === $prefix) {
-                        throw new CoreException('请指定分表前缀: prefix');
+                        throw new CoreException('Please specify the sub-table prefix');
                     }
 
                     $number = &$splitConfig['number'];
                     if (null === $number) {
                         $number = 32;
                     } elseif (!is_numeric($number) || $number > 2048) {
-                        throw new CoreException('分表数量仅支持数字且不能大于2048！');
+                        throw new CoreException('The number of sub-tables only supports numbers and cannot be greater than 2048！');
                     }
 
                     $data['split_info'] = [
@@ -229,7 +229,7 @@ class Model extends Cli
             }
 
             if (empty($tableName)) {
-                throw new CoreException('请指定表名');
+                throw new CoreException('Please specify the table name');
             }
 
             $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $modelConfig['namespace']);
@@ -252,11 +252,11 @@ class Model extends Cli
             $configFileRelativePath = $configRelativePath . $dbConfigFile;
             $mateData = $M->link->getMetaData($M->getPrefix($tableName));
             if (isset($field) && !isset($mateData[$field])) {
-                throw new CoreException('分表字段不存在: ' . $field);
+                throw new CoreException('The sub-table field does not exist: ' . $field);
             }
 
             if (empty($mateData)) {
-                throw new CoreException('获取数据表信息失败');
+                throw new CoreException('Failed to get data table information');
             }
 
             $primaryKey = null;
@@ -275,7 +275,7 @@ class Model extends Cli
             }
 
             if (empty($primaryKey)) {
-                throw new CoreException('主键未设置');
+                throw new CoreException('Please set the primary key!');
             }
 
             //处理Oracle自动序列
@@ -326,13 +326,13 @@ class Model extends Cli
 
             $ret = $this->view->genClass($data);
             if (false === $ret) {
-                throw new CoreException("请检查目录权限");
+                throw new CoreException("Please check directory permissions");
             } else {
-                $this->consoleMsg("{$propertyType}::{$namespace}\\{$modelName} [成功]");
+                $this->consoleMsg("{$propertyType}::{$namespace}\\{$modelName} [success]");
             }
 
         } catch (Exception $e) {
-            $this->consoleMsg("{$propertyType}::{$namespace}\\{$modelName} [失败 : !! " . $e->getMessage() . ']');
+            $this->consoleMsg("{$propertyType}::{$namespace}\\{$modelName} [fail : !! " . $e->getMessage() . ']');
         }
     }
 
