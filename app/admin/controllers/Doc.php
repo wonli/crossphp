@@ -127,7 +127,7 @@ class Doc extends Admin
             }
 
             $docCategory = [];
-            $docData = (new ApiDocData())->getAll([], 'id, group_key, group_name, api_path, api_name, api_method, enable_mock');
+            $docData = (new ApiDocData())->getAll(['doc_id' => $doc_id], 'id, group_key, group_name, api_path, api_name, api_method, enable_mock');
             if (!empty($docData)) {
                 foreach ($docData as $d) {
                     $docCategory[$d['group_key']]['group_key'] = $d['group_key'];
