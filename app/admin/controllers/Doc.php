@@ -437,6 +437,7 @@ class Doc extends Admin
         }
 
         $UserDoc = new ApiDocUser();
+        $UserDoc->u = $this->u;
         $UserDoc->doc_id = $apiDocData->doc_id;
         $userData = $UserDoc->getAll();
         $ud = [];
