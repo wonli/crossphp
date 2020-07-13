@@ -54,6 +54,9 @@
       apiClassList(groupKey)
     }
 
+    $('.a-nav-menu').removeClass('current')
+    $('.menu-nav-' + id).addClass('current')
+
     var lid = layer.load()
     $.get('<?= $this->url('doc:makeTestForm') ?>', { 'id': id }, function (d) {
       showFormOrTestCase(true, d)
@@ -186,7 +189,7 @@
 <div id="mask"></div>
 <script>
   $(function () {
-    var docId = '<?= $this->e($this->data, 'doc_id', '') ?>', hashData = getHashData()
+    var hashData = getHashData()
     if (hashData.category && hashData.id) {
       apiClassList(hashData.category)
       if (hashData.id) {

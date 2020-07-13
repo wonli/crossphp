@@ -11,10 +11,9 @@
             foreach ($data['children'] as $api) {
                 $list_container_id = $api['group_key'] . '/' . $api['id'];
                 ?>
-                <div class="row a-nav-menu">
+                <div class="row a-nav-menu menu-nav-<?= $api['id'] ?>">
                     <i class="fa dot"></i>
-                    <a href="javascript:void(0)" class="<?= $list_container_id ?>"
-                       onclick="getTestCase('<?= $api['group_key'] ?>', '<?= $api['id'] ?>')">
+                    <a href="javascript:void(0)" onclick="getTestCase('<?= $api['group_key'] ?>', '<?= $api['id'] ?>')">
                         <?= $api['api_name'] ?? '' ?>
                     </a>
                 </div>
