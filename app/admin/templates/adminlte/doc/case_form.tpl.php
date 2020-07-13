@@ -20,9 +20,6 @@ $formFields = $data['api']['api_params'] ?? [];
         <div class="form-container">
             <form class="form-inline" data-toggle="validator" role="form" target="_blank"
                   method="<?= $this->getApiActionMethod($data ?? []) ?>"
-                  data-api-method="<?= $method ?>"
-                  data-api-path="<?= $action ?>"
-                  data-api-url="<?= $apiUrl ?>"
                   action="<?= $this->getApiActionUrl($data ?? []) ?>" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-md-12 case-title" style="margin:10px 0">
@@ -77,6 +74,7 @@ $formFields = $data['api']['api_params'] ?? [];
                                                     'name' => $field_name,
                                                     'type' => $input_type,
                                                     'class' => 'form-control',
+                                                    'style' => 'min-width:75%'
                                                 );
 
                                                 $input_addition_html = '';
@@ -89,12 +87,13 @@ $formFields = $data['api']['api_params'] ?? [];
                                                     case 'textarea':
                                                         $input_ele_type = 'textarea';
                                                         $input_tag_data['rows'] = 5;
-                                                        $input_tag_data['style'] = 'min-width:80%';
+                                                        $input_tag_data['style'] = 'min-width:85%';
                                                         $input_tag_data['placeholder'] = $field_name;
                                                         $input = $this->htmlTag($input_ele_type, $input_tag_data);
                                                         break;
 
                                                     case 'select':
+                                                        $input_tag_data['style'] = 'min-width:50%';
                                                         if (!empty($options)) {
                                                             $selectOptions = [];
                                                             $options = explode(' ', trim($options));
@@ -117,6 +116,7 @@ $formFields = $data['api']['api_params'] ?? [];
                                                         $input_tag_data['type'] = 'file';
                                                         $input_tag_data['placeholder'] = $field_name;
                                                         $input_tag_data['multiple'] = true;
+                                                        $input_tag_data['style'] = 'min-width:80%';
                                                         $input = $this->htmlTag($input_ele_type, $input_tag_data);
                                                         break;
 
@@ -134,7 +134,7 @@ $formFields = $data['api']['api_params'] ?? [];
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div class="form-group col-lg-12">
+                                                        <div class="form-group" style="width:100%">
                                                             <?= $input ?>
                                                             <span class="hidden-xs">
                                                                 <?= $input_addition_html ?>
