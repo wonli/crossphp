@@ -8,6 +8,7 @@
 namespace app\admin\views;
 
 
+use Cross\Interactive\ResponseData;
 use Cross\Exception\CoreException;
 
 use lib\UI\Component\Table;
@@ -86,21 +87,30 @@ class DocView extends AdminView
 
     /**
      * 生成api列表
+     *
+     * @throws CoreException
      */
     function docApiList()
     {
-        foreach($this->data['data']??[] as $d) {
-            ?>
-            <div class="row">
-                    <div class="col-md-12 case-title" style="margin:10px 0">
-                        <span class="badge"><?= $d['api_method'] ?? 'post' ?></span>
-                        <a href="javascript:void(0)" onclick="getTestCase('<?= $d['group_key'] ?>', '<?= $d['id'] ?>')">
-                            <?= $d['api_name']??'' ?>
-                        </a>
-                        <span class="hidden-xs">(<?= $d['api_path'] ?>)</span>
+        $data = &$this->data;
+        $statusName = ResponseData::builder()->getStatusName();
+        $statusCode = $data[$statusName] ?? 0;
+        if ($statusCode == 1) {
+            foreach($this->data['data']??[] as $d) {
+                ?>
+                <div class="row">
+                        <div class="col-md-12 case-title" style="margin:10px 0">
+                            <span class="badge"><?= $d['api_method'] ?? 'post' ?></span>
+                            <a href="javascript:void(0)" onclick="getTestCase('<?= $d['group_key'] ?>', '<?= $d['id'] ?>')">
+                                <?= $d['api_name']??'' ?>
+                            </a>
+                            <span class="hidden-xs">(<?= $d['api_path'] ?>)</span>
+                        </div>
                     </div>
-                </div>
-            <?php
+                <?php
+            }
+        } else {
+            $this->noticeBlock();
         }
     }
 
