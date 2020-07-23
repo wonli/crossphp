@@ -359,8 +359,9 @@ class DocView extends AdminView
                         </div>
                     </td>
                     <td>
-                        <div class="form-group col-lg-12">
+                        <div class="form-group" style="width: 100%">
                             <input type="text" class="form-control" required="1" name="<?= $field ?>"
+                                   style="min-width: 75%"
                                    value="<?= $userValue ?>"
                                    placeholder="<?= $name ?>">
                             <span class="hidden-xs">
