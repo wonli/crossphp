@@ -21,11 +21,21 @@ use PDO;
 class Model extends Cli
 {
     /**
+     * @var bool
+     */
+    protected $strictCommand = false;
+
+    /**
      * @var array
      */
-    protected $commandAlias = [
-        'f' => 'file|model配置文件名称(默认main)'
+    protected $commandConfig = [
+        'file|f' => 'model配置文件名称(默认main)'
     ];
+
+    /**
+     * @var string
+     */
+    protected $commandDesc = '更多用法请查看model配置文件 config/main.model.php';
 
     /**
      * 命名空间前缀
@@ -42,7 +52,7 @@ class Model extends Cli
      */
     function index($name = '')
     {
-        $fileName = $this->command('file', true) ?: 'main';
+        $fileName = $this->command('file', true, 'main');
         $configName = "config::{$fileName}.model.php";
         $propertyFile = $this->getFilePath($configName);
         if (!file_exists($propertyFile)) {

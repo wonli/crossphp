@@ -27,45 +27,54 @@ use lib\LogStation\CliLog;
 abstract class Cli extends Controller
 {
     /**
-     * 命令列表
+     * 命令参数
      *
      * <pre>
      * 格式如下：
-     * --command 命令全名，支持等号传值
-     * -c 命令简写，可以组合
+     * --command 命令
+     * -c 命令简写，单字符可以组合
      * </pre>
      *
      * @var []
      */
-    protected $cliCommands;
+    protected $cliCommands = [];
 
     /**
-     * 命令参数别名
+     * 命令参数配置
      *
      * <pre>
-     * 下面三种写法等效，第一种无tips
-     * ['c' => 'clean', ‘u’ => 'update']
-     * ['c' => 'clean|清理', ‘u’ => 'update|更新']
-     * ['c' => ['command' => 'clean', 'tips' => '清理'],'u' => ['command' => 'update', 'tips' => '更新']]
-     * -cu等效 -c -u，第一个命令传--help时，显示提示信息
+     * 配置命令参数和提示
+     * ['clean|c' => '清理', ‘update|u’ => '更新']
+     * -cu等效 -c -u，第一个命令传--help时，显示帮助信息
      * </pre>
      * @var array
      */
-    protected $commandAlias = [];
+    protected $commandConfig = [];
 
     /**
+     * 默认开启严格模式（传入未配置的参数会报错）
+     *
+     * @var bool
+     */
+    protected $strictCommand = true;
+
+    /**
+     * 命名描述信息, 多行用数组
+     *
+     * @var string|array
+     */
+    protected $commandDesc;
+
+    /**
+     * 进程title
+     *
      * @var string
      */
     protected $processTitle;
 
     /**
-     * 是否解析命令行参数(params1=value1 params2=value2)
+     * 原始参数
      *
-     * @var bool
-     */
-    protected $initCliParams = true;
-
-    /**
      * @var array
      */
     protected $oriParams;
@@ -83,15 +92,36 @@ abstract class Cli extends Controller
     protected $dev = [];
 
     /**
-     * @var string
-     */
-    protected $devConfig = 'config::.dev.php';
-
-    /**
+     * 是否处理开发者信息
+     *
      * @var bool
      */
     protected $initDevConfig = true;
 
+    /**
+     * 是否解析命令和参数
+     *
+     * @var bool
+     */
+    protected $initCliParams = true;
+
+    /**
+     * 命令帮助信息
+     *
+     * @var array
+     */
+    private $tipsData = [];
+
+    /**
+     * 开发者信息存储文件
+     *
+     * @var string
+     */
+    private $devConfig = 'config::.dev.php';
+
+    /**
+     * Cli constructor.
+     */
     function __construct()
     {
         global $argv;
@@ -101,11 +131,93 @@ abstract class Cli extends Controller
             $this->processTitle = $argv[1];
         }
 
-        $this->logger = new CliLog($this->processTitle);
+        $this->setLogger(new CliLog($this->processTitle));
         if ('Darwin' !== PHP_OS) {
             cli_set_process_title($this->processTitle);
         }
 
+        $this->initDevInfo();
+        $this->parseCliCommands();
+        $this->parseParams();
+    }
+
+    /**
+     * 自定义logger
+     *
+     * @param ILog $logger
+     */
+    function setLogger(ILog $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    /**
+     * 获取命令行参数值
+     *
+     * @param string $command 命令名称
+     * @param bool $getValue 是否取值
+     * @param null $default 默认值
+     * @return mixed
+     */
+    function command(string $command, bool $getValue = false, $default = null)
+    {
+        if ($getValue) {
+            if (!isset($this->cliCommands[$command]) && null !== $default) {
+                return $default;
+            } elseif (!isset($this->cliCommands[$command])) {
+                $this->commandTips($command, 'Need params: -');
+            }
+
+            return $this->cliCommands[$command];
+        }
+
+        //不取值时仅判断是否传了参数
+        $has = array_key_exists($command, $this->cliCommands);
+        if ($has && null !== $this->cliCommands[$command]) {
+            return $this->cliCommands[$command];
+        } elseif ($has) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * 解析命令行参数配置
+     */
+    function parseCliCommands(): void
+    {
+        $aliasData = [];
+        if (!empty($this->commandConfig)) {
+            foreach ($this->commandConfig as $command => $tips) {
+                $d = [];
+                $command = trim($command);
+                if (false !== strpos($command, '|')) {
+                    list($command, $shortCommand) = explode('|', $command);
+                    $d['shortCommand'] = trim($shortCommand);
+                } else {
+                    $d['shortCommand'] = '';
+                }
+
+                $d['command'] = $command;
+                $d['tips'] = $tips;
+
+                $this->tipsData[] = $d;
+                $aliasData[$command] = $d;
+                if (!empty($d['shortCommand'])) {
+                    $aliasData[$d['shortCommand']] = $d;
+                }
+            }
+        }
+
+        $this->commandConfig = $aliasData;
+    }
+
+    /**
+     * 处理命令和参数
+     */
+    function parseParams(): void
+    {
         //处理注释配置中的参数
         $this->oriParams = &$this->params;
         if (!empty($this->action_annotate['params'])) {
@@ -114,11 +226,10 @@ abstract class Cli extends Controller
             $params = [];
         }
 
-        //处理$argv传递过来的参数
         if ($this->initCliParams) {
             $defaultCommand = null;
             foreach ($this->params as $p) {
-                if (false !== strpos($p, '-') && !empty($this->commandAlias)) {
+                if (false !== strpos($p, '-')) {
                     if ($p[1] != '-') {
                         $cmd = trim(trim($p, '-'));
                         if (false !== strpos($cmd, '=')) {
@@ -129,26 +240,26 @@ abstract class Cli extends Controller
                             $cmdValue = null;
                         }
 
-                        for ($i = 0, $j = strlen($cmd); $i < $j; $i++) {
-                            $cmdFlag = $cmd[$i];
-                            if (!isset($this->commandAlias[$cmdFlag])) {
-                                $this->commandTips($cmdFlag);
-                                break 2;
-                            }
+                        if (isset($this->commandConfig[$cmd])) {
+                            $alias = &$this->commandConfig[$cmd];
+                            $this->cliCommands[$cmd] = $cmdValue;
+                            $this->cliCommands[$alias['command']] = $cmdValue;
+                        } else {
+                            for ($i = 0, $j = strlen($cmd); $i < $j; $i++) {
+                                $cmdFlag = $cmd[$i];
+                                if ($this->strictCommand && !isset($this->commandConfig[$cmdFlag])) {
+                                    $this->commandTips($cmdFlag);
+                                    break 2;
+                                } elseif (!isset($this->commandConfig[$cmdFlag])) {
+                                    break 2;
+                                }
 
-                            $commandAlias = &$this->commandAlias[$cmdFlag];
-                            if (null !== $commandAlias && is_array($commandAlias)) {
-                                $realCmd = &$commandAlias['command'];
-                            } elseif (null !== $commandAlias && false !== strpos($commandAlias, '|')) {
-                                list($realCmd) = explode('|', $commandAlias);
-                            } elseif (null !== $commandAlias) {
-                                $realCmd = $commandAlias;
-                            } else {
-                                $realCmd = $cmd;
+                                $commandAlias = &$this->commandConfig[$cmdFlag];
+                                if (null !== $commandAlias) {
+                                    $this->cliCommands[$cmdFlag] = $cmdValue;
+                                    $this->cliCommands[$commandAlias['command']] = $cmdValue;
+                                }
                             }
-
-                            $this->cliCommands[trim($cmd)] = $cmdValue;
-                            $this->cliCommands[trim($realCmd)] = $cmdValue;
                         }
                     } else {
                         $cmd = trim($p, '-');
@@ -180,7 +291,13 @@ abstract class Cli extends Controller
 
             $this->params = $params;
         }
+    }
 
+    /**
+     * 处理开发者信息
+     */
+    function initDevInfo(): void
+    {
         //处理开发者信息
         if ($this->initDevConfig) {
             $devFile = $this->getFilePath($this->devConfig);
@@ -225,85 +342,69 @@ abstract class Cli extends Controller
     }
 
     /**
-     * 自定义logger
+     * 命令帮助信息
      *
-     * @param ILog $logger
+     * @param string $cmd
+     * @param string $tipsText
      */
-    function setLogger(ILog $logger)
+    protected function commandTips($cmd = null, $tipsText = 'Not support command: -')
     {
-        $this->logger = $logger;
-    }
+        $this->consoleMsg(PHP_EOL, false);
 
-    /**
-     * command
-     *
-     * @param string $command
-     * @param bool $getArgs
-     * @return mixed
-     */
-    function command(string $command, bool $getArgs = false)
-    {
-        if (empty($this->cliCommands)) {
-            return false;
+        $s = false;
+        if (null !== $cmd) {
+            $s = true;
+            $this->consoleMsg("  {$tipsText}" . $cmd . PHP_EOL . PHP_EOL, false);
         }
 
-        if ($getArgs) {
-            return $this->cliCommands[$command] ?? false;
-        }
+        if (!empty($this->tipsData)) {
+            $commandMaxLength = $shortCommandMaxLength = 0;
+            foreach ($this->tipsData as $set) {
+                $sLength = strlen($set['shortCommand']);
+                if ($sLength > $shortCommandMaxLength) {
+                    $shortCommandMaxLength = $sLength;
+                }
 
-        $has = array_key_exists($command, $this->cliCommands);
-        if ($has && null !== $this->cliCommands[$command]) {
-            return $this->cliCommands[$command];
-        } elseif ($has) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * 输出命令提示
-     *
-     * @param string $cmdFlag
-     */
-    protected function commandTips($cmdFlag = null)
-    {
-        if (null !== $cmdFlag) {
-            $this->consoleMsg('  Not support command: -' . $cmdFlag . PHP_EOL, false);
-        }
-
-        $commandConfig = [];
-        $commandMaxLength = 0;
-        foreach ($this->commandAlias as $s => $set) {
-            $d['s'] = $s;
-            if (is_array($set)) {
-                $d['command'] = $set['command'] ?? '';
-                $d['tips'] = $set['tips'] ?? '';
-            } elseif (false !== strpos($set, '|')) {
-                list($d['command'], $d['tips']) = explode('|', $set);
-            } else {
-                $d['command'] = $d['tips'] = $set;
+                $commandLength = strlen($set['command']);
+                if ($commandLength > $commandMaxLength) {
+                    $commandMaxLength = $commandLength;
+                }
             }
 
-            $commandConfig[] = $d;
-            $commandLength = strlen($d['command']);
-            if ($commandLength > $commandMaxLength) {
-                $commandMaxLength = $commandLength;
+            $helperContext = [];
+            array_map(function ($d) use ($shortCommandMaxLength, $commandMaxLength, &$helperContext) {
+                $line = str_pad(!empty($d['shortCommand']) ? "  -{$d['shortCommand']}, " : '', $shortCommandMaxLength + 5, ' ', STR_PAD_LEFT);
+                $line .= str_pad("--{$d['command']}    ", $commandMaxLength + 6, ' ', STR_PAD_LEFT);
+                $line .= $d['tips'];
+                $helperContext[] = $line;
+            }, $this->tipsData);
+
+            $padSpace = str_pad('', $shortCommandMaxLength + $commandMaxLength + 11, ' ', STR_PAD_LEFT);
+        } else {
+            $padSpace = '  ';
+        }
+
+        if (!empty($this->commandDesc)) {
+            if (!is_array($this->commandDesc)) {
+                $this->commandDesc = [$this->commandDesc];
+            }
+
+            if (!empty($helperContext)) {
+                $helperContext[] = '';
+            }
+
+            foreach ($this->commandDesc as $desc) {
+                $helperContext[] = $padSpace . $desc;
             }
         }
 
-        $helperContext = [];
-        array_map(function ($d) use ($commandMaxLength, &$helperContext) {
-            $line = str_pad("--{$d['command']}", $commandMaxLength + 3, ' ', STR_PAD_LEFT);
-            $line .= ", -{$d['s']}";
-            $line .= str_pad(' ', 3, ' ');
-            $line .= $d['tips'];
-
-            $helperContext[] = $line;
-        }, $commandConfig);
+        if (empty($helperContext)) {
+            $helperContext[] = ($s ? '    - ' : '  No more information!');
+        }
 
         $helperContext[] = PHP_EOL;
         $this->consoleMsg(implode(PHP_EOL, $helperContext), false);
+
         exit(0);
     }
 

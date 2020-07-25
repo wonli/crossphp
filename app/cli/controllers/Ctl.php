@@ -25,9 +25,19 @@ class Ctl extends Cli
     /**
      * @var array
      */
-    protected $commandAlias = [
-        'c' => 'class|类名称',
-        'v' => 'viewCtl|是否生成视图控制器',
+    protected $commandConfig = [
+        'class|c' => '生成类名称（请使用小驼峰命名法，第一个字符自动转换为大写）',
+        'viewCtl|v' => '是否生成视图控制器，在配置文件控制',
+    ];
+
+    /**
+     * 命令描述
+     *
+     * @var array
+     */
+    protected $commandDesc = [
+        '生成控制器和视图控制器 php ctl:[api|admin|web] ctl后跟名称指定app名称',
+        '更多信息请查看config/ctl.config.php配置文件'
     ];
 
     /**
@@ -77,12 +87,7 @@ class Ctl extends Cli
             return;
         }
 
-        $className = $this->command('class');
-        if (empty($className)) {
-            $this->commandTips();
-            return;
-        }
-
+        $className = $this->command('class', true);
         $config = &$ctlConfig[$name];
         $config['author'] = sprintf('%s <%s>', $this->dev['name'], $this->dev['email']);
         if (!empty($this->oriParams)) {
@@ -149,9 +154,9 @@ class Ctl extends Cli
 
         //创建视图控制器
         $tplName = '';
-        $makeViewController = $this->command('viewController');
-        if ($makeViewController) {
-            $makeViewController = $this->getBooleanValueFromString($makeViewController);
+        $createViewCtl = $this->command('viewCtl');
+        if (null !== $createViewCtl) {
+            $makeViewController = $this->getBooleanValueFromString($createViewCtl);
         } else {
             $makeViewController = &$config['makeViewController'];
         }
