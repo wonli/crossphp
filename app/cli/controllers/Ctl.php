@@ -36,7 +36,7 @@ class Ctl extends Cli
      * @var array
      */
     protected $commandDesc = [
-        '生成控制器和视图控制器 php ctl:[api|admin|web] ctl后跟名称指定app名称',
+        '生成控制器和视图控制器 php ctl:[api|admin|web] ctl:api指定使用api配置项',
         '更多信息请查看config/ctl.config.php配置文件'
     ];
 

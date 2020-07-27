@@ -165,7 +165,7 @@ abstract class Cli extends Controller
             if (!isset($this->cliCommands[$command]) && null !== $default) {
                 return $default;
             } elseif (!isset($this->cliCommands[$command])) {
-                $this->commandTips($command, 'Need params: -');
+                $this->commandTips($command, 'Need params');
             }
 
             return $this->cliCommands[$command];
@@ -195,8 +195,10 @@ abstract class Cli extends Controller
                 if (false !== strpos($command, '|')) {
                     list($command, $shortCommand) = explode('|', $command);
                     $d['shortCommand'] = trim($shortCommand);
+                    $d['cmdMsg'] = " -{$shortCommand}, --{$command}";
                 } else {
                     $d['shortCommand'] = '';
+                    $d['cmdMsg'] = " --{$command}";
                 }
 
                 $d['command'] = $command;
@@ -347,14 +349,15 @@ abstract class Cli extends Controller
      * @param string $cmd
      * @param string $tipsText
      */
-    protected function commandTips($cmd = null, $tipsText = 'Not support command: -')
+    protected function commandTips(string $cmd = null, string $tipsText = 'Not support params')
     {
         $this->consoleMsg(PHP_EOL, false);
 
         $s = false;
         if (null !== $cmd) {
             $s = true;
-            $this->consoleMsg("  {$tipsText}" . $cmd . PHP_EOL . PHP_EOL, false);
+            $cmdMsg = $this->commandConfig[$cmd]['cmdMsg'] ?? (!empty($cmd) ? "-{$cmd}" : $cmd);
+            $this->consoleMsg("  {$tipsText}: " . $cmdMsg . PHP_EOL . PHP_EOL, false);
         }
 
         if (!empty($this->tipsData)) {
