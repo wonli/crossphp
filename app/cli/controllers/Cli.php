@@ -375,14 +375,24 @@ abstract class Cli extends Controller
             }
 
             $helperContext = [];
-            array_map(function ($d) use ($shortCommandMaxLength, $commandMaxLength, &$helperContext) {
+            $padSpace = str_pad('', $shortCommandMaxLength + $commandMaxLength + 11, ' ', STR_PAD_LEFT);
+            array_map(function ($d) use ($shortCommandMaxLength, $commandMaxLength, $padSpace, &$helperContext) {
                 $line = str_pad(!empty($d['shortCommand']) ? "  -{$d['shortCommand']}, " : '', $shortCommandMaxLength + 5, ' ', STR_PAD_LEFT);
                 $line .= str_pad("--{$d['command']}    ", $commandMaxLength + 6, ' ', STR_PAD_LEFT);
-                $line .= $d['tips'];
-                $helperContext[] = $line;
+                if (is_array($d['tips'])) {
+                    array_walk($d['tips'], function ($t, $index) use ($padSpace, &$line, &$helperContext) {
+                        if ($index == 0) {
+                            $line .= $t;
+                        } else {
+                            $line = $padSpace . $t;
+                        }
+                        $helperContext[] = $line;
+                    });
+                } else {
+                    $line .= $d['tips'];
+                    $helperContext[] = $line;
+                }
             }, $this->tipsData);
-
-            $padSpace = str_pad('', $shortCommandMaxLength + $commandMaxLength + 11, ' ', STR_PAD_LEFT);
         } else {
             $padSpace = '  ';
         }
