@@ -17,7 +17,8 @@
   ],
   "require": {
     "php": "^7.2.0",
-    "ideaa/cross": "^2.1.0"
+    "ideaa/cross": "^2.1.0",
+    "ext-pdo": "*"
   },
   "repositories": {
     "packagist": {

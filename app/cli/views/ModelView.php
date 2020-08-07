@@ -24,8 +24,13 @@ class ModelView extends CliView
         $classAbsoluteFile = $classSavePath . $data['name'] . '.php';
         if (file_exists($classAbsoluteFile)) {
             //处理用户自定义代码
-            $classContent = file_get_contents($classAbsoluteFile);
-            preg_match("/.*autoGenCodeFlag;(\n|\r\n)(.*)}/s", $classContent, $matches);
+            $fileContent = file_get_contents($classAbsoluteFile);
+            preg_match("/(.*){$data['type']} {$data['name']}.*autoGenCodeFlag;(?:\n|\r\n)(.*)}/s", $fileContent, $matches);
+            $header = &$matches[1];
+            if (!empty($header)) {
+                $content = preg_replace("/(.*)({$data['type']} {$data['name']}.*)/s", "{$header}$2", $content);
+            }
+
             $userCodeSegment = &$matches[2];
             if (!empty($userCodeSegment)) {
                 $content = preg_replace("/(.*autoGenCodeFlag;(\n|\r\n).*?)/s", "$1{$userCodeSegment}", $content);
