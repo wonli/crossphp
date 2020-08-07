@@ -189,7 +189,7 @@ class Model extends Cli
             $sequence = '';
             $data['split_info'] = [];
             if (is_array($tableNameConfig)) {
-                //单独处理序号
+                //处理Oracle自定义序列
                 if (!empty($tableNameConfig['sequence'])) {
                     $sequence = &$tableNameConfig['sequence'];
                 }
@@ -288,7 +288,7 @@ class Model extends Cli
                 throw new CoreException('Please set the primary key!');
             }
 
-            //处理Oracle自动序列
+            //处理Oracle自增序列
             if ($isOracle && empty($sequence) && !empty($modelConfig['autoSequence'])) {
                 $seqName = Helper::md10(implode('`', array_keys($mateData)));
                 $sequence = strtoupper("auto_{$seqName}_seq");
