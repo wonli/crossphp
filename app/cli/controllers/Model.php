@@ -127,6 +127,7 @@ class Model extends Cli
             $this->namespacePrefix = str_replace('/', '\\', $config['namespace']);
             if (!empty($config['models'])) {
                 foreach ($config['models'] as $modelName => $tableNameConfig) {
+                    $this->genModelInfo($tableNameConfig, $modelName, $db, $config);
                     $this->genClass($tableNameConfig, $modelName, $db, $config['type'], $config);
                 }
             }
@@ -134,115 +135,25 @@ class Model extends Cli
     }
 
     /**
-     * 生成类
+     * 生成模型信息类
      *
      * @param string $tableNameConfig
      * @param string $modelName
      * @param string $db
-     * @param string $propertyType 生成类的类型
      * @param array $modelConfig
      * @throws CoreException
      */
-    private function genClass($tableNameConfig, $modelName, $db = '', $propertyType = 'class', $modelConfig = [])
+    private function genModelInfo($tableNameConfig, $modelName, $db = '', $modelConfig = [])
     {
-        if (empty($db)) {
-            $key = ':';
-        } else {
-            $key = $db;
-        }
-
-        static $cache;
-        if (!isset($cache[$key])) {
-            $cache[$key] = new Module($db);
-        }
-
-        $allowPropertyType = ['class' => true, 'trait' => true];
-        if (!isset($allowPropertyType[$propertyType])) {
-            $propertyType = 'class';
-        }
-
-        /* @var $M Module */
-        $M = &$cache[$key];
-        $linkType = $M->getLinkType();
-        $linkName = $M->getLinkName();
-
-        $modelName = str_replace('/', '\\', $modelName);
-        $modelName = trim($modelName, '\\');
-        $pos = strrpos($modelName, '\\');
-
-        if ($pos) {
-            $modelName = substr($modelName, $pos + 1);
-            $namespace = substr($modelName, 0, $pos);
-            if ($this->namespacePrefix) {
-                $namespace = $this->namespacePrefix . '\\' . $namespace;
-            }
-        } else {
-            $namespace = $this->namespacePrefix;
-        }
-
-        if (empty($namespace)) {
-            $this->consoleMsg("Please specify {$propertyType}::{$modelName} Specifying namespaces");
-            return;
-        }
+        $propertyType = 'class';
+        $modelName = "{$modelName}Table";
+        $namespace = $this->getGenClassNamespace($modelName) . '\\' . 'Table';
 
         try {
             $sequence = '';
             $data['split_info'] = [];
-            if (is_array($tableNameConfig)) {
-                //处理Oracle自定义序列
-                if (!empty($tableNameConfig['sequence'])) {
-                    $sequence = &$tableNameConfig['sequence'];
-                }
-
-                if (!empty($tableNameConfig['split'])) {
-                    //处理分表
-                    $splitConfig = &$tableNameConfig['split'];
-                    $method = &$splitConfig['method'];
-                    if (null === $method) {
-                        $method = 'hash';
-                    }
-
-                    $field = &$splitConfig['field'];
-                    if (null === $field) {
-                        throw new CoreException('Please specify the sub-table fields');
-                    }
-
-                    $prefix = &$splitConfig['prefix'];
-                    if (null === $prefix) {
-                        throw new CoreException('Please specify the sub-table prefix');
-                    }
-
-                    $number = &$splitConfig['number'];
-                    if (null === $number) {
-                        $number = 32;
-                    } elseif (!is_numeric($number) || $number > 2048) {
-                        throw new CoreException('The number of sub-tables only supports numbers and cannot be greater than 2048！');
-                    }
-
-                    $data['split_info'] = [
-                        'number' => $number,
-                        'method' => $method,
-                        'field' => $field,
-                        'prefix' => $prefix,
-                    ];
-
-                    //分表时默认使用第一张表的结构
-                    $tableName = $splitConfig['prefix'] . '0';
-                }
-
-                if (empty($tableName) && !empty($tableNameConfig['table'])) {
-                    $tableName = &$tableNameConfig['table'];
-                }
-
-            } else {
-                $tableName = $tableNameConfig;
-            }
-
-            if (empty($tableName)) {
-                throw new CoreException('Please specify the table name');
-            }
-
-            $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $modelConfig['namespace']);
+            $tableName = $this->getTableName($tableNameConfig, $data['split_info']);
+            $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $namespace);
             if (!empty($modelConfig['path'])) {
                 $genPath = rtrim($modelConfig['path'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
             } else {
@@ -259,8 +170,8 @@ class Model extends Cli
                 $dbConfigFile = 'db.config.php';
             }
 
-            $configFileRelativePath = $configRelativePath . $dbConfigFile;
-            $mateData = $M->link->getMetaData($M->getPrefix($tableName));
+            $ModuleInstance = $this->getModuleInstance($db);
+            $mateData = $ModuleInstance->link->getMetaData($ModuleInstance->getPrefix($tableName));
             if (isset($field) && !isset($mateData[$field])) {
                 throw new CoreException('The sub-table field does not exist: ' . $field);
             }
@@ -270,7 +181,7 @@ class Model extends Cli
             }
 
             $primaryKey = null;
-            $isOracle = (0 === strcasecmp($linkType, 'oracle'));
+            $isOracle = (0 === strcasecmp($ModuleInstance->getLinkType(), 'oracle'));
             foreach ($mateData as $key => $set) {
                 if ($set['primary']) {
                     if ($isOracle && !empty($set['default_value'])) {
@@ -295,12 +206,12 @@ class Model extends Cli
 
                 //判断是否存在
                 $sequenceSQL = "select sequence_name from all_sequences where sequence_name= '{$sequence}'";
-                $hasSequences = $M->link->rawSql($sequenceSQL)
+                $hasSequences = $ModuleInstance->link->rawSql($sequenceSQL)
                     ->stmt()->fetch(PDO::FETCH_ASSOC);
 
                 if (empty($hasSequences)) {
                     //获取表主键当前最大自增加ID值
-                    $rows = $M->link->rawSql("select max($primaryKey) inc from {$tableName}")
+                    $rows = $ModuleInstance->link->rawSql("select max($primaryKey) inc from {$tableName}")
                         ->stmt()->fetch(PDO::FETCH_ASSOC);
                     $startWith = 1;
                     if (!empty($rows['INC'])) {
@@ -308,11 +219,11 @@ class Model extends Cli
                     }
 
                     //创建sequence
-                    $isCreated = $M->link->rawSql("create sequence {$sequence}
+                    $isCreated = $ModuleInstance->link->rawSql("create sequence {$sequence}
                         increment by 1 --每次加几
                         start with {$startWith} --从几开始
                         nomaxvalue  --不设置最大值
-                        nocycle cache 3")->stmt()->execute();
+                        nocycle cache 10")->stmt()->execute();
                     if (!$isCreated) {
                         $sequence = '';
                     }
@@ -326,15 +237,15 @@ class Model extends Cli
             $data['mate_data'] = $mateData;
             $data['namespace'] = $namespace;
             $data['gen_path'] = $genPath;
-            $data['db_config_path'] = $configFileRelativePath;
+            $data['db_config_path'] = $configRelativePath . $dbConfigFile;
             $data['model_info'] = [
-                'n' => $linkName,
-                'type' => $linkType,
+                'n' => $ModuleInstance->getLinkName(),
+                'type' => $ModuleInstance->getLinkType(),
                 'table' => $tableName,
                 'sequence' => $sequence
             ];
 
-            $ret = $this->view->genClass($data);
+            $ret = $this->view->genModelInfo($data);
             if (false === $ret) {
                 throw new CoreException("Please check directory permissions");
             } else {
@@ -344,6 +255,175 @@ class Model extends Cli
         } catch (Exception $e) {
             $this->consoleMsg("{$propertyType}::{$namespace}\\{$modelName} [fail : !! " . $e->getMessage() . ']');
         }
+    }
+
+    /**
+     * 生成类
+     *
+     * @param $tableNameConfig
+     * @param $modelName
+     * @param string $db
+     * @param string $propertyType
+     * @param array $modelConfig
+     * @throws CoreException
+     */
+    private function genClass($tableNameConfig, $modelName, $db = '', $propertyType = 'class', $modelConfig = [])
+    {
+        $allowPropertyType = ['class' => true, 'trait' => true];
+        if (!isset($allowPropertyType[$propertyType])) {
+            $propertyType = 'class';
+        }
+
+        $namespace = $this->getGenClassNamespace($modelName);
+        $modelClassName = $modelName . 'Table';
+        $modelNamespace = $namespace . '\\Table\\' . $modelClassName;
+        $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $namespace);
+        if (!empty($modelConfig['path'])) {
+            $genPath = rtrim($modelConfig['path'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        } else {
+            $genPath = PROJECT_REAL_PATH . trim($namespacePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        }
+
+        $ModuleInstance = $this->getModuleInstance($db);
+        $tableName = $this->getTableName($tableNameConfig);
+        $mateData = $ModuleInstance->link->getMetaData($ModuleInstance->getPrefix($tableName));
+        $data = [
+            'name' => $modelName,
+            'type' => $propertyType,
+            'mate_data' => $mateData,
+            'namespace' => $namespace,
+            'modelClass' => $modelClassName,
+            'modelNamespace' => $modelNamespace,
+            'genPath' => $genPath,
+        ];
+
+        $ret = $this->view->genClass($data);
+        if (false === $ret) {
+            throw new CoreException("Please check directory permissions");
+        } else {
+            $this->consoleMsg("{$propertyType}::{$namespace}\\{$modelName} [success]");
+        }
+    }
+
+    /**
+     * 解析表配置项获取表名
+     *
+     * @param mixed $tableNameConfig
+     * @param array $splitInfo
+     * @return string
+     * @throws CoreException
+     */
+    private function getTableName($tableNameConfig, &$splitInfo = []): string
+    {
+        if (is_array($tableNameConfig)) {
+            //处理Oracle自定义序列
+            if (!empty($tableNameConfig['sequence'])) {
+                $sequence = &$tableNameConfig['sequence'];
+            }
+
+            if (!empty($tableNameConfig['split'])) {
+                //处理分表
+                $splitConfig = &$tableNameConfig['split'];
+                $method = &$splitConfig['method'];
+                if (null === $method) {
+                    $method = 'hash';
+                }
+
+                $field = &$splitConfig['field'];
+                if (null === $field) {
+                    throw new CoreException('Please specify the sub-table fields');
+                }
+
+                $prefix = &$splitConfig['prefix'];
+                if (null === $prefix) {
+                    throw new CoreException('Please specify the sub-table prefix');
+                }
+
+                $number = &$splitConfig['number'];
+                if (null === $number) {
+                    $number = 32;
+                } elseif (!is_numeric($number) || $number > 2048) {
+                    throw new CoreException('The number of sub-tables only supports numbers and cannot be greater than 2048！');
+                }
+
+                $splitInfo = [
+                    'number' => $number,
+                    'method' => $method,
+                    'field' => $field,
+                    'prefix' => $prefix,
+                ];
+
+                //分表时默认使用第一张表的结构
+                $tableName = $splitConfig['prefix'] . '0';
+            }
+
+            if (empty($tableName) && !empty($tableNameConfig['table'])) {
+                $tableName = &$tableNameConfig['table'];
+            }
+
+        } else {
+            $tableName = $tableNameConfig;
+        }
+
+        if (empty($tableName)) {
+            throw new CoreException('Please specify the table name');
+        }
+
+        return $tableName;
+    }
+
+    /**
+     * 获取Module实例
+     *
+     * @param string $db
+     * @return Module
+     * @throws CoreException
+     */
+    private function getModuleInstance(string $db = ''): Module
+    {
+        if (empty($db)) {
+            $key = ':';
+        } else {
+            $key = $db;
+        }
+
+        static $cache;
+        if (!isset($cache[$key])) {
+            $cache[$key] = new Module($db);
+        }
+
+        return $cache[$key];
+    }
+
+    /**
+     * 获取生成类命名空间
+     *
+     * @param string $modelName
+     * @param string $propertyType
+     * @return false|string
+     * @throws CoreException
+     */
+    private function getGenClassNamespace(string $modelName, $propertyType = 'class')
+    {
+        $modelName = str_replace('/', '\\', $modelName);
+        $modelName = trim($modelName, '\\');
+        $pos = strrpos($modelName, '\\');
+
+        if ($pos) {
+            $modelName = substr($modelName, $pos + 1);
+            $namespace = substr($modelName, 0, $pos);
+            if ($this->namespacePrefix) {
+                $namespace = $this->namespacePrefix . '\\' . $namespace;
+            }
+        } else {
+            $namespace = $this->namespacePrefix;
+        }
+
+        if (empty($namespace)) {
+            throw new CoreException("Please specify {$propertyType}::{$modelName} Specifying namespaces");
+        }
+
+        return $namespace;
     }
 
     /**

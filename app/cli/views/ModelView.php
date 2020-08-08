@@ -19,13 +19,12 @@ class ModelView extends CliView
      */
     function genClass($data = [])
     {
-        $content = $this->obRenderTpl('model/default', $data);
-        $classSavePath = $data['gen_path'];
+        $content = $this->obRenderTpl('model/class', $data);
+        $classSavePath = $data['genPath'];
         $classAbsoluteFile = $classSavePath . $data['name'] . '.php';
         if (file_exists($classAbsoluteFile)) {
-            //处理用户自定义代码
             $fileContent = file_get_contents($classAbsoluteFile);
-            preg_match("/(.*){$data['type']} {$data['name']}.*autoGenCodeFlag;(?:\n|\r\n)(.*)}/s", $fileContent, $matches);
+            preg_match("/(.*){$data['type']} {$data['name']}(?:.*__construct\(\))(.*)/s", $fileContent, $matches);
             $header = &$matches[1];
             if (!empty($header)) {
                 $content = preg_replace("/(.*)({$data['type']} {$data['name']}.*)/s", "{$header}$2", $content);
@@ -33,10 +32,25 @@ class ModelView extends CliView
 
             $userCodeSegment = &$matches[2];
             if (!empty($userCodeSegment)) {
-                $content = preg_replace("/(.*autoGenCodeFlag;(\n|\r\n).*?)/s", "$1{$userCodeSegment}", $content);
+                $content = preg_replace("/(.*__construct\(\))(.*)/s", "$1{$userCodeSegment}", $content);
             }
         }
 
+        Helper::createFolders($classSavePath);
+        return file_put_contents($classAbsoluteFile, $content);
+    }
+
+    /**
+     * 生成model信息类
+     *
+     * @param array $data
+     * @return bool|int
+     */
+    function genModelInfo($data = [])
+    {
+        $content = $this->obRenderTpl('model/modelInfo', $data);
+        $classSavePath = $data['gen_path'];
+        $classAbsoluteFile = $classSavePath . $data['name'] . '.php';
         Helper::createFolders($classSavePath);
         return file_put_contents($classAbsoluteFile, $content);
     }
@@ -82,16 +96,39 @@ class ModelView extends CliView
      * 生成类名
      *
      * @param string $name
+     * @param string $modelName
      * @param string $type
      * @return string
      */
-    protected function makeObjectName(string $name, string $type): string
+    protected function makeClassName(string $name, string $modelName, string $type): string
     {
         $objs = [];
         if ($type == 'class') {
             $objs[] = 'use Cross\Model\SQLModel;';
             $objs[] = PHP_EOL;
+            $objs[] = "use {$modelName};";
+            $objs[] = PHP_EOL;
             $className = sprintf('%s %s extends SQLModel' . PHP_EOL, $type, $name);
+        } else {
+            $className = sprintf("%s %s" . PHP_EOL, $type, $name);
+        }
+
+        $objs[] = $className;
+        return implode(PHP_EOL, $objs);
+    }
+
+    /**
+     * @param string $name
+     * @param string $type
+     * @return string
+     */
+    protected function makeModelInfoClassName(string $name, string $type): string
+    {
+        $objs = [];
+        if ($type == 'class') {
+            $objs[] = 'use Cross\I\IModelInfo;';
+            $objs[] = PHP_EOL;
+            $className = sprintf('%s %s implements IModelInfo' . PHP_EOL, $type, $name);
         } else {
             $className = sprintf("%s %s" . PHP_EOL, $type, $name);
         }

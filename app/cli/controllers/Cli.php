@@ -321,7 +321,7 @@ abstract class Cli extends Controller
 
                 $dev['name'] = $name;
                 $dev['email'] = $email;
-                $result = $this->view->genConfigFile($devFile, $dev);
+                $result = (new CliView())->genConfigFile($devFile, $dev);
                 if (!$result) {
                     $this->consoleMsg('Save developer info fail!');
                     exit(0);
