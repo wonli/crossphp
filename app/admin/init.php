@@ -13,7 +13,7 @@ return [
     'sys' => [
         /**
          * Http会话保存方式
-         * 默认支持 COOKIE 和 SESSION, 也可以指定为自定义的类
+         * 默认支持 COOKIE,SESSION,REDIS也可以指定为自定义的类
          * 如: '\lib\MysqlSession' 或 new \lib\MysqlSession()
          */
         'auth' => 'session',
