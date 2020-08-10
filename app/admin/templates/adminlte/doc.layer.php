@@ -61,6 +61,12 @@
     $.get('<?= $this->url('doc:makeTestForm') ?>', { 'id': id }, function (d) {
       showFormOrTestCase(true, d)
       layer.close(lid)
+    }).fail(function (e) {
+        layer.msg('网络请求出错!');
+        setTimeout(function () {
+            window.location.hash = ''
+            window.location.reload()
+        }, 1000);
     })
 
     window.location.hash = '!' + groupKey + '/' + id

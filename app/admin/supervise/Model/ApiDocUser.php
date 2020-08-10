@@ -5,6 +5,9 @@ namespace app\admin\supervise\Model;
 use Cross\Model\SQLModel;
 
 
+use app\admin\supervise\Model\Table\ApiDocUserTable;
+
+
 class ApiDocUser extends SQLModel
 {
     public $id = null;
@@ -13,45 +16,8 @@ class ApiDocUser extends SQLModel
     public $name = null;
     public $value = null;
 
-    /**
-     * 主键名
-     *
-     * @var string
-     */
-    protected $pk = 'id';
-
-    /**
-     * 模型信息
-     *
-     * @var array
-     */
-    protected $modelInfo = [
-        'n' => 'db',
-        'type' => 'mysql',
-        'table' => 'cpa_doc_user',
-        'sequence' => '',
-        'config' => __DIR__ . '/../../../../config/db.config.php'
-    ];
-
-    /**
-     * 表字段属性
-     *
-     * @var array
-     */
-    protected $fieldsInfo = [
-        'id' => ['primary' => true, 'is_index' => 'PRI', 'auto_increment' => true, 'default_value' => '', 'not_null' => true, 'comment' => ''],
-        'u' => ['primary' => false, 'is_index' => 'MUL', 'auto_increment' => false, 'default_value' => '', 'not_null' => true, 'comment' => ''],
-        'doc_id' => ['primary' => false, 'is_index' => false, 'auto_increment' => false, 'default_value' => 0, 'not_null' => true, 'comment' => ''],
-        'name' => ['primary' => false, 'is_index' => 'MUL', 'auto_increment' => false, 'default_value' => '', 'not_null' => true, 'comment' => ''],
-        'value' => ['primary' => false, 'is_index' => false, 'auto_increment' => false, 'default_value' => '', 'not_null' => true, 'comment' => ''],
-    ];
-
-    /**
-     * ⚠️以上代码是自动生的，任何修改都将被覆盖
-     * ⚠️请在此成员变量之后编写业务代码
-     * ⚠️请不要修改或使用此成员变量
-     *
-     * @var mixed
-     */
-    private $autoGenCodeFlag;
+    function __construct()
+    {
+        parent::__construct(new ApiDocUserTable());
+    }
 }

@@ -428,12 +428,12 @@ class Doc extends Admin
         $id = $this->params['id'];
         $apiDocData = new ApiDocData();
         $apiDocData->id = $id;
-        $apiData = $apiDocData->get();
-        if (empty($apiData)) {
+        $apiData = $apiDocData->property();
+        if (empty($apiData->doc_id)) {
             throw new FrontException('获取API数据失败');
         } else {
-            $apiData['api_params'] = json_decode($apiData['api_params'], true);
-            $this->data['api'] = $apiData;
+            $apiData->api_params = json_decode($apiData->api_params, true);
+            $this->data['api'] = $apiData->getArrayData();
         }
 
         $UserDoc = new ApiDocUser();
@@ -636,7 +636,7 @@ class Doc extends Admin
                         $api = explode(',', $apiData['api']);
                         @list($method, $path, $name) = array_map('trim', $api);
                         $adc->api_method = $method ?: '';
-                        $adc->api_path = $path ?: '';
+                        $adc->api_path = $path ? '/' . ltrim($path, '/') : '';
                         $adc->api_name = $name ?: $apiName;
                     } else {
                         continue;
