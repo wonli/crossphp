@@ -676,6 +676,7 @@ class Doc extends Admin
         }
 
         if (!empty($historyData)) {
+            $ADD->doc_id = $docId;
             $ADD->api_path = ['IN', $historyData];
             $ADD->del();
         }
