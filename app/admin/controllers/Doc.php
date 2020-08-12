@@ -622,6 +622,12 @@ class Doc extends Admin
             return $this->responseData(100706, $responseData);
         }
 
+        $ADD = new ApiDocData();
+        $historyData = $ADD->getAll(['doc_id' => $docId], 'api_path');
+        if (!empty($historyData)) {
+            $historyData = array_column($historyData, 'api_path');
+        }
+
         foreach ($responseData['data'] as $groupKey => $d) {
             $adc = new ApiDocData();
             $adc->doc_id = $docId;
@@ -658,10 +664,20 @@ class Doc extends Admin
                         $adc->global_params = $apiData['global_params'];
                     }
 
+                    $index = array_search($adc->api_path, $historyData) ?? null;
+                    if (null !== $index || false !== $index) {
+                        unset($historyData[$index]);
+                    }
+
                     $adc->update_user = $this->u;
                     $adc->updateOrAdd();
                 }
             }
+        }
+
+        if (!empty($historyData)) {
+            $ADD->api_path = ['IN', $historyData];
+            $ADD->del();
         }
 
         $data = [
