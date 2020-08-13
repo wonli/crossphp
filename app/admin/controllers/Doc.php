@@ -645,6 +645,8 @@ class Doc extends Admin
                         $adc->api_path = $path ? '/' . ltrim($path, '/') : '';
                         $adc->api_name = $name ?: $apiName;
                     } else {
+                        $adc->api_path = null;
+                        $adc->api_method = null;
                         continue;
                     }
 
@@ -658,10 +660,14 @@ class Doc extends Admin
                         }
 
                         $adc->api_params = json_encode($apiRequest, JSON_UNESCAPED_UNICODE);
+                    } else {
+                        $adc->api_params = '';
                     }
 
                     if (!empty($apiData['global_params'])) {
                         $adc->global_params = $apiData['global_params'];
+                    } else {
+                        $adc->global_params = null;
                     }
 
                     $index = array_search($adc->api_path, $historyData) ?? null;

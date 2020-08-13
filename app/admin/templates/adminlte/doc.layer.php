@@ -62,11 +62,11 @@
       showFormOrTestCase(true, d)
       layer.close(lid)
     }).fail(function (e) {
-        layer.msg('网络请求出错!');
+        layer.msg('正在更新接口数据');
         setTimeout(function () {
             window.location.hash = ''
             window.location.reload()
-        }, 1000);
+        }, 1500);
     })
 
     window.location.hash = '!' + groupKey + '/' + id
