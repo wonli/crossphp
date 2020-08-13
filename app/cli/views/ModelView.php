@@ -19,8 +19,10 @@ class ModelView extends CliView
      */
     function genClass($data = [])
     {
-        $content = $this->obRenderTpl('model/class', $data);
         $classSavePath = $data['genPath'];
+        Helper::createFolders($classSavePath);
+
+        $content = $this->obRenderTpl('model/class', $data);
         $classAbsoluteFile = $classSavePath . $data['name'] . '.php';
         if (file_exists($classAbsoluteFile)) {
             $fileContent = file_get_contents($classAbsoluteFile);
@@ -36,7 +38,6 @@ class ModelView extends CliView
             }
         }
 
-        Helper::createFolders($classSavePath);
         return file_put_contents($classAbsoluteFile, $content);
     }
 
@@ -50,8 +51,9 @@ class ModelView extends CliView
     {
         $content = $this->obRenderTpl('model/modelInfo', $data);
         $classSavePath = $data['gen_path'];
-        $classAbsoluteFile = $classSavePath . $data['name'] . '.php';
         Helper::createFolders($classSavePath);
+
+        $classAbsoluteFile = $classSavePath . $data['name'] . '.php';
         return file_put_contents($classAbsoluteFile, $content);
     }
 

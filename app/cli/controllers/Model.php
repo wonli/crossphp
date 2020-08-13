@@ -147,7 +147,7 @@ class Model extends Cli
     {
         $propertyType = 'class';
         $modelName = "{$modelName}Table";
-        $namespace = $this->getGenClassNamespace($modelName) . '\\' . 'Table';
+        $namespace = $this->getModelNameAndNamespace($modelName) . '\\' . 'Table';
 
         try {
             $sequence = '';
@@ -274,7 +274,7 @@ class Model extends Cli
             $propertyType = 'class';
         }
 
-        $namespace = $this->getGenClassNamespace($modelName);
+        $namespace = $this->getModelNameAndNamespace($modelName);
         $modelClassName = $modelName . 'Table';
         $modelNamespace = $namespace . '\\Table\\' . $modelClassName;
         $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $namespace);
@@ -396,14 +396,14 @@ class Model extends Cli
     }
 
     /**
-     * 获取生成类命名空间
+     * 获取model类目和namespace
      *
      * @param string $modelName
      * @param string $propertyType
      * @return false|string
      * @throws CoreException
      */
-    private function getGenClassNamespace(string $modelName, $propertyType = 'class')
+    private function getModelNameAndNamespace(string &$modelName, $propertyType = 'class')
     {
         $modelName = str_replace('/', '\\', $modelName);
         $modelName = trim($modelName, '\\');
