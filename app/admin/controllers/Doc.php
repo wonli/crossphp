@@ -658,7 +658,7 @@ class Doc extends Admin
 
                         $apiRequest = [];
                         foreach ($apiRequestData as $req) {
-                            $request = explode(',', $req);
+                            $request = explode(',', trim($req, ','));
                             foreach ($request as $n) {
                                 @list($a['field'], $a['label'], $a['required']) = array_map('trim', explode('|', $n));
                                 $apiRequest[] = $a;
