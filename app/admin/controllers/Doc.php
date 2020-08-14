@@ -650,13 +650,19 @@ class Doc extends Admin
                         continue;
                     }
 
-                    if (!empty($apiData['request'])) {
+                    $apiRequestData = $apiData['request'] ?? '';
+                    if (!empty($apiRequestData)) {
+                        if (!is_array($apiRequestData)) {
+                            $apiRequestData = [$apiRequestData];
+                        }
+
                         $apiRequest = [];
-                        $request = explode(',', $apiData['request']);
-                        $request = array_map('trim', $request);
-                        foreach ($request as $n) {
-                            @list($a['field'], $a['label'], $a['required']) = array_map('trim', explode('|', $n));
-                            $apiRequest[] = $a;
+                        foreach ($apiRequestData as $req) {
+                            $request = explode(',', $req);
+                            foreach ($request as $n) {
+                                @list($a['field'], $a['label'], $a['required']) = array_map('trim', explode('|', $n));
+                                $apiRequest[] = $a;
+                            }
                         }
 
                         $adc->api_params = json_encode($apiRequest, JSON_UNESCAPED_UNICODE);
