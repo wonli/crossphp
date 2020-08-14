@@ -405,13 +405,13 @@ class Model extends Cli
      */
     private function getModelNameAndNamespace(string &$modelName, $propertyType = 'class')
     {
-        $modelName = str_replace('/', '\\', $modelName);
-        $modelName = trim($modelName, '\\');
-        $pos = strrpos($modelName, '\\');
+        $modelNamespace = str_replace('/', '\\', $modelName);
+        $modelNamespace = trim($modelNamespace, '\\');
+        $pos = strrpos($modelNamespace, '\\');
 
         if ($pos) {
-            $modelName = substr($modelName, $pos + 1);
-            $namespace = substr($modelName, 0, $pos);
+            $namespace = substr($modelNamespace, 0, $pos);
+            $modelName = substr($modelNamespace, $pos + 1);
             if ($this->namespacePrefix) {
                 $namespace = $this->namespacePrefix . '\\' . $namespace;
             }
