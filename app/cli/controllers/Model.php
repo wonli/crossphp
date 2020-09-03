@@ -284,24 +284,28 @@ class Model extends Cli
             $genPath = PROJECT_REAL_PATH . trim($namespacePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
         }
 
-        $ModuleInstance = $this->getModuleInstance($db);
-        $tableName = $this->getTableName($tableNameConfig);
-        $mateData = $ModuleInstance->link->getMetaData($ModuleInstance->getPrefix($tableName));
-        $data = [
-            'name' => $modelName,
-            'type' => $propertyType,
-            'mate_data' => $mateData,
-            'namespace' => $namespace,
-            'modelClass' => $modelClassName,
-            'modelNamespace' => $modelNamespace,
-            'genPath' => $genPath,
-        ];
+        try {
+            $ModuleInstance = $this->getModuleInstance($db);
+            $tableName = $this->getTableName($tableNameConfig);
+            $mateData = $ModuleInstance->link->getMetaData($ModuleInstance->getPrefix($tableName));
+            $data = [
+                'name' => $modelName,
+                'type' => $propertyType,
+                'mate_data' => $mateData,
+                'namespace' => $namespace,
+                'modelClass' => $modelClassName,
+                'modelNamespace' => $modelNamespace,
+                'genPath' => $genPath,
+            ];
 
-        $ret = $this->view->genClass($data);
-        if (false === $ret) {
-            throw new CoreException("Please check directory permissions");
-        } else {
-            $this->consoleMsg("{$propertyType}::{$namespace}\\{$modelName} [success]");
+            $ret = $this->view->genClass($data);
+            if (false === $ret) {
+                throw new CoreException("Please check directory permissions");
+            } else {
+                $this->consoleMsg("{$propertyType}::{$namespace}\\{$modelName} [success]");
+            }
+        } catch (Exception $e) {
+            $this->consoleMsg("{$propertyType}::{$namespace}\\{$modelName} [fail : !! " . $e->getMessage() . ']');
         }
     }
 
