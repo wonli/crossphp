@@ -155,7 +155,7 @@ class Model extends Cli
             $tableName = $this->getTableName($tableNameConfig, $data['split_info']);
             $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $namespace);
             if (!empty($modelConfig['path'])) {
-                $genPath = rtrim($modelConfig['path'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+                $genPath = rtrim($modelConfig['path'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'Table' . DIRECTORY_SEPARATOR;
             } else {
                 $genPath = PROJECT_REAL_PATH . trim($namespacePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
             }
