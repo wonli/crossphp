@@ -19,17 +19,15 @@ class ModelView extends CliView
      */
     function genClass($data = [])
     {
-        $classSavePath = $data['genPath'];
-        Helper::createFolders($classSavePath);
-
+        Helper::createFolders($data['genPath']);
         $content = $this->obRenderTpl('model/class', $data);
-        $classAbsoluteFile = $classSavePath . $data['name'] . '.php';
-        if (file_exists($classAbsoluteFile)) {
+        $classAbsoluteFile = &$data['genAbsoluteFile'];
+        if ($data['genFileExists']) {
             $fileContent = file_get_contents($classAbsoluteFile);
-            preg_match("/(.*){$data['type']} {$data['name']}(?:.*__construct\(\))(.*)/s", $fileContent, $matches);
+            preg_match("/(.*){$data['type']} {$data['modelName']}(?:.*__construct\(\))(.*)/s", $fileContent, $matches);
             $header = &$matches[1];
             if (!empty($header)) {
-                $content = preg_replace("/(.*)({$data['type']} {$data['name']}.*)/s", "{$header}$2", $content);
+                $content = preg_replace("/(.*)({$data['type']} {$data['modelName']}.*)/s", "{$header}$2", $content);
             }
 
             $userCodeSegment = &$matches[2];
@@ -38,7 +36,7 @@ class ModelView extends CliView
             }
         }
 
-        return file_put_contents($classAbsoluteFile, $content);
+        return $this->saveContent($classAbsoluteFile, $content);
     }
 
     /**
@@ -50,11 +48,8 @@ class ModelView extends CliView
     function genModelInfo($data = [])
     {
         $content = $this->obRenderTpl('model/modelInfo', $data);
-        $classSavePath = $data['gen_path'];
-        Helper::createFolders($classSavePath);
-
-        $classAbsoluteFile = $classSavePath . $data['name'] . '.php';
-        return file_put_contents($classAbsoluteFile, $content);
+        $classAbsoluteFile = $data['genPath'] . $data['name'] . '.php';
+        return $this->saveContent($classAbsoluteFile, $content);
     }
 
     /**
@@ -66,7 +61,22 @@ class ModelView extends CliView
     function makeModelFile($propertyFile)
     {
         $content = $this->tpl('model/model.config', true, false);
-        return file_put_contents($propertyFile, $content);
+        return $this->saveContent($propertyFile, $content);
+    }
+
+    /**
+     * 保存内容
+     *
+     * @param string $absoluteFileAddr
+     * @param string $content
+     * @return false|int
+     */
+    function saveContent(string $absoluteFileAddr, string $content)
+    {
+        $dir = dirname($absoluteFileAddr);
+        Helper::createFolders($dir);
+        $content = str_replace("\r\n", "\n", $content);
+        return file_put_contents($absoluteFileAddr, $content);
     }
 
     /**
@@ -84,9 +94,15 @@ class ModelView extends CliView
                 $space = '';
             }
 
-            $fieldsTpl = sprintf('%spublic $%s = null;', $space, $f);
+            if (isset($info['userValue']) && null !== $info['userValue']) {
+                $userValue = $info['userValue'];
+            } else {
+                $userValue = 'null';
+            }
+
+            $fieldsTpl = sprintf('%spublic $%s = %s;', $space, $f, $userValue);
             if (!empty($info['comment'])) {
-                $fieldsTpl = sprintf('%spublic $%s = null; //%s', $space, $f, $info['comment']);
+                $fieldsTpl = sprintf('%spublic $%s = %s; //%s', $space, $f, $userValue, $info['comment']);
             }
 
             echo $fieldsTpl . PHP_EOL;

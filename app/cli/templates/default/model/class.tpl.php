@@ -3,14 +3,14 @@
 namespace <?= $data['namespace'] ?>;
 <?php endif ?>
 
-<?= $this->makeClassName($data['name'], $data['modelNamespace'], $data['type']) ?>
+<?= $this->makeClassName($data['modelName'], $data['tableNamespace'], $data['type']) ?>
 {
-    <?php $this->makeModelFields($data['mate_data']); ?>
+    <?php $this->makeModelFields($data['mateData']); ?>
 <?php if($data['type'] == 'class') : ?>
 
     function __construct()
     {
-        parent::__construct(new <?= $data['modelClass'] ?>());
+        parent::__construct(new <?= $data['tableClass'] ?>());
     }
 <?php endif ?>
 }

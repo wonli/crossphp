@@ -18,9 +18,9 @@ namespace <?= $data['namespace'] ?>;
      * @var array
      */
     protected $modelInfo = [
-        <?= $this->makeArrayProperty($data['model_info'], 8) . PHP_EOL ?>
+        <?= $this->makeArrayProperty($data['modelInfo'], 8) . PHP_EOL ?>
     ];
-<?php if(!empty($data['split_info'])) : ?>
+<?php if(!empty($data['splitInfo'])) : ?>
 
     /**
      * 分表配置
@@ -28,7 +28,7 @@ namespace <?= $data['namespace'] ?>;
      * @var array
      */
     protected $splitConfig = [
-        <?= $this->makeArrayProperty($data['split_info'], 8) . PHP_EOL ?>
+        <?= $this->makeArrayProperty($data['splitInfo'], 8) . PHP_EOL ?>
     ];
 <?php else : ?>
 
@@ -46,7 +46,7 @@ namespace <?= $data['namespace'] ?>;
      * @var array
      */
     protected $fieldsInfo = [
-        <?php $this->makeModelInfo($data['mate_data']) ?>
+        <?php $this->makeModelInfo($data['mateData']) ?>
     ];
 
     /**
@@ -96,6 +96,6 @@ namespace <?= $data['namespace'] ?>;
      */
     function getConfigFile(): string
     {
-        return __DIR__ . '/<?= ltrim($data['db_config_path'], '/') ?>';
+        return __DIR__ . '/<?= ltrim($data['dbConfigPath'], '/') ?>';
     }
 }

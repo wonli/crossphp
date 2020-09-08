@@ -4,10 +4,13 @@ namespace app\cli\controllers;
 
 use app\cli\views\ModelView;
 
-use Cross\Core\Helper;
 use Cross\Exception\CoreException;
+use Cross\Model\SQLModel;
+use Cross\Core\Helper;
 use Cross\Core\Loader;
 use Cross\MVC\Module;
+
+use ReflectionClass;
 use Exception;
 use PDO;
 
@@ -234,11 +237,11 @@ class Model extends Cli
             $data['type'] = $propertyType;
             $data['name'] = $modelName;
             $data['model'] = $modelConfig;
-            $data['mate_data'] = $mateData;
+            $data['mateData'] = $mateData;
             $data['namespace'] = $namespace;
-            $data['gen_path'] = $genPath;
-            $data['db_config_path'] = $configRelativePath . $dbConfigFile;
-            $data['model_info'] = [
+            $data['genPath'] = $genPath;
+            $data['dbConfigPath'] = $configRelativePath . $dbConfigFile;
+            $data['modelInfo'] = [
                 'n' => $ModuleInstance->getLinkName(),
                 'type' => $ModuleInstance->getLinkType(),
                 'table' => $tableName,
@@ -275,8 +278,8 @@ class Model extends Cli
         }
 
         $namespace = $this->getModelNameAndNamespace($modelName);
-        $modelClassName = $modelName . 'Table';
-        $modelNamespace = $namespace . '\\Table\\' . $modelClassName;
+        $tableClassName = $modelName . 'Table';
+        $tableNamespace = $namespace . '\\Table\\' . $tableClassName;
         $namespacePath = str_replace('\\', DIRECTORY_SEPARATOR, $namespace);
         if (!empty($modelConfig['path'])) {
             $genPath = rtrim($modelConfig['path'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
@@ -288,14 +291,30 @@ class Model extends Cli
             $ModuleInstance = $this->getModuleInstance($db);
             $tableName = $this->getTableName($tableNameConfig);
             $mateData = $ModuleInstance->link->getMetaData($ModuleInstance->getPrefix($tableName));
+
+            $modelFileExists = false;
+            $absoluteModelFile = $genPath . $modelName . '.php';
+            if (file_exists($absoluteModelFile)) {
+                $modelFileExists = true;
+                $rfModelClass = (new ReflectionClass($namespace . '\\' . $modelName))->newInstance();
+                if ($rfModelClass instanceof SQLModel) {
+                    $userProperty = $rfModelClass->getArrayData();
+                    foreach ($mateData as $name => &$config) {
+                        $config['userValue'] = $userProperty[$name] ?? null;
+                    }
+                }
+            }
+
             $data = [
-                'name' => $modelName,
                 'type' => $propertyType,
-                'mate_data' => $mateData,
+                'mateData' => $mateData,
                 'namespace' => $namespace,
-                'modelClass' => $modelClassName,
-                'modelNamespace' => $modelNamespace,
+                'modelName' => $modelName,
+                'tableClass' => $tableClassName,
+                'tableNamespace' => $tableNamespace,
                 'genPath' => $genPath,
+                'genAbsoluteFile' => $absoluteModelFile,
+                'genFileExists' => $modelFileExists,
             ];
 
             $ret = $this->view->genClass($data);
