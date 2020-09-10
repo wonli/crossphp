@@ -495,7 +495,7 @@ class Doc extends Admin
             if (!empty($devs)) {
                 foreach ($devs as $d) {
                     if (!empty($d['api_addr'])) {
-                        $servers[] = array_map('trim', $d);;
+                        $servers[] = array_map('trim', $d);
                     }
                 }
             }
