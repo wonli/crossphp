@@ -495,8 +495,7 @@ class Doc extends Admin
             if (!empty($devs)) {
                 foreach ($devs as $d) {
                     if (!empty($d['api_addr'])) {
-                        $d['api_addr'] = rtrim($d['api_addr'], '/');
-                        $servers[] = $d;
+                        $servers[] = array_map('trim', $d);;
                     }
                 }
             }
@@ -553,7 +552,6 @@ class Doc extends Admin
                 case 'del':
                     $this->ADM->del($this->params['id']);
                     $this->to('doc:setting');
-                    return;
                     break;
 
                 default:
@@ -629,26 +627,24 @@ class Doc extends Admin
         }
 
         foreach ($responseData['data'] as $groupKey => $d) {
-            $adc = new ApiDocData();
-            $adc->doc_id = $docId;
-            $adc->group_key = $groupKey;
-            $adc->group_name = $d['api_spec'] ?? $groupKey;
-            $adc->global_params = (int)$d['global_params'];
-            $adc->update_at = time();
             if (!empty($d['methods'])) {
                 foreach ($d['methods'] as $apiName => $apiData) {
-                    $adc->api_name = $apiName;
-                    if (!empty($apiData['api'])) {
-                        $api = explode(',', $apiData['api']);
-                        @list($method, $path, $name) = array_map('trim', $api);
-                        $adc->api_method = $method ?: '';
-                        $adc->api_path = $path ? '/' . ltrim($path, '/') : '';
-                        $adc->api_name = $name ?: $apiName;
-                    } else {
-                        $adc->api_path = null;
-                        $adc->api_method = null;
+                    if (empty($apiData['api'])) {
                         continue;
                     }
+
+                    $adc = new ApiDocData();
+                    $adc->doc_id = $docId;
+                    $adc->group_key = $groupKey;
+                    $adc->group_name = $d['api_spec'] ?? $groupKey;
+                    $adc->global_params = (int)$d['global_params'];
+                    $adc->update_at = time();
+
+                    $api = explode(',', $apiData['api']);
+                    @list($method, $path, $name) = array_map('trim', $api);
+                    $adc->api_method = $method ?: '';
+                    $adc->api_path = $path ? '/' . ltrim($path, '/') : '';
+                    $adc->api_name = $name ?: $apiName;
 
                     $apiRequestData = $apiData['request'] ?? '';
                     if (!empty($apiRequestData)) {
@@ -672,8 +668,6 @@ class Doc extends Admin
 
                     if (!empty($apiData['global_params'])) {
                         $adc->global_params = $apiData['global_params'];
-                    } else {
-                        $adc->global_params = null;
                     }
 
                     $index = array_search($adc->api_path, $historyData) ?? null;
