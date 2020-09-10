@@ -682,6 +682,8 @@ class Doc extends Admin
                     }
 
                     $adc->update_user = $this->u;
+                    $adc->useIndex('doc_id', $adc->doc_id);
+                    $adc->useIndex('api_path', $adc->api_path);
                     $adc->updateOrAdd();
                 }
             }
