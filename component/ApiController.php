@@ -8,11 +8,12 @@ namespace component;
 
 use Cross\Core\Annotate;
 use Cross\Exception\CoreException;
+use Cross\Exception\LogicStatusException;
 use Cross\Interactive\ResponseData;
-use Cross\Exception\FrontException;
 use Cross\MVC\Controller;
 use Cross\MVC\View;
 
+use ReflectionException;
 use ReflectionMethod;
 use ReflectionClass;
 
@@ -69,8 +70,8 @@ abstract class ApiController extends Controller
     /**
      * ApiController constructor.
      *
-     * @throws FrontException
-     * @throws CoreException
+     * @throws LogicStatusException
+     * @throws CoreException|ReflectionException
      */
     function __construct()
     {
@@ -141,54 +142,21 @@ abstract class ApiController extends Controller
     }
 
     /**
-     * 从POST中获取指定数据
+     * 获取输入数据
      *
      * @param string $key
-     * @param bool $filter_data 是否使用过滤器
-     * @param bool $is_force_params 是否强制验证
-     * @return string
-     * @throws FrontException
-     * @throws CoreException
+     * @param mixed $default
+     * @return InputFilter
      */
-    function getInputData(string $key, bool $filter_data = true, bool $is_force_params = false)
+    function input(string $key, $default = null): InputFilter
     {
-        $value = '';
-        $defaultValue = &$this->data_container[$key];
-        if ($filter_data && $defaultValue) {
-            $defaultValue = htmlentities(strip_tags(trim($defaultValue)), ENT_COMPAT, 'utf-8');
+        $val = $this->data_container[$key] ?? null;
+        if (empty($val) && null !== $default) {
+            $val = $default;
         }
 
-        if (isset($this->force_params[$key]) || $is_force_params) {
-            if (!isset($this->data_container[$key]) || '' == $defaultValue) {
-                $this->ResponseData->setStatus(0);
-                $this->ResponseData->setMessage("缺少参数({$key})");
-                $this->display($this->ResponseData);
-            } elseif ($filter_data) {
-                $value = $this->filterInputData($key, $defaultValue);
-            } else {
-                $value = $defaultValue;
-            }
-        } elseif (isset($this->data_container[$key])) {
-            if ($filter_data && '' != $defaultValue) {
-                $value = $this->filterInputData($key, $defaultValue);
-            } else {
-                $value = $defaultValue;
-            }
-        }
-
-        return $value;
+        return new InputFilter($val);
     }
-
-    /**
-     * 过滤数据
-     *
-     * @param string $key
-     * @param string $value
-     * @return string|void
-     * @throws FrontException
-     * @throws CoreException
-     */
-    abstract protected function filterInputData(string $key, $value);
 
     /**
      * 获取通过header传送的数据
@@ -214,8 +182,7 @@ abstract class ApiController extends Controller
      * @param string $filter_name
      * @param bool $is_multi 是否是多文件
      * @return array
-     * @throws FrontException
-     * @throws CoreException
+     * @throws LogicStatusException|CoreException
      */
     function getFileData(string $key, string $filter_name = 'images', bool &$is_multi = false)
     {
@@ -244,26 +211,25 @@ abstract class ApiController extends Controller
     }
 
     /**
-     * 视图
+     * 输出JSON
      *
-     * @param null $data
-     * @param string $method
+     * @param mixed $data
+     * @param string|null $method
      * @param int $http_response_status
-     * @throws FrontException
-     * @throws CoreException
+     * @throws CoreException|LogicStatusException
      * @see Controller::display()
      */
     protected function display($data = null, string $method = null, int $http_response_status = 200): void
     {
-        $this->delegate->getResponse()->setContentType('JSON');
+        $this->delegate->getResponse()->setResponseStatus($http_response_status)->setContentType('JSON');
         if (!$data instanceof ResponseData) {
             $data = parent::getResponseData($data);
         }
 
         if ($data->getStatus() != 1) {
-            $frontException = new FrontException($data->getMessage(), $data->getStatus());
-            $frontException->addResponseData($data);
-            throw $frontException;
+            $LogicStatusException = new LogicStatusException($data->getStatus(), $data->getMessage());
+            $LogicStatusException->addResponseData($data);
+            throw $LogicStatusException;
         }
 
         $this->delegate->getResponse()->end(json_encode($data->getData(), JSON_UNESCAPED_UNICODE));
@@ -301,7 +267,7 @@ abstract class ApiController extends Controller
                 break;
 
             default:
-                $data_container = $this->delegate->getRequest()->getGetData();
+                $data_container = $this->delegate->getRequest()->getRequestData();
         }
 
         return $data_container;
@@ -311,6 +277,7 @@ abstract class ApiController extends Controller
      * API 调试文档基础数据
      *
      * @return array
+     * @throws ReflectionException
      */
     protected function docApiData(): array
     {
@@ -398,8 +365,7 @@ abstract class ApiController extends Controller
      * @param string $tmp_file 临时文件路径
      * @param int $size
      * @return mixed
-     * @throws FrontException
-     * @throws CoreException
+     * @throws LogicStatusException|CoreException
      */
     private function checkUploadImage(string $upload_file_name, string $tmp_file, int $size = 3000000)
     {
