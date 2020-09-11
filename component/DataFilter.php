@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @author wonli <wonli@live.com>
+ * DataFilter.php
+ */
 
 namespace component;
 
@@ -7,17 +10,19 @@ use Cross\Exception\LogicStatusException;
 use Cross\Runtime\Rules;
 use Cross\Core\Helper;
 
+use lib\Upload\Uploader;
+
 use Throwable;
 use Exception;
 use Closure;
 
 
 /**
- * Class InputFilter
+ * Class DataFilter
  *
  * @package component
  */
-class InputFilter
+class DataFilter
 {
 
     /**
@@ -59,7 +64,7 @@ class InputFilter
     function __construct($ctx)
     {
         $this->msg = null;
-        $this->ctx = trim($ctx);
+        $this->ctx = !is_array($ctx) ? trim($ctx) : $ctx;
     }
 
     /**
@@ -86,24 +91,6 @@ class InputFilter
     function int()
     {
         return (int)$this->ctx;
-    }
-
-    /**
-     * 限定范围
-     *
-     * @param int $min
-     * @param int $max
-     * @return int|null
-     * @throws LogicStatusException
-     */
-    function range(int $min, int $max)
-    {
-        $ctx = $this->int();
-        if ($ctx < $min || $ctx > $max) {
-            $this->throwMsg('参数值范围 %d ~ %d', $min, $max);
-        }
-
-        return $ctx;
     }
 
     /**
@@ -135,6 +122,43 @@ class InputFilter
         }
 
         return $this->ctx;
+    }
+
+    /**
+     * 限定范围
+     *
+     * @param int $min
+     * @param int $max
+     * @return int|null
+     * @throws LogicStatusException
+     */
+    function range(int $min, int $max)
+    {
+        $ctx = $this->int();
+        if ($ctx < $min || $ctx > $max) {
+            $this->throwMsg('参数值范围 %d ~ %d', $min, $max);
+        }
+
+        return $ctx;
+    }
+
+    /**
+     * 限定参数长度（支持中文）
+     *
+     * @param int $min
+     * @param int $max
+     * @return string
+     * @throws LogicStatusException
+     */
+    function length(int $min, int $max)
+    {
+        $ctx = $this->val();
+        $len = Helper::strLen($ctx);
+        if ($len < $min || $len > $max) {
+            $this->throwMsg('参数长度 %d ~ %d', $min, $max);
+        }
+
+        return $ctx;
     }
 
     /**
@@ -212,24 +236,7 @@ class InputFilter
             $this->throwMsg('请输入正确的日期');
         }
 
-        return date('Y-m-d', $unixTime);
-    }
-
-    /**
-     * 日期时间验证
-     *
-     * @param null $unixTime
-     * @return false|string
-     * @throws LogicStatusException
-     */
-    function dateTime(&$unixTime = null)
-    {
-        $unixTime = strtotime($this->ctx);
-        if (!$unixTime) {
-            $this->throwMsg('请输入正确的年月日');
-        }
-
-        return date('Y-m-d H:i:s', $unixTime);
+        return $this->ctx;
     }
 
     /**
@@ -301,6 +308,25 @@ class InputFilter
     function val()
     {
         return htmlentities(strip_tags($this->ctx), ENT_COMPAT, 'utf-8');
+    }
+
+    /**
+     * 上传验证
+     *
+     * @param Uploader $uploader
+     * @return array
+     * @throws LogicStatusException
+     */
+    function uploader(Uploader $uploader): array
+    {
+        $uploader->addFile($this->ctx);
+        try {
+            return $uploader->save();
+        } catch (Exception $e) {
+            $this->throwMsg('上传出错: %s', $e->getMessage());
+        }
+
+        return [];
     }
 
     /**

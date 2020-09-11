@@ -6,10 +6,10 @@
 
 namespace component;
 
-use Cross\Core\Annotate;
 use Cross\Exception\CoreException;
 use Cross\Exception\LogicStatusException;
 use Cross\Interactive\ResponseData;
+use Cross\Core\Annotate;
 use Cross\MVC\Controller;
 use Cross\MVC\View;
 
@@ -24,41 +24,40 @@ use ReflectionClass;
  */
 abstract class ApiController extends Controller
 {
+    /**
+     * 默认请求类型
+     *
+     * @var string
+     */
+    protected $requestType = 'post';
 
     /**
      * 接口所需参数
      *
      * @var array
      */
-    protected $api_request_params = [];
+    protected $apiRequestParams = [];
 
     /**
-     * 默认请求类型
-     *
-     * @var string
-     */
-    private $request_type = 'post';
-
-    /**
-     * 数据容器
+     * 参数容器类型
      *
      * @var array
      */
-    private $data_container = [];
+    protected $inputDataContainer = [];
+
+    /**
+     * 当前请求数据容器
+     *
+     * @var array
+     */
+    protected $requestDataContainer = [];
 
     /**
      * 根据输入类型重置数据容器
      *
      * @var array
      */
-    private $input_data_container = ['multi_file' => true, 'file' => true];
-
-    /**
-     * 需要强制验证的输入数据
-     *
-     * @var array
-     */
-    private $force_params = [];
+    protected $resetContainerType = ['multi_file' => true, 'file' => true];
 
     /**
      * @var ResponseData
@@ -70,8 +69,7 @@ abstract class ApiController extends Controller
     /**
      * ApiController constructor.
      *
-     * @throws LogicStatusException
-     * @throws CoreException|ReflectionException
+     * @throws LogicStatusException|CoreException|ReflectionException
      */
     function __construct()
     {
@@ -96,39 +94,43 @@ abstract class ApiController extends Controller
         }
 
         //验证请求类型
-        $request_type = &$this->request_type;
+        $requestType = &$this->requestType;
         $annotate_api = &$this->action_annotate['api'];
         if (!empty($annotate_api)) {
             $request_method = $this->delegate->getRequest()->SERVER('REQUEST_METHOD');
-            list($request_type) = explode(',', $annotate_api);
-            if (strcasecmp($request_method, trim($request_type)) !== 0) {
+            list($requestType) = explode(',', $annotate_api);
+            if (strcasecmp($request_method, trim($requestType)) !== 0) {
                 $this->display(200000);
                 return;
             }
         }
 
         //验证请求所需参数
-        $this->data_container = $this->getDataContainer($request_type);
+        $this->requestDataContainer = $this->getDataContainer($requestType);
         $annotate_request = &$this->action_annotate['request'];
         if (!empty($annotate_request)) {
             $request = explode(',', $annotate_request);
             if (!empty($request)) {
-                foreach ($request as $params) {
-                    $requestParams = explode("\n", $params);
+                foreach ($request as $actionParams) {
+                    $requestParams = explode("\n", $actionParams);
                     foreach ($requestParams as $p) {
                         list($params, $message, $require) = explode('|', trim($p));
                         if (strpos($params, ':') !== false) {
-                            list($params, $input_type) = explode(':', $params);
+                            list($params, $inputParamsType) = explode(':', $params);
+                            $this->inputDataContainer[$params] = $inputParamsType;
+                        } else {
+                            $inputParamsType = $requestType;
+                            $this->inputDataContainer[$params] = $requestType;
                         }
 
-                        $this->api_request_params[] = $params;
+                        $this->apiRequestParams[] = $params;
                         if ($require) {
-                            $data_container = $this->data_container;
-                            if (isset($input_type) && isset($this->input_data_container[$input_type])) {
-                                $data_container = $this->getDataContainer($input_type);
+                            $dataContainer = $this->requestDataContainer;
+                            if (isset($this->resetContainerType[$inputParamsType])) {
+                                $dataContainer = $this->getDataContainer($inputParamsType);
                             }
 
-                            if (!isset($data_container[$params])) {
+                            if (!isset($dataContainer[$params])) {
                                 $this->ResponseData->setStatus(0);
                                 $this->ResponseData->setMessage("缺少参数{$params}($message)");
                                 $this->display($this->ResponseData);
@@ -146,16 +148,21 @@ abstract class ApiController extends Controller
      *
      * @param string $key
      * @param mixed $default
-     * @return InputFilter
+     * @return DataFilter
      */
-    function input(string $key, $default = null): InputFilter
+    function input(string $key, $default = null): DataFilter
     {
-        $val = $this->data_container[$key] ?? null;
+        $val = '';
+        $dataContainer = $this->getDataContainer($this->inputDataContainer[$key] ?? $this->requestType);
+        if (is_array($dataContainer)) {
+            $val = $dataContainer[$key] ?? null;
+        }
+
         if (empty($val) && null !== $default) {
             $val = $default;
         }
 
-        return new InputFilter($val);
+        return new DataFilter($val);
     }
 
     /**
@@ -173,41 +180,6 @@ abstract class ApiController extends Controller
         }
 
         return $data;
-    }
-
-    /**
-     * 从FILES中获取数据
-     *
-     * @param string $key
-     * @param string $filter_name
-     * @param bool $is_multi 是否是多文件
-     * @return array
-     * @throws LogicStatusException|CoreException
-     */
-    function getFileData(string $key, string $filter_name = 'images', bool &$is_multi = false)
-    {
-        $fileData = $this->delegate->getRequest()->getFileData();
-        if (!empty($fileData[$key]) && !empty($fileData[$key]['name'])) {
-            if ($filter_name == 'images') {
-                $upload_name = &$fileData[$key]['name'];
-                $upload_tmp_name = &$fileData[$key]['tmp_name'];
-                if (!is_array($upload_name)) {
-                    $is_multi = false;
-                    $ext = $this->checkUploadImage($upload_name, $upload_tmp_name);
-                } else {
-                    $ext = [];
-                    $is_multi = true;
-                    for ($i = 0, $j = count($upload_name); $i < $j; $i++) {
-                        $ext[$i] = $this->checkUploadImage($upload_name[$i], $upload_tmp_name[$i]);
-                    }
-                }
-
-                $fileData[$key]['ext'] = $ext;
-                return $fileData[$key];
-            }
-        }
-
-        return [];
     }
 
     /**
@@ -238,39 +210,39 @@ abstract class ApiController extends Controller
     /**
      * 获取对应请求类型的数据容器
      *
-     * @param string $request_type
+     * @param string $requestType
      * @return mixed
      */
-    private function getDataContainer(string $request_type)
+    private function getDataContainer(string $requestType)
     {
-        switch ($request_type) {
+        switch ($requestType) {
             case 'file':
             case 'multi_file':
-                $data_container = $this->delegate->getRequest()->getFileData();
+                $dataContainer = $this->delegate->getRequest()->getFileData();
                 break;
 
             case 'post':
-                $data_container = $this->delegate->getRequest()->getPostData();
-                if (empty($data_container)) {
+                $dataContainer = $this->delegate->getRequest()->getPostData();
+                if (empty($dataContainer)) {
                     $input = file_get_contents("php://input");
                     $content_type = $this->delegate->getRequest()->SERVER('CONTENT_TYPE');
                     if (0 == strcasecmp($content_type, 'application/json')) {
-                        $data_container = json_decode($input, true);
+                        $dataContainer = json_decode($input, true);
                     } else {
                         $input = trim($input);
                         $input = trim($input, '"');
-                        parse_str($input, $data_container);
+                        parse_str($input, $dataContainer);
                     }
 
-                    $this->delegate->getRequest()->setPostData($data_container, true);
+                    $this->delegate->getRequest()->setPostData($dataContainer, true);
                 }
                 break;
 
             default:
-                $data_container = $this->delegate->getRequest()->getRequestData();
+                $dataContainer = $this->delegate->getRequest()->getRequestData();
         }
 
-        return $data_container;
+        return $dataContainer;
     }
 
     /**
@@ -283,7 +255,9 @@ abstract class ApiController extends Controller
     {
         $result = [];
         $ANNOTATE = Annotate::getInstance($this->delegate);
-        $controllerList = glob(PROJECT_REAL_PATH . str_replace('\\', DIRECTORY_SEPARATOR, $this->delegate->getAppNamespace()) . '/controllers/*.php');
+        $controllerList = glob(PROJECT_REAL_PATH .
+            str_replace('\\', DIRECTORY_SEPARATOR, $this->delegate->getAppNamespace()) . '/controllers/*.php');
+
         array_map(function ($f) use (&$result, $ANNOTATE) {
             $fileName = pathinfo($f, PATHINFO_FILENAME);
             $classNamespace = $this->delegate->getApplication()->getControllerNamespace($fileName);
@@ -356,46 +330,5 @@ abstract class ApiController extends Controller
         $key = $this->getConfig()->get('encrypt', 'doc');
         $localToken = md5(md5($key . $t) . $t);
         return $localToken == $token;
-    }
-
-    /**
-     * 验证上传图片文件
-     *
-     * @param string $upload_file_name 上传原始文件名
-     * @param string $tmp_file 临时文件路径
-     * @param int $size
-     * @return mixed
-     * @throws LogicStatusException|CoreException
-     */
-    private function checkUploadImage(string $upload_file_name, string $tmp_file, int $size = 3000000)
-    {
-        $allow_image_type = array('jpeg' => 1, 'jpg' => 1, 'png' => 1);
-        $origin_name_info = explode('.', $upload_file_name);
-        $origin_name_ext = end($origin_name_info);
-
-        if (!isset($allow_image_type[$origin_name_ext])) {
-            $this->display(200052);
-        }
-
-        $image_info = @getimagesize($tmp_file);
-        if (!empty($image_info)) {
-            $image_ext = strtolower(image_type_to_extension($image_info[2]));
-            $image_type = substr($image_ext, 1);
-            $image_size = filesize($tmp_file);
-
-            //验证图片类型
-            if (!isset($allow_image_type[$image_type])) {
-                $this->display(200052);
-            }
-
-            //验证图片大小
-            if ($image_size > $size) {
-                $this->display(200051);
-            }
-        } else {
-            $this->display(200050);
-        }
-
-        return $origin_name_ext;
     }
 }
