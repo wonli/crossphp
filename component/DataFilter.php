@@ -162,16 +162,92 @@ class DataFilter
     }
 
     /**
-     * 正则匹配
+     * 验证字母
      *
-     * @param string $pattern
+     * @throws LogicStatusException
+     */
+    function alpha()
+    {
+        return $this->regx('/[a-zA-Z]/', '参数只能是字母');
+    }
+
+    /**
+     * 字母数字或下划线
+     *
+     * @param int $min 最小长度
+     * @param int $max 最大长度
+     * @return array|mixed
+     * @throws LogicStatusException
+     */
+    function account(int $min = 2, int $max = 12)
+    {
+        $pattern = sprintf("/^(?!_)[a-zA-Z_0-9]{%d,%d}$/u", $min, $max);
+        return $this->regx($pattern, sprintf('参数只能是 %d~%d 位字母数字或下划线（且不能以下划线开头）', $min, $max));
+    }
+
+    /**
+     * 中文
+     *
      * @return mixed
      * @throws LogicStatusException
      */
-    function regx(string $pattern)
+    function chinese()
+    {
+        if (!Helper::isChinese($this->ctx)) {
+            $this->throwMsg('参数必须是中文');
+        }
+
+        return $this->ctx;
+    }
+
+    /**
+     * 手机号
+     *
+     * @return array|mixed|string
+     * @throws LogicStatusException
+     */
+    function mobile()
+    {
+        if (!Helper::isChinese($this->ctx)) {
+            $this->throwMsg('参数不是一个正确的手机号码');
+        }
+
+        return $this->ctx;
+    }
+
+    /**
+     * 数组
+     *
+     * @param mixed $delimiter 分隔符
+     * @return array|mixed
+     * @throws LogicStatusException
+     */
+    function array($delimiter = null)
+    {
+        $ctx = $this->ctx;
+        if (null !== $delimiter) {
+            $ctx = explode($delimiter, $ctx);
+        }
+
+        if (!is_array($ctx)) {
+            $this->throwMsg('参数必须是一个数组');
+        }
+
+        return array_map('trim', $ctx);
+    }
+
+    /**
+     * 正则匹配
+     *
+     * @param string $pattern
+     * @param string|null $msg
+     * @return mixed
+     * @throws LogicStatusException
+     */
+    function regx(string $pattern, string $msg = null)
     {
         if (!preg_match($pattern, $this->ctx)) {
-            $this->throwMsg('参数正则验证失败');
+            $this->throwMsg($msg ?: '参数正则验证失败');
         }
 
         return $this->ctx;
