@@ -5,8 +5,8 @@
 
 namespace app\api\controllers;
 
+use Cross\Exception\LogicStatusException;
 use Cross\Exception\CoreException;
-use Cross\Exception\FrontException;
 use Cross\Core\Delegate;
 
 /**
@@ -23,13 +23,12 @@ class Main extends Api
      *
      * @cp_api get, /main/index, 获取框架当前版本号
      * @cp_request t|当前时间|1
-     * @throws FrontException
-     * @throws CoreException
+     * @throws CoreException|LogicStatusException
      */
     function index()
     {
         $data['version'] = Delegate::getVersion();
-        $data['t'] = $this->getInputData('t');
+        $data['t'] = $this->input('t')->int();
 
         $this->display($data);
     }
