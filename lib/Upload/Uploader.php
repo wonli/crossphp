@@ -91,6 +91,20 @@ class Uploader
     protected $savePath;
 
     /**
+     * 文件路径(附加到返回路径前)
+     *
+     * @var string
+     */
+    protected $fileDir;
+
+    /**
+     * 文件前缀
+     *
+     * @var string
+     */
+    protected $fileNamePrefix;
+
+    /**
      * 是否返回已上传文件真实地址
      *
      * @var bool
@@ -232,6 +246,20 @@ class Uploader
     }
 
     /**
+     * 设置保存附加路径（可访问路径）
+     *
+     * @param string $dir
+     * @param string $namePrefix 文件名前缀
+     */
+    function setFireDir(string $dir, string $namePrefix = '')
+    {
+        $this->fileDir = '/' . trim(trim($dir, '\\'), '/') . '/';
+        if (!empty($namePrefix)) {
+            $this->fileNamePrefix = trim($namePrefix);
+        }
+    }
+
+    /**
      * 获取文件存储路径
      *
      * @return string
@@ -244,23 +272,19 @@ class Uploader
     /**
      * 保存上传文件
      *
-     * @param string $dir 存储路径（可访问路径）
-     * @param string $namePrefix 文件名前缀
      * @return array
      * @throws Exception
      */
-    function save($dir = '', $namePrefix = '')
+    function save()
     {
-        $dir = trim(trim($dir, '\\'), '/');
-        if (!empty($dir)) {
-            $this->setSavePath($this->savePath . $dir);
-            $dir = '/' . $dir . '/';
-        }
-
-        $data = array(
+        $data = [
             'files' => [],
             'uploadedCount' => 0,
-        );
+        ];
+
+        if ($this->fileDir) {
+            $this->setSavePath($this->savePath . $this->fileDir);
+        }
 
         $files = $this->verifyUploadFile();
         if (!empty($files)) {
@@ -271,11 +295,11 @@ class Uploader
                     $fileName = Helper::random(16) . '.' . $f['extension'];
                 }
 
-                if ($namePrefix) {
-                    $fileName = $namePrefix . '_' . $fileName;
+                if ($this->fileNamePrefix) {
+                    $fileName = $this->fileNamePrefix . '_' . $fileName;
                 }
 
-                $fileUrl = $dir . $fileName;
+                $fileUrl = $this->fileDir . $fileName;
                 $destination = $this->savePath . $fileName;
                 $isUpload = move_uploaded_file($f['tmp_name'], $destination);
                 if ($isUpload) {
@@ -411,10 +435,10 @@ class Uploader
     private function addFailFile($filename, $error)
     {
         $this->failCount++;
-        $this->failFiles[] = array(
+        $this->failFiles[] = [
             'filename' => $filename,
             'error' => $error,
-        );
+        ];
     }
 }
 
