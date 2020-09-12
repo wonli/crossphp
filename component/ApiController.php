@@ -9,6 +9,7 @@ namespace component;
 use Cross\Exception\CoreException;
 use Cross\Exception\LogicStatusException;
 use Cross\Interactive\ResponseData;
+use Cross\Interactive\DataFilter;
 use Cross\Core\Annotate;
 use Cross\MVC\Controller;
 use Cross\MVC\View;
