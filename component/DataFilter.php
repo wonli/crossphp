@@ -208,7 +208,7 @@ class DataFilter
      */
     function mobile()
     {
-        if (!Helper::isChinese($this->ctx)) {
+        if (!Helper::isMobile($this->ctx)) {
             $this->throwMsg('参数不是一个正确的手机号码');
         }
 
@@ -263,7 +263,7 @@ class DataFilter
     function closure(Closure $handler)
     {
         try {
-            $v = $handler($this->ctx);
+            $v = $handler($this->ctx, $this);
             if (false === $v) {
                 $this->throwMsg('false');
             }
@@ -403,6 +403,81 @@ class DataFilter
         }
 
         return [];
+    }
+
+    /**
+     * 通过所有验证方法
+     *
+     * @param array $handler 方法名:参数1,参数2
+     * @return mixed
+     * @throws LogicStatusException
+     */
+    function all(...$handler)
+    {
+        foreach ($handler as $act) {
+            if (false !== strpos($act, ':')) {
+                list($act, $actParamsSet) = explode(':', $act);
+                if (!empty($actParamsSet)) {
+                    $params = array_map('trim', explode(',', $actParamsSet));
+                }
+            }
+
+            if (!method_exists($this, $act)) {
+                $this->throwMsg('不支持的验证方法 %s', $act);
+            }
+
+            try {
+                if (!empty($params)) {
+                    call_user_func_array([$this, $act], $params);
+                } else {
+                    call_user_func([$this, $act]);
+                }
+            } catch (Exception $e) {
+                $this->throwMsg('验证异常: %s', $e->getMessage());
+            }
+        }
+
+        return $this->ctx;
+    }
+
+    /**
+     * 满足任意规则
+     *
+     * @param mixed ...$handler 方法名:参数1,参数2
+     * @return mixed
+     * @throws LogicStatusException
+     */
+    function any(...$handler)
+    {
+        $acts = [];
+        foreach ($handler as $act) {
+            if (false !== strpos($act, ':')) {
+                list($act, $actParamsSet) = explode(':', $act);
+                if (!empty($actParamsSet)) {
+                    $params = array_map('trim', explode(',', $actParamsSet));
+                }
+            }
+
+            if (!method_exists($this, $act)) {
+                $this->throwMsg('不支持的验证方法 %s', $act);
+            }
+
+            $acts[] = $act;
+            try {
+                if (!empty($params)) {
+                    call_user_func_array([$this, $act], $params);
+                } else {
+                    call_user_func([$this, $act]);
+                }
+
+                return $this->ctx;
+            } catch (Exception $e) {
+
+            }
+        }
+
+        $this->throwMsg('验证失败: %s', implode(',', $acts));
+        return false;
     }
 
     /**
