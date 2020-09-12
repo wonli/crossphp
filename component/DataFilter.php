@@ -8,6 +8,7 @@ namespace component;
 
 use Cross\Exception\LogicStatusException;
 use Cross\Runtime\Rules;
+use Cross\Core\Delegate;
 use Cross\Core\Helper;
 
 use lib\Upload\Uploader;
@@ -52,11 +53,6 @@ class DataFilter
     protected $userState = false;
 
     /**
-     * @var array
-     */
-    protected $rules = [];
-
-    /**
      * InputFilter constructor.
      *
      * @param mixed $ctx
@@ -84,13 +80,22 @@ class DataFilter
     }
 
     /**
-     * 整形
+     * 整型
      *
      * @return int
+     * @throws LogicStatusException
      */
     function int()
     {
-        return (int)$this->ctx;
+        if (!is_numeric($this->ctx)) {
+            $this->throwMsg('参数必须是一个数字');
+        }
+
+        if ($this->ctx > PHP_INT_MAX || $this->ctx < PHP_INT_MIN) {
+            $this->throwMsg('参数值超过范围');
+        }
+
+        return intval($this->ctx);
     }
 
     /**
@@ -106,6 +111,21 @@ class DataFilter
         }
 
         return $ctx;
+    }
+
+    /**
+     * 浮点数
+     *
+     * @return mixed
+     * @throws LogicStatusException
+     */
+    function float()
+    {
+        if (!is_numeric($this->ctx)) {
+            $this->throwMsg('参数必须是一个数字');
+        }
+
+        return floatval($this->ctx);
     }
 
     /**
@@ -511,7 +531,8 @@ class DataFilter
             $msgCtx = $this->msg;
         }
 
-        throw new LogicStatusException($this->code, $msgCtx);
+        $code = Delegate::env('sys.filterFailStatus') ?? $this->code;
+        throw new LogicStatusException($code, $msgCtx);
     }
 
     /**
