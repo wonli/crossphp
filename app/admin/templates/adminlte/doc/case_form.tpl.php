@@ -9,7 +9,6 @@ $action = $data['api']['api_path'] ?? '';
 $method = $data['api']['api_method'] ?? '';
 
 $apiId = $data['api']['id'] ?? '';
-$apiUrl = ($data['doc']['current_server']['api_addr'] ?? '') . $action;
 
 $headerParams = $data['doc']['header_params'] ?? [];
 $useGlobalParams = $data['user']['global_params'] ?? [];

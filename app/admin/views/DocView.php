@@ -423,17 +423,19 @@ class DocView extends AdminView
      */
     function getApiActionUrl()
     {
-        $headerParams = $this->data['doc']['header_params']??[];
+        $apiPath = $this->data['api']['api_path'] ?? '';
+        $serverAddr = $this->data['doc']['current_server']['api_addr'] ?? '';
+        $headerParams = $this->data['doc']['header_params'] ?? [];
         if (empty($headerParams)) {
-            return  ($this->data['doc']['current_server']['api_addr'] ?? '') . $this->data['api']['api_path'] ?? '';
+            return  rtrim($serverAddr, '/') . '/' . ltrim($apiPath, '/');
         }
 
         return $this->url('doc:curlRequest', [
             'ugp' => $this->data['api']['global_params']??[],
             'method' => $this->data['api']['api_method']??'get',
             'doc_id' => $this->data['doc']['id']??0,
-            'host' => urlencode($this->data['doc']['current_server']['api_addr']??''),
-            'path' => urlencode($this->data['api']['api_path']??'')
+            'host' => urlencode($serverAddr),
+            'path' => urlencode($apiPath)
         ]);
     }
 
