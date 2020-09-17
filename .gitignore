@@ -4,5 +4,5 @@
 .svn/
 vendor/
 cache/
-config/.dev.php
+/config/.*
 composer.lock
