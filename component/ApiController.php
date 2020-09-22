@@ -225,7 +225,7 @@ abstract class ApiController extends Controller
             case 'post':
                 $dataContainer = $this->delegate->getRequest()->getPostData();
                 if (empty($dataContainer)) {
-                    $input = file_get_contents("php://input");
+                    $input = filter_var(file_get_contents("php://input"), FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
                     $content_type = $this->delegate->getRequest()->SERVER('CONTENT_TYPE');
                     if (0 == strcasecmp($content_type, 'application/json')) {
                         $dataContainer = json_decode($input, true);
