@@ -31,7 +31,14 @@ return [
          * 如果值为JSON或XML的时候,会直接调用View中的JSON或XML方法来输出数据
          * 也可以在ApiView中自定义处理方法(比如MSG_PACK等)
          */
-        'display' => 'JSON'
+        'display' => 'JSON',
+    ],
+
+    /**
+     * cookie相关配置
+     */
+    'cookie' => [
+        'domain' => ''
     ],
 
     /**

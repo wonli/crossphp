@@ -31,6 +31,13 @@ return [
     ],
 
     /**
+     * cookie相关配置
+     */
+    'cookie' => [
+        'domain' => '',
+    ],
+
+    /**
      * 系统中用到的各种密钥
      * uri 加密URL
      * auth 加密cookie
