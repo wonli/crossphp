@@ -216,6 +216,7 @@ abstract class ApiController extends Controller
      */
     private function getDataContainer(string $requestType)
     {
+        $defaultDataContainer = $this->delegate->getRequest()->getRequestData();
         switch ($requestType) {
             case 'file':
             case 'multi_file':
@@ -238,12 +239,13 @@ abstract class ApiController extends Controller
                     $this->delegate->getRequest()->setPostData($dataContainer, true);
                 }
                 break;
-
-            default:
-                $dataContainer = $this->delegate->getRequest()->getRequestData();
         }
 
-        return $dataContainer;
+        if (!empty($dataContainer)) {
+            return array_merge($defaultDataContainer, $dataContainer);
+        }
+
+        return $defaultDataContainer;
     }
 
     /**
