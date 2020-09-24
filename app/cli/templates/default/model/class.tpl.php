@@ -13,4 +13,20 @@ namespace <?= $data['namespace'] ?>;
         parent::__construct(new <?= $data['tableClass'] ?>());
     }
 <?php endif ?>
+
+    /**
+     * @inheritdoc
+     */
+    protected function autoJoin()
+    {
+
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function autoProcessData(array &$data)
+    {
+
+    }
 }
