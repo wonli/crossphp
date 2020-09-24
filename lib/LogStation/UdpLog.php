@@ -1,6 +1,6 @@
 <?php
 /**
- * Cross - a micro PHP 5 framework
+ * Cross - lightness PHP framework
  *
  * @link        http://www.crossphp.com
  * @license     MIT License
