@@ -252,7 +252,6 @@ abstract class ApiController extends Controller
      * API 调试文档基础数据
      *
      * @return array
-     * @throws ReflectionException
      */
     protected function docApiData(): array
     {
