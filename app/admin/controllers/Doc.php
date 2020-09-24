@@ -11,6 +11,7 @@ use app\admin\supervise\Model\ApiDoc;
 use app\admin\supervise\Model\ApiDocData;
 use app\admin\supervise\Model\ApiDocUser;
 
+use Cross\Exception\LogicStatusException;
 use Cross\Exception\DBConnectException;
 use Cross\Exception\FrontException;
 use Cross\Interactive\ResponseData;
@@ -145,7 +146,7 @@ class Doc extends Admin
     /**
      * 初始化api接口数据
      *
-     * @throws CoreException|DBConnectException
+     * @throws CoreException|DBConnectException|LogicStatusException
      */
     function initApiData()
     {
@@ -166,7 +167,7 @@ class Doc extends Admin
             return;
         }
 
-        $docId = $this->params['id'] ?: 0;
+        $docId = $this->input('id')->id();
         $updateStatus = $this->getInitApiData($docId, $apiAddr, $docToken);
         if ($updateStatus->getStatus() != 1) {
             $this->display($updateStatus->getData(), 'JSON');
@@ -183,7 +184,7 @@ class Doc extends Admin
      * @cp_display codeSegment
      * @throws CoreException
      * @throws DBConnectException
-     * @throws FrontException
+     * @throws LogicStatusException
      */
     function codeSegment()
     {
@@ -211,16 +212,11 @@ class Doc extends Admin
     /**
      * @throws CoreException
      * @throws DBConnectException
-     * @throws FrontException
+     * @throws LogicStatusException
      */
     function curlRequest()
     {
-        $apiId = $this->params['doc_-_api-_-id'] ?? 0;
-        if (empty($apiId)) {
-            throw new FrontException('获取文档信息失败');
-        }
-
-        unset($this->params['doc_-_api-_-id']);
+        $apiId = $this->input('doc_-_api-_-id')->id();
         $params = $this->params;
         $curlData = $this->getApiCurlData($apiId, $params, $serverInfo);
         $g = (new Generator())->run($curlData);
@@ -253,7 +249,7 @@ class Doc extends Admin
      * @return array|mixed
      * @throws CoreException
      * @throws DBConnectException
-     * @throws FrontException
+     * @throws LogicStatusException
      */
     function getApiCurlData($apiId, &$params = [], &$serverInfo = [])
     {
@@ -262,7 +258,7 @@ class Doc extends Admin
         $Api->id = $apiId;
         $apiData = $Api->get();
         if (empty($apiData)) {
-            throw new FrontException('获取api数据失败');
+            throw new LogicStatusException(0, '获取api数据失败');
         }
 
         $docId = $apiData['doc_id'];
@@ -285,7 +281,7 @@ class Doc extends Admin
         $method = $apiData['api_method'] ?? 'POST';
         $server = $doc['servers'][$sid] ?? [];
         if (empty($server)) {
-            throw new FrontException('获取Server信息失败');
+            throw new LogicStatusException(0, '获取Server信息失败');
         }
 
         $apiUrl = rtrim($server['api_addr'], '/') . '/' . $apiData['api_path'];
@@ -340,17 +336,17 @@ class Doc extends Admin
      * 更改API服务器地址
      *
      * @cp_params doc_id, sid=0
-     * @throws CoreException
+     * @throws CoreException|LogicStatusException
      */
     function changeApiServer()
     {
-        $docId = (int)$this->params['doc_id'];
+        $docId = $this->input('doc_id')->uInt();
         if (!$docId) {
             $this->to('doc:setting');
             return;
         }
 
-        $sid = (int)$this->params['sid'];
+        $sid = $this->input('sid')->uInt();
         $docInfo = $this->ADM->get($docId);
         $servers = &$docInfo['servers'];
         if (!isset($servers[$sid])) {
@@ -376,11 +372,11 @@ class Doc extends Admin
      * 保存公共参数
      *
      * @cp_params doc_id
-     * @throws CoreException
+     * @throws CoreException|LogicStatusException
      */
     function saveCommonParams()
     {
-        $docId = (int)$this->params['doc_id'];
+        $docId = $this->input('doc_id')->uInt();
         if (!$docId) {
             $this->to('doc:setting');
             return;
@@ -425,7 +421,7 @@ class Doc extends Admin
      */
     function makeTestForm()
     {
-        $id = $this->params['id'];
+        $id = $this->input('id')->id();
         $apiDocData = new ApiDocData();
         $apiDocData->id = $id;
         $apiData = $apiDocData->property();
@@ -533,7 +529,7 @@ class Doc extends Admin
                 'last_update_admin' => $this->u,
             ];
 
-            $id = $this->params['id'];
+            $id = $this->input('id')->id();
             if (!empty($id)) {
                 $this->ADM->update($id, $saveData);
             } else {
@@ -544,13 +540,13 @@ class Doc extends Admin
             $this->to('doc:setting');
             return;
         } else {
-            switch ($this->params['action']) {
+            switch ($this->input('action')->val()) {
                 case 'edit':
-                    $this->data['data'] = $this->ADM->get($this->params['id']);
+                    $this->data['data'] = $this->ADM->get($this->input('id')->id());
                     break;
 
                 case 'del':
-                    $this->ADM->del($this->params['id']);
+                    $this->ADM->del($this->input('id')->id());
                     $this->to('doc:setting');
                     break;
 
@@ -576,7 +572,7 @@ class Doc extends Admin
      */
     function makeParamsNode()
     {
-        $this->data['t'] = $this->params['t'];
+        $this->data['t'] = $this->input('t')->val();
         $this->view->makeParamsNode($this->data);
     }
 

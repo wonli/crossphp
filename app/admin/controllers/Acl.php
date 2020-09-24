@@ -55,11 +55,11 @@ class Acl extends Admin
      * 子菜单管理
      *
      * @cp_params id
-     * @throws CoreException
+     * @throws CoreException|LogicStatusException
      */
     function editMenu()
     {
-        $id = (int)$this->params['id'];
+        $id = $this->input('id')->uInt();
         if ($this->isPost()) {
             $postData = $this->request->getPostData();
             if (!empty($postData['menu'])) {
@@ -119,16 +119,16 @@ class Acl extends Admin
      * 删除
      *
      * @cp_params id, e
-     * @throws CoreException
+     * @throws CoreException|LogicStatusException
      */
     function del()
     {
-        if (!empty($this->params['id'])) {
-            $this->ACL->delNav((int)$this->params['id']);
+        if (!empty($this->input('id')->uInt())) {
+            $this->ACL->delNav($this->input('id')->uInt());
         }
 
-        if (!empty($this->params['e'])) {
-            $this->to('acl:editMenu', array('id' => (int)$this->params['e']));
+        if (!empty($this->input('e')->uInt())) {
+            $this->to('acl:editMenu', array('id' => $this->input('e')->uInt()));
             return;
         }
 
@@ -181,11 +181,11 @@ class Acl extends Admin
             $ret = $this->ACL->editRoleMenu($postData['rid'] ?? '', $postData['name'] ?? '', $postData['menu_id'] ?? '');
             if ($ret->getStatus() == 1) {
                 $this->to("acl:roleList");
+                return;
             }
         }
 
         $this->display($this->data);
-        return;
     }
 
     /**
@@ -193,16 +193,16 @@ class Acl extends Admin
      *
      * @cp_params rid
      * @throws CoreException
-     * @throws ReflectionException
+     * @throws ReflectionException|LogicStatusException
      */
     function editRole()
     {
-        if (empty($this->params['rid'])) {
+        if (empty($this->input('rid')->uInt())) {
             $this->to('acl');
             return;
         }
 
-        $rid = (int)$this->params['rid'];
+        $rid = $this->input('rid')->uInt();
         $roleInfo = $this->ACL->getRoleInfo(['id' => $rid]);
         if (empty($roleInfo)) {
             $this->to('acl');
@@ -212,7 +212,7 @@ class Acl extends Admin
         if ($this->isPost()) {
             $postData = $this->request->getPostData();
             $this->ACL->editRoleMenu($rid, $postData['name'] ?? '', $postData['menu_id'] ?? '');
-            $this->to('acl:editRole', ['rid' => $this->params['rid']]);
+            $this->to('acl:editRole', ['rid' => $rid]);
             return;
         }
 
@@ -227,12 +227,12 @@ class Acl extends Admin
      * 删除角色
      *
      * @cp_params rid
-     * @throws CoreException
+     * @throws CoreException|LogicStatusException
      */
     function delRole()
     {
         $isAjax = $this->isAjax();
-        $rid = $isAjax ? (int)$this->request->getGetData()['rid'] : (int)$this->params['rid'];
+        $rid = $isAjax ? (int)$this->request->getGetData()['rid'] : $this->input('rid')->uInt();
 
         $ret = $this->ACL->delRole($rid);
         if ($isAjax) {
@@ -247,12 +247,12 @@ class Acl extends Admin
      *
      * @cp_params p=1
      * @throws CoreException
-     * @throws FrontException
+     * @throws LogicStatusException
      */
     function user()
     {
         $page = [
-            'p' => $this->params['p'],
+            'p' => $this->input('p')->uInt(),
             'limit' => 10,
         ];
 
@@ -314,8 +314,8 @@ class Acl extends Admin
      */
     function userSecurityCard()
     {
-        $op = &$this->params['op'];
-        $user = &$this->params['user'];
+        $op = $this->input('op')->val();
+        $user = $this->input('user')->val();
 
         $SEC = new SecurityModule();
         if ($op == 'bind') {
@@ -334,11 +334,11 @@ class Acl extends Admin
      * 删除管理员
      *
      * @cp_params uid
-     * @throws CoreException
+     * @throws CoreException|LogicStatusException
      */
     function delUser()
     {
-        $uid = (int)$this->params['uid'];
+        $uid = $this->input('uid')->uInt();
         $this->ADMIN->del(['id' => $uid]);
         $this->to('acl:user');
     }

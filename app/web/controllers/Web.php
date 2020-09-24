@@ -19,28 +19,6 @@ abstract class Web extends Controller
     abstract function index();
 
     /**
-     * 获取输入数据
-     *
-     * @param string $key
-     * @param mixed $default
-     * @return DataFilter
-     */
-    function input(string $key, $default = null): DataFilter
-    {
-        $val = '';
-        $dataContainer = array_merge($this->params, $this->request->getRequestData());
-        if (is_array($dataContainer)) {
-            $val = $dataContainer[$key] ?? null;
-        }
-
-        if (empty($val) && null !== $default) {
-            $val = $default;
-        }
-
-        return new DataFilter($val);
-    }
-
-    /**
      * 处理页面
      *
      * @param mixed $data

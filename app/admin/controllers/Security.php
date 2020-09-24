@@ -57,7 +57,7 @@ class Security extends Admin
     function securityCard()
     {
         try {
-            $act = &$this->params['act'];
+            $act = $this->input('act')->val();
             switch ($act) {
                 case 'bind':
                     $actRet = $this->SEC->bindCard($this->u);
@@ -151,10 +151,11 @@ class Security extends Admin
             $tplThemeList = &$themeConfig[$tplDir];
         }
 
-        if (!empty($this->params['act'])) {
-            switch ($this->params['act']) {
+        $act = $this->input('act')->val();
+        if (!empty($act)) {
+            switch ($act) {
                 case 'setTheme':
-                    $theme = &$this->params['theme'];
+                    $theme = $this->input('theme')->val();
                     if ($hasTheme && $theme) {
                         $useTheme = &$tplThemeList['themes'][$theme];
                         if ($useTheme && !empty($useTheme['class'])) {
