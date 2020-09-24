@@ -54,8 +54,7 @@ return [
      * 约定接口返回数据字段名
      */
     'responseData' => [
-        'code' => ResponseData::builder()->setStatusName('code'),
-        'msg' => ResponseData::builder()->setMessageName('msg')
+
     ],
     /**
      * 关于url的配置
