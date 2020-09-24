@@ -8,7 +8,6 @@ namespace app\web\controllers;
 
 
 use Cross\Exception\CoreException;
-use Cross\Interactive\DataFilter;
 use Cross\MVC\Controller;
 
 abstract class Web extends Controller

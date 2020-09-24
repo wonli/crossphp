@@ -22,7 +22,7 @@ class CliView extends View
      * @param array $data
      * @return bool|int
      */
-    function genConfigFile($file, array $data = [])
+    function genConfigFile(string $file, array $data = [])
     {
         $configTplFile = $this->tpl('cli/dev.config', false, false);
         $content = $this->obRenderFile($configTplFile, $data);

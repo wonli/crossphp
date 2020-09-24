@@ -7,7 +7,6 @@
 namespace app\admin\controllers;
 
 use Cross\Exception\LogicStatusException;
-use Cross\Exception\FrontException;
 use Cross\Exception\CoreException;
 
 use app\admin\supervise\SecurityModule;

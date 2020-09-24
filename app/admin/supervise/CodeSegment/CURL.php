@@ -97,7 +97,7 @@ class CURL
      * @param int $timeout
      * @return CURL
      */
-    public function setTimeout($timeout)
+    public function setTimeout(int $timeout)
     {
         $this->timeout = $timeout;
         return $this;
@@ -117,7 +117,7 @@ class CURL
      * @param string $cacert
      * @return CURL
      */
-    public function setCacert($cacert)
+    public function setCacert(string $cacert)
     {
         $this->cacert = $cacert;
         return $this;

@@ -222,12 +222,7 @@ abstract class Cli extends Controller
     {
         //处理注释配置中的参数
         $this->oriParams = &$this->params;
-        if (!empty($this->action_annotate['params'])) {
-            $params = $this->action_annotate['params'];
-        } else {
-            $params = [];
-        }
-
+        $params = $this->actionAnnotate['params'] ?? [];
         if ($this->initCliParams) {
             $defaultCommand = null;
             foreach ($this->params as $p) {
@@ -346,7 +341,7 @@ abstract class Cli extends Controller
     /**
      * 命令帮助信息
      *
-     * @param string $cmd
+     * @param string|null $cmd
      * @param string $tipsText
      */
     protected function commandTips(string $cmd = null, string $tipsText = 'Not support params')
@@ -427,7 +422,7 @@ abstract class Cli extends Controller
      * @param string $message
      * @param bool $newLine
      */
-    function consoleMsg($message, $newLine = true)
+    function consoleMsg(string $message, $newLine = true)
     {
         if ($newLine) {
             $msg = '(' . $this->processTitle . ') ' . $message . PHP_EOL;
@@ -444,7 +439,7 @@ abstract class Cli extends Controller
      * @param string $value
      * @return bool|mixed
      */
-    function getBooleanValueFromString($value)
+    function getBooleanValueFromString(string $value)
     {
         $value = strtolower((string)$value);
         $a = ['false' => false, '0' => false, 'disable' => false];

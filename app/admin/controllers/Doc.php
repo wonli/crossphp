@@ -417,7 +417,7 @@ class Doc extends Admin
      *
      * @cp_params id
      * @throws CoreException|DBConnectException
-     * @throws FrontException
+     * @throws FrontException|LogicStatusException
      */
     function makeTestForm()
     {
@@ -468,7 +468,9 @@ class Doc extends Admin
 
     /**
      * @cp_params action=add, id
-     * @throws CoreException|DBConnectException
+     * @throws CoreException
+     * @throws DBConnectException
+     * @throws LogicStatusException
      */
     function action()
     {
@@ -586,7 +588,7 @@ class Doc extends Admin
      * @throws CoreException
      * @throws DBConnectException
      */
-    protected function getInitApiData($docId, $apiAddr, $docToken): ResponseData
+    protected function getInitApiData(int $docId, string $apiAddr, string $docToken): ResponseData
     {
         $requestParams = http_build_query([
             'doc_token' => md5(md5($docToken . TIME) . TIME),

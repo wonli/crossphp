@@ -90,8 +90,8 @@ class Model extends Cli
     }
 
     /**
-     * @param string $name 指定参数
-     * @param array $params
+     * @param mixed $name 指定参数
+     * @param mixed $params
      * @throws CoreException
      * @cp_params file=main
      * @see index
@@ -108,7 +108,7 @@ class Model extends Cli
      * @param array $config
      * @throws CoreException
      */
-    private function makeModels($config)
+    private function makeModels(array $config)
     {
         if (!empty($config)) {
             $db = &$config['db'];
@@ -146,7 +146,7 @@ class Model extends Cli
      * @param array $modelConfig
      * @throws CoreException
      */
-    private function genModelInfo($tableNameConfig, $modelName, $db = '', $modelConfig = [])
+    private function genModelInfo(string $tableNameConfig, string $modelName, $db = '', $modelConfig = [])
     {
         $propertyType = 'class';
         $modelName = "{$modelName}Table";
@@ -339,11 +339,6 @@ class Model extends Cli
     private function getTableName($tableNameConfig, &$splitInfo = []): string
     {
         if (is_array($tableNameConfig)) {
-            //处理Oracle自定义序列
-            if (!empty($tableNameConfig['sequence'])) {
-                $sequence = &$tableNameConfig['sequence'];
-            }
-
             if (!empty($tableNameConfig['split'])) {
                 //处理分表
                 $splitConfig = &$tableNameConfig['split'];

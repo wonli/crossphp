@@ -297,7 +297,6 @@ class ModelView extends CliView
         $i = 0;
         $result = '';
         foreach ($a as $ak => $av) {
-            $v = '';
             switch ($ak) {
                 case 'primary':
                 case 'not_null':

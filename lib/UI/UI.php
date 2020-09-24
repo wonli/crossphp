@@ -344,7 +344,7 @@ abstract class UI
      * @param array $data
      * @return mixed|string
      */
-    protected function getWidgetValue($key, $data)
+    protected function getWidgetValue(string $key, array $data)
     {
         if (false !== strpos($key, ':')) {
             $keys = explode(':', $key);
@@ -369,7 +369,7 @@ abstract class UI
      * @param string $content
      * @return string
      */
-    protected function renderWidget($content)
+    protected function renderWidget(string $content)
     {
         $js = '';
         if (!empty($this->js)) {

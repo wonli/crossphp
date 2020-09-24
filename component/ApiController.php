@@ -318,7 +318,7 @@ abstract class ApiController extends Controller
      * 验证doc token
      *
      * @param string token
-     * @param string $t
+     * @param mixed $t
      * @return bool
      */
     private function verifyDocApiToken(string $token, $t): bool

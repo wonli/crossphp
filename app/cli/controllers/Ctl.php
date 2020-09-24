@@ -104,8 +104,8 @@ class Ctl extends Cli
     }
 
     /**
-     * @param string $name 指定参数
-     * @param array $params
+     * @param mixed $name 指定参数
+     * @param mixed $params
      * @throws CoreException
      * @see index
      */
@@ -121,7 +121,7 @@ class Ctl extends Cli
      * @param array $config
      * @throws CoreException
      */
-    protected function genClass($className, $config)
+    protected function genClass(string $className, array $config)
     {
         if (empty($config['app'])) {
             $this->consoleMsg('Please specified app name!!');

@@ -99,7 +99,7 @@ class Captcha
      * @param string $text
      * @return $this
      */
-    public function setText($text)
+    public function setText(string $text)
     {
         $this->text = $text;
         return $this;
@@ -126,7 +126,7 @@ class Captcha
      * @param int $fontSize
      * @return $this
      */
-    public function setTypefaceDir($dir, $fontSize = 20)
+    public function setTypefaceDir(string $dir, $fontSize = 20)
     {
         $this->fontSize = $fontSize;
         if (is_dir($dir)) {
@@ -144,7 +144,7 @@ class Captcha
      * @param int $b
      * @return $this
      */
-    public function setBackGround($r, $g, $b)
+    public function setBackGround(int $r, int $g, int $b)
     {
         $this->backgroundColor = array('r' => $r, 'g' => $g, 'b' => $b);
         return $this;
@@ -156,9 +156,9 @@ class Captcha
      * @param int $num
      * @return $this
      */
-    public function withPix($num)
+    public function withPix(int $num)
     {
-        $this->withPix = (int)$num;
+        $this->withPix = $num;
         return $this;
     }
 

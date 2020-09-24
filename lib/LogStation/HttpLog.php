@@ -60,11 +60,11 @@ class HttpLog extends LogBase
     /**
      * 写入日志
      *
-     * @param string|array $log
      * @param string $tag
+     * @param string|array $log
      * @return mixed|void
      */
-    function write($tag, $log = '')
+    function write(string $tag, $log = '')
     {
         $this->addToLog($tag, $log);
         $this->send($tag);
