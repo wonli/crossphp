@@ -16,7 +16,7 @@ class MainView extends WebView
      *
      * @param array $data
      */
-    function index($data = array())
+    function index($data = [])
     {
         $this->renderTpl('main/index', $data);
     }

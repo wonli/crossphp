@@ -31,7 +31,7 @@ class ImagePreview extends Widget
      * @param array $b
      * @return mixed
      */
-    function widget($name, $value, $data, $params, $attributes, &$a = array(), &$b = array())
+    function widget(string $name, string $value, array $data, array $params, array $attributes, array &$a = [], array &$b = [])
     {
         $b = array(
             'class' => 'preview',

@@ -105,7 +105,7 @@ class Table extends UI
      *
      * @var array
      */
-    protected $data = array();
+    protected $data = [];
 
     /**
      * 数据总条数
@@ -133,7 +133,7 @@ class Table extends UI
      *
      * @var array
      */
-    protected $actionClosure = array();
+    protected $actionClosure = [];
 
     /**
      * 表格数据POST时的名称
@@ -165,7 +165,7 @@ class Table extends UI
      * @param string $minWidth
      * @return $this
      */
-    function addHead($field, $name, $width, $minWidth = '')
+    function addHead(string $field, string $name, string $width, $minWidth = '')
     {
         $this->head[] = array(
             'field' => $field,
@@ -193,7 +193,7 @@ class Table extends UI
      * @param string $minWidth
      * @return $this
      */
-    function setActionMenu($name, $width, $minWidth = '')
+    function setActionMenu(string $name, string $width, $minWidth = '')
     {
         $this->hasActionMenu = true;
         $this->head[] = array(
@@ -223,7 +223,7 @@ class Table extends UI
      * @param array $attr checkbox 属性
      * @param array $wrapAttr checkbox 外层label属性
      */
-    function addSelectAll(Closure $action = null, $flag = 'select-all', $attr = array(), $wrapAttr = array())
+    function addSelectAll(Closure $action = null, $flag = 'select-all', array $attr = [], array $wrapAttr = [])
     {
         $this->useCheckbox = $flag;
         $this->checkboxValueAction = $action;
@@ -271,11 +271,11 @@ class Table extends UI
     /**
      * 设置数据分组的字段名(一般为数据库表中的主键, 在提交时便于保存和修改数据)
      *
-     * @param string $field_name
+     * @param string $fieldName
      */
-    function setGroupKey($field_name)
+    function setGroupKey(string $fieldName)
     {
-        $this->groupKey = $field_name;
+        $this->groupKey = $fieldName;
     }
 
     /**
@@ -283,7 +283,7 @@ class Table extends UI
      *
      * @param string $name
      */
-    function setTableClass($name)
+    function setTableClass(string $name)
     {
         $this->tableClass = $name;
     }
@@ -293,7 +293,7 @@ class Table extends UI
      *
      * @param string $name
      */
-    function setTableHeadClass($name)
+    function setTableHeadClass(string $name)
     {
         $this->tableHeadClass = $name;
     }
@@ -303,7 +303,7 @@ class Table extends UI
      *
      * @param string $class
      */
-    function setActionClass($class)
+    function setActionClass(string $class)
     {
         $this->actionClass = $class;
     }
@@ -353,7 +353,7 @@ class Table extends UI
         if (!empty($this->data)) {
             foreach ($this->data as $d) {
                 $td = '';
-                $b = array();
+                $b = [];
                 $token = isset($d[$this->groupKey]) ? $d[$this->groupKey] : '';
                 foreach ($this->fields as $key => $val) {
                     $value = $this->getWidgetValue($key, $d);
@@ -363,7 +363,7 @@ class Table extends UI
                         $inputName = "{$token}[{$key}]";
                     }
 
-                    $a = array();
+                    $a = [];
                     $content = $this->makeWidgetContent($key, $value, $token, $d, $inputName, $a, $b);
                     $a['@content'] = $content;
 
@@ -412,10 +412,10 @@ class Table extends UI
      * 生成选择框
      *
      * @param string $token
-     * @param array $data
+     * @param mixed $data
      * @return mixed
      */
-    private function makeCheckbox($token, $data)
+    private function makeCheckbox(string $token, $data)
     {
         $id = "token-{$token}";
         $flagClass = "{$this->useCheckbox}-flag";

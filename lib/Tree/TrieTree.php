@@ -23,7 +23,7 @@ class TrieTree
     /**
      * @var array
      */
-    protected $tree = array();
+    protected $tree = [];
 
     /**
      * 外部设置前缀树数据结构
@@ -51,7 +51,7 @@ class TrieTree
      * @param string $file
      * @throws Exception
      */
-    function loadFromDict($file)
+    function loadFromDict(string $file)
     {
         $fp = fopen($file, 'r');
         if (!$fp) {
@@ -69,7 +69,7 @@ class TrieTree
             for ($i = 0, $count = count($data); $i < $count; $i++) {
                 $c = &$data[$i];
                 if (!isset($tree[$c])) {
-                    $tree[$c] = array();
+                    $tree[$c] = [];
                 }
 
                 $tree = &$tree[$c];
@@ -88,24 +88,24 @@ class TrieTree
      * </pre>
      *
      * @param string $str
-     * @param string $sensitive_word
+     * @param string $sensitiveWord
      * @param string $separator
      * @return bool
      */
-    function match($str, &$sensitive_word = '', $separator = '|')
+    function match(string $str, &$sensitiveWord = '', $separator = '|')
     {
         $match = false;
-        $matchWords = array();
+        $matchWords = [];
         $data = Helper::stringToArray($str);
         for ($i = 0, $count = count($data); $i < $count; $i++) {
             $word = $data[$i];
             if (isset($this->tree[$word])) {
                 $tree = &$this->tree[$word];
                 for ($j = $i + 1; $j < $count; $j++) {
-                    $next_word = $data[$j];
-                    if (isset($tree[$next_word])) {
-                        $word .= $next_word;
-                        $tree = &$tree[$next_word];
+                    $nextWord = $data[$j];
+                    if (isset($tree[$nextWord])) {
+                        $word .= $nextWord;
+                        $tree = &$tree[$nextWord];
                     } else {
                         break;
                     }
@@ -118,7 +118,7 @@ class TrieTree
             }
         }
 
-        $sensitive_word = implode($separator, $matchWords);
+        $sensitiveWord = implode($separator, $matchWords);
         return $match;
     }
 
@@ -129,14 +129,14 @@ class TrieTree
      * @param string $char
      * @return string
      */
-    function replace($str, $char = '*')
+    function replace(string $str, $char = '*')
     {
         $data = Helper::stringToArray($str);
         for ($i = 0, $count = count($data); $i < $count; $i++) {
             if (isset($this->tree[$data[$i]])) {
                 $tree = &$this->tree[$data[$i]];
 
-                $matchIndexes = array();
+                $matchIndexes = [];
                 for ($j = $i + 1; $j < $count; $j++) {
                     if (isset($tree[$data[$j]])) {
                         $matchIndexes[] = $j;

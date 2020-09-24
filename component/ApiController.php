@@ -96,11 +96,11 @@ abstract class ApiController extends Controller
 
         //验证请求类型
         $requestType = &$this->requestType;
-        $annotate_api = &$this->action_annotate['api'];
-        if (!empty($annotate_api)) {
-            $request_method = $this->delegate->getRequest()->SERVER('REQUEST_METHOD');
-            list($requestType) = explode(',', $annotate_api);
-            if (strcasecmp($request_method, trim($requestType)) !== 0) {
+        $annotateApi = &$this->actionAnnotate['api'];
+        if (!empty($annotateApi)) {
+            $requestMethod = $this->delegate->getRequest()->SERVER('REQUEST_METHOD');
+            list($requestType) = explode(',', $annotateApi);
+            if (strcasecmp($requestMethod, trim($requestType)) !== 0) {
                 $this->display(200000);
                 return;
             }
@@ -108,9 +108,9 @@ abstract class ApiController extends Controller
 
         //验证请求所需参数
         $this->requestDataContainer = $this->getDataContainer($requestType);
-        $annotate_request = &$this->action_annotate['request'];
-        if (!empty($annotate_request)) {
-            $request = explode(',', $annotate_request);
+        $annotateRequest = &$this->actionAnnotate['request'];
+        if (!empty($annotateRequest)) {
+            $request = explode(',', $annotateRequest);
             if (!empty($request)) {
                 foreach ($request as $actionParams) {
                     $requestParams = explode("\n", $actionParams);
@@ -188,13 +188,13 @@ abstract class ApiController extends Controller
      *
      * @param mixed $data
      * @param string|null $method
-     * @param int $http_response_status
+     * @param int $httpResponseStatus
      * @throws CoreException|LogicStatusException
      * @see Controller::display()
      */
-    protected function display($data = null, string $method = null, int $http_response_status = 200): void
+    protected function display($data = null, string $method = null, int $httpResponseStatus = 200): void
     {
-        $this->delegate->getResponse()->setResponseStatus($http_response_status)->setContentType('JSON');
+        $this->delegate->getResponse()->setResponseStatus($httpResponseStatus)->setContentType('JSON');
         if (!$data instanceof ResponseData) {
             $data = parent::getResponseData($data);
         }
@@ -226,8 +226,8 @@ abstract class ApiController extends Controller
                 $dataContainer = $this->delegate->getRequest()->getPostData();
                 if (empty($dataContainer)) {
                     $input = filter_var(file_get_contents("php://input"), FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
-                    $content_type = $this->delegate->getRequest()->SERVER('CONTENT_TYPE');
-                    if (0 == strcasecmp($content_type, 'application/json')) {
+                    $contentType = $this->delegate->getRequest()->SERVER('CONTENT_TYPE');
+                    if (0 == strcasecmp($contentType, 'application/json')) {
                         $dataContainer = json_decode($input, true);
                     } else {
                         $input = trim($input);

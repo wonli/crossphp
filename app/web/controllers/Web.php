@@ -43,19 +43,19 @@ abstract class Web extends Controller
     /**
      * 处理页面
      *
-     * @param null $data
-     * @param string $method
-     * @param int $http_response_status
+     * @param mixed $data
+     * @param string|null $method
+     * @param int $httpResponseStatus
      * @throws CoreException
      * @see Controller::display()
      */
-    protected function display($data = null, string $method = null, int $http_response_status = 200): void
+    protected function display($data = null, string $method = null, int $httpResponseStatus = 200): void
     {
         $responseData = parent::getResponseData($data);
         if ($responseData->getStatus() != 1) {
             throw new CoreException($responseData->getMessage());
         }
 
-        parent::display($data, $method, $http_response_status);
+        parent::display($data, $method, $httpResponseStatus);
     }
 }

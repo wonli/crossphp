@@ -57,10 +57,10 @@ class Generator
             foreach ($object as $key => $value) {
                 if (is_array($value) && !empty($value)) {
                     if ($this->isAssoc($value)) {
-                        $is_list = false;
+                        $isList = false;
                         $data2 = $value;
                     } else {
-                        $is_list = true;
+                        $isList = true;
                         $this->getArrayMaxMember($value, $data2);
                         if ($data2 === null) {
                             $data2 = $value;
@@ -70,7 +70,7 @@ class Generator
                     $child = [];
                     $this->getStruct($data2, $child);
 
-                    if ($is_list) {
+                    if ($isList) {
                         $struct[$key] = array(
                             "[list]" => $child,
                         );

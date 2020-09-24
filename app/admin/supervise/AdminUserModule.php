@@ -30,56 +30,57 @@ class AdminUserModule extends AdminModule
      *
      * @param string $username
      * @param string $password
-     * @param string $code_location
-     * @param string $code_value
+     * @param string $codeLocation
+     * @param string $codeValue
      * @return ResponseData
      * @throws CoreException
+     * @throws Exception
      */
-    function checkAdmin($username, $password, $code_location = '', $code_value = ''): ResponseData
+    function checkAdmin(string $username, string $password, $codeLocation = '', $codeValue = ''): ResponseData
     {
         $SEC = new SecurityModule;
         try {
-            $user_info = $this->link->get($this->t_admin, '*', ['name' => $username]);
+            $userInfo = $this->link->get($this->t_admin, '*', ['name' => $username]);
         } catch (Exception $e) {
             return $this->responseData(100100);
         }
 
-        if (empty($user_info)) {
+        if (empty($userInfo)) {
             return $this->responseData(100210);
         }
 
-        if ($user_info ['t'] != 1) {
+        if ($userInfo ['t'] != 1) {
             return $this->responseData(100211);
         }
 
-        if ($user_info && !empty($user_info['password'])) {
-            $is_bind = $SEC->checkbind($username);
-            if ($is_bind) {
-                if (empty($code_location) || empty($code_value)) {
+        if ($userInfo && !empty($userInfo['password'])) {
+            $isBind = $SEC->checkbind($username);
+            if ($isBind) {
+                if (empty($codeLocation) || empty($codeValue)) {
                     return $this->responseData(100300);
                 }
 
-                $verify = $SEC->verifyCode($username, $code_location, $code_value);
+                $verify = $SEC->verifyCode($username, $codeLocation, $codeValue);
                 if (!$verify) {
                     return $this->responseData(100301);
                 }
             }
 
-            $user_password = self::genPassword($password, $user_info['salt']);
-            if ($user_password === $user_info['password']) {
+            $userPassword = self::genPassword($password, $userInfo['salt']);
+            if ($userPassword === $userInfo['password']) {
 
                 //更新登录信息
                 $token = Helper::random(32);
-                $this->update($user_info['id'], [
+                $this->update($userInfo['id'], [
                     'token' => $token,
                     'last_login_date' => date('Y-m-d H:i:s'),
                     'last_login_ip' => $this->request->getClientIPAddress()
                 ]);
 
                 return $this->responseData(1, [
-                    'id' => $user_info['id'],
-                    'rid' => $user_info['rid'],
-                    'name' => $user_info['name'],
+                    'id' => $userInfo['id'],
+                    'rid' => $userInfo['rid'],
+                    'name' => $userInfo['name'],
                     'token' => $token
                 ]);
             }
@@ -97,7 +98,7 @@ class AdminUserModule extends AdminModule
      * @return mixed
      * @throws CoreException
      */
-    function getAdminUserList(&$page = ['p' => 1, 'limit' => 10])
+    function getAdminUserList(array &$page = ['p' => 1, 'limit' => 10])
     {
         return $this->link->find("{$this->t_admin} a LEFT JOIN {$this->t_security_card} s ON a.name=s.bind_user",
             'a.*, s.id bind_id', ['a.rid' => ['>', 0]], $page);
@@ -109,6 +110,7 @@ class AdminUserModule extends AdminModule
      * @param array $data
      * @return ResponseData
      * @throws CoreException
+     * @throws Exception
      */
     function addAdmin(array $data): ResponseData
     {
@@ -167,12 +169,13 @@ class AdminUserModule extends AdminModule
      * @param array $data
      * @return ResponseData
      * @throws CoreException
+     * @throws Exception
      */
-    function update($id, $data): ResponseData
+    function update(int $id, array $data): ResponseData
     {
         unset($data['id']);
-        $admin_info = $this->link->get($this->t_admin, '*', ['id' => $id]);
-        if (!$admin_info) {
+        $adminInfo = $this->link->get($this->t_admin, '*', ['id' => $id]);
+        if (!$adminInfo) {
             return $this->responseData(100400);
         }
 
@@ -185,7 +188,7 @@ class AdminUserModule extends AdminModule
         }
 
         //重新生成密码
-        if (isset($data['password']) && ($data['password'] !== $admin_info['password'])) {
+        if (isset($data['password']) && ($data['password'] !== $adminInfo['password'])) {
             $data ['password'] = self::genPassword($data['password'], $data['salt']);
         }
 
@@ -205,7 +208,7 @@ class AdminUserModule extends AdminModule
      * @param string $type
      * @throws CoreException
      */
-    function updateActLog($name, $params, $type = 'post')
+    function updateActLog(string $name, $params, string $type = 'post')
     {
         if (is_array($params)) {
             $params = array_filter($params);
@@ -226,13 +229,13 @@ class AdminUserModule extends AdminModule
             'ip' => $this->request->getClientIPAddress()
         ];
 
-        $act_info = $this->link->get($this->t_act_log, 'count(id) has, min(id) del_act_id', [
+        $actInfo = $this->link->get($this->t_act_log, 'count(id) has, min(id) del_act_id', [
             'name' => $name,
             'type' => $type
         ]);
 
-        if ($act_info['has'] >= self::MAX_ACT_LOG) {
-            $this->link->del($this->t_act_log, ['id' => $act_info['del_act_id']]);
+        if ($actInfo['has'] >= self::MAX_ACT_LOG) {
+            $this->link->del($this->t_act_log, ['id' => $actInfo['del_act_id']]);
         }
 
         $this->link->add($this->t_act_log, $data);
@@ -245,11 +248,12 @@ class AdminUserModule extends AdminModule
      * @param string $pwd
      * @return bool
      * @throws CoreException
+     * @throws Exception
      */
-    function checkPassword($name, $pwd)
+    function checkPassword(string $name, string $pwd)
     {
-        $admin_info = $this->link->get($this->t_admin, '*', ['name' => $name]);
-        return $admin_info ['password'] === self::genPassword($pwd, $admin_info['salt']);
+        $adminInfo = $this->link->get($this->t_admin, '*', ['name' => $name]);
+        return $adminInfo ['password'] === self::genPassword($pwd, $adminInfo['salt']);
     }
 
     /**
@@ -259,6 +263,7 @@ class AdminUserModule extends AdminModule
      * @param string $pwd
      * @return ResponseData
      * @throws CoreException
+     * @throws Exception
      */
     function updatePassword(string $name, string $pwd): ResponseData
     {
@@ -282,8 +287,9 @@ class AdminUserModule extends AdminModule
      * @param string $password
      * @param string $salt
      * @return string
+     * @throws Exception
      */
-    static function genPassword($password, &$salt = '')
+    static function genPassword(string $password, &$salt = '')
     {
         if (empty($salt)) {
             $salt = Helper::random(16);

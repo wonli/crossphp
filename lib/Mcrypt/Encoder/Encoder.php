@@ -19,7 +19,7 @@ abstract class Encoder
      * @param string $data
      * @return mixed
      */
-    abstract function enCode($data);
+    abstract function enCode(string $data);
 
     /**
      * 解码
@@ -27,5 +27,5 @@ abstract class Encoder
      * @param string $data
      * @return mixed
      */
-    abstract function deCode($data);
+    abstract function deCode(string $data);
 }

@@ -17,7 +17,7 @@ class ModelView extends CliView
      * @param array $data
      * @return bool|int
      */
-    function genClass($data = [])
+    function genClass(array $data = [])
     {
         Helper::createFolders($data['genPath']);
         $content = $this->obRenderTpl('model/class', $data);
@@ -45,7 +45,7 @@ class ModelView extends CliView
      * @param array $data
      * @return bool|int
      */
-    function genModelInfo($data = [])
+    function genModelInfo(array $data = [])
     {
         $content = $this->obRenderTpl('model/modelInfo', $data);
         $classAbsoluteFile = $data['genPath'] . $data['name'] . '.php';
@@ -58,7 +58,7 @@ class ModelView extends CliView
      * @param string $propertyFile
      * @return bool|int
      */
-    function makeModelFile($propertyFile)
+    function makeModelFile(string $propertyFile)
     {
         $content = $this->tpl('model/model.config', true, false);
         return $this->saveContent($propertyFile, $content);
@@ -84,7 +84,7 @@ class ModelView extends CliView
      *
      * @param array $data
      */
-    protected function makeModelFields($data): void
+    protected function makeModelFields(array $data): void
     {
         $i = 0;
         foreach ($data as $f => $info) {
@@ -164,11 +164,11 @@ class ModelView extends CliView
     protected function makeModelInfo(array $data): void
     {
         $i = 0;
-        foreach ($data as $mate_key => $mate_info) {
+        foreach ($data as $mateKey => $mateInfo) {
             if ($i != 0) {
-                echo '        \'' . $mate_key . '\' => [' . $this->fieldsConfig($mate_info) . '],' . PHP_EOL;
+                echo '        \'' . $mateKey . '\' => [' . $this->fieldsConfig($mateInfo) . '],' . PHP_EOL;
             } else {
-                echo '\'' . $mate_key . '\' => [' . $this->fieldsConfig($mate_info) . '],' . PHP_EOL;
+                echo '\'' . $mateKey . '\' => [' . $this->fieldsConfig($mateInfo) . '],' . PHP_EOL;
             }
             $i++;
         }

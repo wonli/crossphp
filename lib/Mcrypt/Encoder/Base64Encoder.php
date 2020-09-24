@@ -20,7 +20,7 @@ class Base64Encoder extends Encoder
      * @param string $data
      * @return string
      */
-    public function enCode($data)
+    public function enCode(string $data)
     {
         return str_replace(array('=', '/', '+'), array('', '-', '_'), base64_encode($data));
     }
@@ -31,7 +31,7 @@ class Base64Encoder extends Encoder
      * @param string $data
      * @return string
      */
-    public function deCode($data)
+    public function deCode(string $data)
     {
         return base64_decode(str_replace(array('-', '_'), array('/', '+'), $data));
     }

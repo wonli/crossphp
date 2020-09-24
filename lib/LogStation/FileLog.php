@@ -29,7 +29,7 @@ class FileLog extends LogBase
      * @param string $path
      * @throws Exception
      */
-    function __construct($path = '')
+    function __construct(string $path = '')
     {
         parent::__construct();
         if (!$path && defined('PROJECT_REAL_PATH')) {
@@ -56,14 +56,14 @@ class FileLog extends LogBase
     /**
      * 写入日志
      *
-     * @param string $logFileName
+     * @param string $fileName
      * @param mixed $log
      * @return bool|string
      */
-    function write($logFileName, $log = '')
+    function write(string $fileName, $log = '')
     {
-        $this->addToLog($logFileName, $log);
-        return $this->save($logFileName);
+        $this->addToLog($fileName, $log);
+        return $this->save($fileName);
     }
 
     /**
@@ -73,7 +73,7 @@ class FileLog extends LogBase
      * @param string $logName
      * @return string
      */
-    function exception(Exception $exception, $logName = 'exception')
+    function exception(Exception $exception, string $logName = 'exception')
     {
         $trace = explode("\n", $exception->getTraceAsString());
 
@@ -97,11 +97,11 @@ class FileLog extends LogBase
      * @param string $filePrefix LOG文件名前缀
      * @return bool|string
      */
-    function save($filePrefix = 'exception')
+    function save(string $filePrefix = 'exception')
     {
-        $log_id = self::genLogID();
+        $logId = self::genLogID();
         $space = str_pad('-', 28, '-');
-        $start = sprintf("%s ( %s - %s ) %s", $space, date('Y-m-d H:i:s'), $log_id, $space);
+        $start = sprintf("%s ( %s - %s ) %s", $space, date('Y-m-d H:i:s'), $logId, $space);
 
         //加入头部
         $content = $this->getLogContent(false);
@@ -119,7 +119,7 @@ class FileLog extends LogBase
         $logFile = $this->logPath . $filePrefix . '-' . date('d') . '.log';
         $ret = error_log($content, 3, $logFile);
         if ($ret) {
-            return $log_id;
+            return $logId;
         }
 
         return $ret;

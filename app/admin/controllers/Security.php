@@ -8,8 +8,8 @@ namespace app\admin\controllers;
 
 use app\admin\supervise\SecurityModule;
 
+use Cross\Exception\LogicStatusException;
 use Cross\Exception\CoreException;
-use Cross\Exception\FrontException;
 use ReflectionException;
 
 /**
@@ -52,43 +52,47 @@ class Security extends Admin
      * 密保卡
      *
      * @cp_params act=preview
-     * @throws CoreException|FrontException
+     * @throws CoreException
      */
     function securityCard()
     {
-        $act = &$this->params['act'];
-        switch ($act) {
-            case 'bind':
-                $actRet = $this->SEC->bindCard($this->u);
-                break;
+        try {
+            $act = &$this->params['act'];
+            switch ($act) {
+                case 'bind':
+                    $actRet = $this->SEC->bindCard($this->u);
+                    break;
 
-            case 'refresh':
-                $actRet = $this->SEC->updateCard($this->u);
-                break;
+                case 'refresh':
+                    $actRet = $this->SEC->updateCard($this->u);
+                    break;
 
-            case 'unbind':
-                $actRet = $this->SEC->unBind($this->u);
-                break;
+                case 'unbind':
+                    $actRet = $this->SEC->unBind($this->u);
+                    break;
 
-            case 'download':
-                $actRet = $this->SEC->makeSecurityCardImage($this->u);
-                break;
-        }
-
-        if (!empty($actRet)) {
-            $status = $actRet->getStatus();
-            if ($status != 1) {
-                $this->end($status);
-                return;
-            } else {
-                $this->to('security:securityCard');
-                return;
+                case 'download':
+                    $actRet = $this->SEC->makeSecurityCardImage($this->u);
+                    break;
             }
-        }
 
-        $data = $this->SEC->getSecurityData($this->u);
-        if (!empty($data) && $data[0] != -1) {
-            $this->data['card'] = $data[1];
+            if (!empty($actRet)) {
+                $status = $actRet->getStatus();
+                if ($status != 1) {
+                    $this->end($status);
+                    return;
+                } else {
+                    $this->to('security:securityCard');
+                    return;
+                }
+            }
+
+            $data = $this->SEC->getSecurityData($this->u);
+            if (!empty($data) && $data[0] != -1) {
+                $this->data['card'] = $data[1];
+            }
+        } catch (LogicStatusException $e) {
+            $this->data = $e->getResponseData();
         }
 
         $this->display($this->data);
@@ -98,7 +102,7 @@ class Security extends Admin
      * 更改密码
      *
      * @throws CoreException
-     * @throws FrontException
+     * @throws LogicStatusException
      */
     function changePassword()
     {
@@ -108,8 +112,8 @@ class Security extends Admin
                 $this->end(100220);
                 return;
             } else {
-                $is_right = $this->ADMIN->checkPassword($this->u, $postData['op']);
-                if ($is_right) {
+                $isRight = $this->ADMIN->checkPassword($this->u, $postData['op']);
+                if ($isRight) {
                     $this->ADMIN->updatePassword($this->u, $postData['np1']);
                 } else {
                     $this->end(100221);

@@ -33,7 +33,6 @@ class Main extends Controller
 
     /**
      * 设置layer
-     * @throws CoreException
      */
     function __construct()
     {
@@ -57,13 +56,13 @@ class Main extends Controller
         if ($this->isPost()) {
             $postData = $this->request->getPostData();
             if (isset($postData['user']) && isset($postData['pwd']) && isset($postData['v']) && isset($postData['vv'])) {
-                $check_ret = $this->ADMIN->checkAdmin($postData['user'], $postData['pwd'], $postData['v'], $postData['vv']);
-                if ($check_ret->getStatus() == 1) {
-                    $this->setAuth('u', $check_ret->getDataContent());
+                $checkRet = $this->ADMIN->checkAdmin($postData['user'], $postData['pwd'], $postData['v'], $postData['vv']);
+                if ($checkRet->getStatus() == 1) {
+                    $this->setAuth('u', $checkRet->getDataContent());
                     $this->to('panel');
                     return;
                 } else {
-                    $data['status'] = $check_ret->getStatus();
+                    $data['status'] = $checkRet->getStatus();
                 }
             } else {
                 $data['status'] = 100230;

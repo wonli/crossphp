@@ -14,17 +14,17 @@ class Result
     const DATA_FLUTTER = 'flutter';
     const DATA_JAVA = 'java';
 
-    public $reasone;
+    public $reason;
     public $code = 1;
 
     public $data = [];
 
     /**
-     * @param mixed $reasone
+     * @param mixed $reason
      */
-    public function setReasone($reasone)
+    public function setReason($reason)
     {
-        $this->reasone = $reasone;
+        $this->reason = $reason;
     }
 
     /**
@@ -44,7 +44,7 @@ class Result
     {
         return array(
             'code' => $this->code,
-            'reason' => $this->reasone,
+            'reason' => $this->reason,
             'data' => $this->data,
         );
     }

@@ -26,7 +26,7 @@ class AdminView extends View
     /**
      * @var array
      */
-    private $action_name;
+    private $actionName;
 
     /**
      * @var array
@@ -66,9 +66,9 @@ class AdminView extends View
      */
     function notice($code, $tpl = null)
     {
-        $code_text = $this->parseGetFile('config::status.config.php');
-        if (isset($code_text[$code])) {
-            $this->text($code_text[$code], $tpl);
+        $codeText = $this->parseGetFile('config::status.config.php');
+        if (isset($codeText[$code])) {
+            $this->text($codeText[$code], $tpl);
         } else {
             $this->text('未指明的错误识别码' . $code, $tpl);
         }
@@ -78,9 +78,9 @@ class AdminView extends View
      * 文本提示
      *
      * @param string $text
-     * @param string $tpl
+     * @param null $tpl
      */
-    function text($text, $tpl = null)
+    function text(string $text, $tpl = null)
     {
         if ($tpl === null) {
             $tpl = '<div style="background: #F0F8FF;padding:10px;">%s</div>';
@@ -111,19 +111,19 @@ class AdminView extends View
      * 设置所有菜单数据
      *
      * @param array $menu
-     * @param array $menu_icon
+     * @param array $menuIcon
      */
-    function setMenuData($menu, $menu_icon = [])
+    function setMenuData(array $menu, array $menuIcon = [])
     {
-        $action_name = &$this->action_name;
+        $actionName = &$this->actionName;
         foreach ($menu as $name => &$m) {
-            $menu_icon_config = &$menu_icon[$name];
-            if (is_array($menu_icon_config)) {
-                $icon = $menu_icon_config[0];
-                $child_menu_icon_config = $menu_icon_config[1];
+            $menuIconConfig = &$menuIcon[$name];
+            if (is_array($menuIconConfig)) {
+                $icon = $menuIconConfig[0];
+                $childMenuIconConfig = $menuIconConfig[1];
             } else {
-                $icon = $menu_icon_config;
-                $child_menu_icon_config = [];
+                $icon = $menuIconConfig;
+                $childMenuIconConfig = [];
             }
 
             $m['icon'] = $icon;
@@ -131,18 +131,18 @@ class AdminView extends View
             if (!empty($m['child_menu'])) {
                 foreach ($m['child_menu'] as $id => &$mc) {
                     $ca = strtolower($m['link'] . ':' . $mc['link']);
-                    $action_name[$ca] = $mc['link'];
+                    $actionName[$ca] = $mc['link'];
                     if ($mc['name']) {
-                        $action_name[$ca] = $mc['name'];
+                        $actionName[$ca] = $mc['name'];
                     }
 
-                    if (is_array($child_menu_icon_config)) {
-                        $mc_icon = &$child_menu_icon_config[$mc['link']];
+                    if (is_array($childMenuIconConfig)) {
+                        $mcIcon = &$childMenuIconConfig[$mc['link']];
                     } else {
-                        $mc_icon = &$child_menu_icon_config;
+                        $mcIcon = &$childMenuIconConfig;
                     }
 
-                    $mc['icon'] = $mc_icon;
+                    $mc['icon'] = $mcIcon;
                     if ($mc['display'] == 1) {
                         $m['child_menu_num']++;
                     } else {
@@ -160,16 +160,16 @@ class AdminView extends View
     /**
      * 生成导航菜单
      *
-     * @param string $controller_menu_name
-     * @param string $action_menu_name
+     * @param string $controllerMenuName
+     * @param string $actionMenuName
      * @throws CoreException
      */
-    function renderNavMenu(&$controller_menu_name = '', &$action_menu_name = '')
+    function renderNavMenu(string &$controllerMenuName = '', string &$actionMenuName = '')
     {
         $controller = lcfirst($this->controller);
         $ca = strtolower($controller . ':' . $this->action);
-        if (isset($this->action_name[$ca])) {
-            $action_menu_name = $this->action_name[$ca];
+        if (isset($this->actionName[$ca])) {
+            $actionMenuName = $this->actionName[$ca];
         }
 
         if (!empty($this->menus)) {
@@ -178,19 +178,19 @@ class AdminView extends View
                     continue;
                 }
 
-                $icon_name = 'fa fa-circle-o';
+                $iconName = 'fa fa-circle-o';
                 if (!empty($m['icon'])) {
-                    $icon_name = $m['icon'];
+                    $iconName = $m['icon'];
                 }
 
                 $class = '';
                 if (0 === strcasecmp($controller, $m['link'])) {
-                    $controller_menu_name = $m['name'];
+                    $controllerMenuName = $m['name'];
                     $class = 'active';
                 }
 
-                $child_node_num = &$m['child_menu_num'];
-                if ($child_node_num > 0) {
+                $childNodeNum = &$m['child_menu_num'];
+                if ($childNodeNum > 0) {
                     $class = "treeview {$class}";
                 }
 
@@ -202,7 +202,7 @@ class AdminView extends View
                     $target = '_blank';
                 }
 
-                $child_menu = array(
+                $childMenu = array(
                     'controller' => &$m['link'],
                     'current_controller' => $controller,
                     'child' => &$m['child_menu']
@@ -213,9 +213,9 @@ class AdminView extends View
                     'name' => $m['name'],
                     'class' => $class,
                     'target' => $target,
-                    'icon_name' => $icon_name,
-                    'child_menu' => &$child_menu,
-                    'child_node_num' => $child_node_num
+                    'icon_name' => $iconName,
+                    'child_menu' => &$childMenu,
+                    'child_node_num' => $childNodeNum
                 ));
             }
         }
@@ -228,15 +228,15 @@ class AdminView extends View
      * </pre>
      *
      * @param string $controller
-     * @param string $params
-     * @param string $link_text
-     * @param string $confirm_title
+     * @param array $params
+     * @param string $linkText
+     * @param string $confirmTitle
      * @throws CoreException
      */
-    function confirmUrl($controller, $params, $link_text, $confirm_title = '确定执行该操作吗?')
+    function confirmUrl(string $controller, array $params, string $linkText, string $confirmTitle = '确定执行该操作吗?')
     {
-        echo $this->a($link_text, 'javascript:void(0)', array(
-            'title' => $confirm_title,
+        echo $this->a($linkText, 'javascript:void(0)', array(
+            'title' => $confirmTitle,
             'class' => 'confirm-href-flag',
             'action' => $this->url($controller, $params)
         ));
@@ -260,13 +260,13 @@ class AdminView extends View
      * @param string $class
      * @param string $tpl
      */
-    function page(array $data, $class = 'pagination', $tpl = 'default')
+    function page(array $data, string $class = 'pagination', string $tpl = 'default')
     {
         $data['pagination_class'] = $class;
         if (!isset($data['link'])) {
             $params = [];
-            $current_controller = lcfirst($this->controller);
-            $controller = "{$current_controller}:{$this->action}";
+            $currentController = lcfirst($this->controller);
+            $controller = "{$currentController}:{$this->action}";
         } elseif (is_array($data['link']) && $data['link'][1]) {
             list($controller, $params) = $data['link'];
         } elseif (is_array($data['link'])) {

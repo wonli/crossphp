@@ -3,6 +3,7 @@
  * Class Tree
  * crossphp 优化返回数据
  */
+
 namespace lib\Tree;
 
 class Tree
@@ -12,49 +13,49 @@ class Tree
      *
      * @var array
      */
-    public $data = array();
+    public $data = [];
 
     /**
      * 父亲节点与孩子节点的关系映射
      *
      * @var array
      */
-    public $child = array(-1 => array());
+    public $child = [-1 => []];
 
     /**
      * 初始节点为0
      *
      * @var array
      */
-    public $layer = array(0 => 0);
+    public $layer = [0 => 0];
 
     /**
      * 非叶子节点的节点，也就是有孩子节点的节点
      *
      * @var array
      */
-    public $parent = array();
+    public $parent = [];
 
     /**
      * 子节点的名称
      *
      * @var string
      */
-    public $id_field = '';
+    public $idField = '';
 
     /**
      * 一般是分类名称
      *
      * @var string
      */
-    public $value_field = '';
+    public $valueField = '';
 
     /**
      * 父节点的名称
      *
      * @var string
      */
-    public $parent_field = '';
+    public $parentField = '';
 
     /**
      * 构造函数
@@ -70,17 +71,17 @@ class Tree
      * 构造树
      *
      * @param array $nodes 结点数组
-     * @param string $id_field
-     * @param string $parent_field
-     * @param string $value_field
+     * @param string $idField
+     * @param string $parentField
+     * @param string $valueField
      */
-    function setTree($nodes, $id_field, $parent_field, $value_field)
+    function setTree(array $nodes, string $idField, string $parentField, string $valueField)
     {
-        $this->value_field = $value_field;
-        $this->id_field = $id_field;
-        $this->parent_field = $parent_field;
+        $this->valueField = $valueField;
+        $this->idField = $idField;
+        $this->parentField = $parentField;
         foreach ($nodes as $node) {
-            $this->setNode($node[$this->id_field], $node[$this->parent_field], $node);
+            $this->setNode($node[$this->idField], $node[$this->parentField], $node);
         }
         $this->setLayer();
     }
@@ -96,7 +97,7 @@ class Tree
      */
     function getOptions($layer = 0, $root = 0, $except = null, $space = '&nbsp;&nbsp;')
     {
-        $options = array();
+        $options = [];
         $childs = $this->getChilds($root, $except);
         foreach ($childs as $id) {
             if ($id > 0 && ($layer <= 0 || $this->getLayer($id) <= $layer)) {
@@ -120,13 +121,13 @@ class Tree
 
         $this->data[$id] = $value;
         if (!isset($this->child[$id])) {
-            $this->child[$id] = array();
+            $this->child[$id] = [];
         }
 
         if (isset($this->child[$parent])) {
             $this->child[$parent][] = $id;
         } else {
-            $this->child[$parent] = array($id);
+            $this->child[$parent] = [$id];
         }
 
         $this->parent[$id] = $parent;
@@ -173,7 +174,7 @@ class Tree
      */
     private function getValue($id)
     {
-        return $this->data[$id][$this->value_field];
+        return $this->data[$id][$this->valueField];
     }
 
     /**
@@ -249,7 +250,7 @@ class Tree
      * <pre>
      * array(
      *     array('id' => '', 'value' => '', children => array(
-     *         array('id' => '', 'value' => '', children => array()),
+     *         array('id' => '', 'value' => '', children => []),
      *     ))
      * )
      * </pre>
@@ -261,20 +262,20 @@ class Tree
      */
     function getArrayList($root = 0, $layer = null, $clear = false)
     {
-        $data = array();
+        $data = [];
         foreach ($this->child[$root] as $id) {
             if ($layer && $this->layer[$this->parent[$id]] > $layer - 1) {
                 continue;
             }
 
             if (true === $clear) {
-                $data[] = array(
-                    $this->id_field => $id,
-                    $this->value_field => $this->getValue($id),
-                    'children' => $this->child[$id] ? $this->getArrayList($id, $layer) : array()
-                );
+                $data[] = [
+                    $this->idField => $id,
+                    $this->valueField => $this->getValue($id),
+                    'children' => $this->child[$id] ? $this->getArrayList($id, $layer) : []
+                ];
             } else {
-                $data[] = array_merge($this->data[$id], array('children' => $this->child[$id] ? $this->getArrayList($id, $layer) : array()));
+                $data[] = array_merge($this->data[$id], ['children' => $this->child[$id] ? $this->getArrayList($id, $layer) : []]);
             }
         }
 

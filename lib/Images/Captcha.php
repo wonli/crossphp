@@ -44,14 +44,14 @@ class Captcha
      *
      * @var array
      */
-    private $fontFamily = array();
+    private $fontFamily = [];
 
     /**
      * 设置背景色
      *
      * @var array
      */
-    private $backgroundColor = array();
+    private $backgroundColor = [];
 
     /**
      * 画多少个干扰点
@@ -220,7 +220,7 @@ class Captcha
     protected function getText()
     {
         if ($this->text) {
-            $texts = array();
+            $texts = [];
             $this->num = Helper::strLen($this->text);
             for ($i = 0; $i < $this->num; $i++) {
                 $texts[] = mb_substr($this->text, $i, 1, 'UTF-8');

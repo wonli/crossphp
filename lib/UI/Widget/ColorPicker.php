@@ -30,7 +30,7 @@ class ColorPicker extends Widget
      * @param array $b
      * @return mixed
      */
-    function widget($name, $value, $data, $params, $attributes, &$a = array(), &$b = array())
+    function widget(string $name, string $value, array $data, array $params, array $attributes, &$a = [], &$b = [])
     {
         $input = <<< INPUT_TPL
 <div class="form-group color-picker-flag" style="margin-bottom:0px;">

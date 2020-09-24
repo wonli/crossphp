@@ -16,8 +16,8 @@ namespace lib\LogStation;
  */
 class UdpLog extends LogBase
 {
-    protected $app_id;
-    protected $app_key;
+    protected $appId;
+    protected $appKey;
 
     protected $port = 9091;
     protected $timeout = null;
@@ -29,7 +29,7 @@ class UdpLog extends LogBase
     {
         parent::__construct();
         $this->setDefaultLogData('');
-        $fp = fsockopen("udp://{$this->station_server}", $this->port, $error_no, $error_string, $this->timeout);
+        $fp = fsockopen("udp://{$this->stationServer}", $this->port, $errorNo, $errorString, $this->timeout);
         if (!$fp) {
             return;
         }
@@ -40,11 +40,11 @@ class UdpLog extends LogBase
     /**
      * 写入日志
      *
-     * @param string|array $log
      * @param string $tag
+     * @param string|array $log
      * @return mixed|void
      */
-    function write($tag, $log = '')
+    function write(string $tag, $log = '')
     {
         $this->addToLog($tag, $log);
         $this->send($tag);
@@ -55,7 +55,7 @@ class UdpLog extends LogBase
      *
      * @param string $tag
      */
-    function send($tag)
+    function send(string $tag)
     {
         if (is_resource($this->fp)) {
             $content = $this->formatRemoteLog($tag, 'udp');
@@ -88,7 +88,7 @@ class UdpLog extends LogBase
      */
     private function getAppHeaderPack()
     {
-        $sign = $this->makeSign($this->app_id, $this->app_key);
-        return pack('a16a32', $this->app_id, $sign);
+        $sign = $this->makeSign($this->appId, $this->appKey);
+        return pack('a16a32', $this->appId, $sign);
     }
 }

@@ -16,8 +16,8 @@ namespace lib\LogStation;
  */
 class HttpLog extends LogBase
 {
-    protected $app_id;
-    protected $app_key;
+    protected $appId;
+    protected $appKey;
 
     protected $port = 9090;
     protected $timeout = null;
@@ -25,16 +25,16 @@ class HttpLog extends LogBase
     /**
      * LogStation constructor.
      *
-     * @param string $station_server
+     * @param string $stationServer
      * @param string $port
      * @param string|int $timeout
      */
-    function __construct($station_server = '', $port = '', $timeout = '')
+    function __construct($stationServer = '', $port = '', $timeout = '')
     {
         parent::__construct();
         $this->setDefaultLogData('');
-        if (!empty($station_server)) {
-            $this->station_server = $station_server;
+        if (!empty($stationServer)) {
+            $this->stationServer = $stationServer;
         }
 
         if (!empty($port)) {
@@ -45,7 +45,7 @@ class HttpLog extends LogBase
             $this->timeout = $timeout;
         }
 
-        $fp = @fsockopen($this->station_server, $this->port, $error_no, $error_string, $this->timeout);
+        $fp = @fsockopen($this->stationServer, $this->port, $errorNo, $errorString, $this->timeout);
         if (!$fp) {
             return;
         }
@@ -73,7 +73,7 @@ class HttpLog extends LogBase
     /**
      * 发送日志
      *
-     * @param string $tag
+     * @param mixed $tag
      */
     function send($tag)
     {
@@ -81,13 +81,13 @@ class HttpLog extends LogBase
             $log = parent::formatRemoteLog($tag, 'http');
             $logContent = json_encode($log);
             $contentLength = strlen($logContent);
-            $sign = $this->makeSign($this->app_id, $this->app_key);
+            $sign = $this->makeSign($this->appId, $this->appKey);
             $q = array(
                 'POST /write HTTP/1.1',
-                "Host: {$this->station_server}",
+                "Host: {$this->stationServer}",
                 "User-Agent: LogStation Client",
                 "Content-Length: {$contentLength}",
-                "App-Id: {$this->app_id}",
+                "App-Id: {$this->appId}",
                 "App-Sign: {$sign}",
                 "Connection: Close\r\n",
                 $logContent

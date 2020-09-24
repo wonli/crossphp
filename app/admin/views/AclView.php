@@ -110,19 +110,19 @@ class AclView extends AdminView
     /**
      * 输出管理员角色选择菜单
      *
-     * @param int $uid
-     * @param string $selected_value
+     * @param mixed $uid
+     * @param string $selectedValue
      */
-    protected function roleSelect($uid, $selected_value = '')
+    protected function roleSelect( $uid, $selectedValue = '')
     {
-        $role_data = &$this->data['roles'];
-        if (!empty($role_data)) {
-            $role_option = [];
-            array_walk($role_data, function ($r) use (&$role_option) {
-                $role_option[$r['id']] = $r['name'];
+        $roleData = &$this->data['roles'];
+        if (!empty($roleData)) {
+            $roleOption = [];
+            array_walk($roleData, function ($r) use (&$roleOption) {
+                $roleOption[$r['id']] = $r['name'];
             });
 
-            echo $this->select($role_option, $selected_value, array(
+            echo $this->select($roleOption, $selectedValue, array(
                 'class' => 'form-control',
                 'name' => "a[{$uid}][rid]",
             ));
@@ -132,10 +132,10 @@ class AclView extends AdminView
     /**
      * 输出帐号状态选择菜单
      *
-     * @param int $uid
-     * @param string $current_value
+     * @param mixed $uid
+     * @param string $currentValue
      */
-    protected function statusCheckbox($uid, $current_value = '')
+    protected function statusCheckbox($uid, $currentValue = '')
     {
         $boxData['data-on'] = '正常';
         $boxData['data-off'] = '禁用';
@@ -143,7 +143,7 @@ class AclView extends AdminView
         $boxData['data-onstyle'] = 'success';
         $boxData['data-offstyle'] = 'danger';
         $boxData['name'] = "a[{$uid}][t]";
-        if ($current_value == 1) {
+        if ($currentValue == 1) {
             $boxData['checked'] = true;
         }
 
@@ -153,10 +153,10 @@ class AclView extends AdminView
     /**
      * 生成解绑选择按钮
      *
-     * @param int $uid
-     * @param string $current_value
+     * @param mixed $uid
+     * @param string $currentValue
      */
-    protected function securityCheckbox($uid, $current_value = '')
+    protected function securityCheckbox($uid, $currentValue = '')
     {
         $boxData['data-on'] = '允许解绑';
         $boxData['data-off'] = '禁止解绑';
@@ -165,7 +165,7 @@ class AclView extends AdminView
         $boxData['data-offstyle'] = 'danger';
         $boxData['data-width'] = '90px';
         $boxData['name'] = "a[{$uid}][usc]";
-        if ($current_value == 1) {
+        if ($currentValue == 1) {
             $boxData['checked'] = true;
         }
 

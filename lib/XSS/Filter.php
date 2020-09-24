@@ -4,17 +4,17 @@ namespace lib\XSS;
 
 class Filter
 {
-    private $allowed_tags = array();
-    private $allowed_protocols = array();
+    private $allowedTags = [];
+    private $allowedProtocols = [];
 
     public function addAllowedProtocols($protocols)
     {
-        $this->allowed_protocols = (array)$protocols;
+        $this->allowedProtocols = (array)$protocols;
     }
 
     public function addAllowedTags($tags)
     {
-        $this->allowed_tags = (array)$tags;
+        $this->allowedTags = (array)$tags;
     }
 
     public function xss($string)
@@ -91,7 +91,7 @@ class Filter
             $elem = '!--';
         }
 
-        if (!in_array(strtolower($elem), $this->allowed_tags, true)) {
+        if (!in_array(strtolower($elem), $this->allowedTags, true)) {
             // Disallowed HTML element.
             return '';
         }
@@ -106,20 +106,20 @@ class Filter
 
         // Is there a closing XHTML slash at the end of the attributes?
         $attrlist = preg_replace('%(\s?)/\s*$%', '\1', $attrlist, -1, $count);
-        $xhtml_slash = $count ? ' /' : '';
+        $xhtmlSlash = $count ? ' /' : '';
 
         // Clean up attributes.
         $attr2 = implode(' ', $this->attributes($attrlist));
         $attr2 = preg_replace('/[<>]/', '', $attr2);
         $attr2 = strlen($attr2) ? ' ' . $attr2 : '';
 
-        return "<$elem$attr2$xhtml_slash>";
+        return "<$elem$attr2$xhtmlSlash>";
     }
 
     private function attributes($attr)
     {
 
-        $attrarr = array();
+        $attrarr = [];
         $mode = 0;
         $attrname = '';
 
@@ -253,7 +253,7 @@ class Filter
 
                 // Check if this is a disallowed protocol. Per RFC2616, section 3.2.3
                 // (URI Comparison) scheme comparison must be case-insensitive.
-                if (!in_array(strtolower($protocol), $this->allowed_protocols, true)) {
+                if (!in_array(strtolower($protocol), $this->allowedProtocols, true)) {
                     $uri = substr($uri, $colonpos + 1);
                 }
             }

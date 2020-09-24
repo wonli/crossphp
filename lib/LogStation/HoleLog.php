@@ -26,7 +26,7 @@ class HoleLog extends LogBase
      * @param mixed $data
      * @return $this
      */
-    function addToLog($tag, $data = array())
+    function addToLog(string $tag, $data = [])
     {
         return $this;
     }
@@ -36,9 +36,9 @@ class HoleLog extends LogBase
      *
      * @param string $tag
      */
-    function send($tag)
+    function send(string $tag)
     {
-        return;
+
     }
 
     /**
@@ -48,7 +48,7 @@ class HoleLog extends LogBase
      * @param mixed $log
      * @return mixed
      */
-    function write($e, $log = '')
+    function write(string $e, $log = '')
     {
         return;
     }
@@ -71,7 +71,7 @@ class HoleLog extends LogBase
      * @param string $logName
      * @return string
      */
-    function exception(Exception $exception, $logName = 'exception')
+    function exception(Exception $exception, string $logName = 'exception')
     {
         return;
     }

@@ -33,7 +33,7 @@ class Go extends Adapter
         $this->doGen($this->struct, $code);
 
         $f = '';
-        if(!empty($this->singleClass)) {
+        if (!empty($this->singleClass)) {
             foreach ($this->singleClass as $s) {
                 $f .= "\n" . $s;
             }
@@ -44,11 +44,11 @@ class Go extends Adapter
     }
 
     /**
-     * @param $data
+     * @param array $data
      * @param string $code
      * @param string $name
      */
-    protected function doGen($data, &$code = '', $name = 'Result')
+    protected function doGen(array $data, string &$code = '', string $name = 'Result')
     {
         $i = $j = 65;
         $json = [];
@@ -78,7 +78,7 @@ class Go extends Adapter
                     $token = "[]{$className}";
                 }
 
-                $json[] = $this->propertieToJson($pName, $n, $token);
+                $json[] = $this->propertiesToJson($pName, $n, $token);
 
                 $item = '';
                 $this->doGen($tree['segment'], $item, $className);
@@ -97,7 +97,7 @@ class Go extends Adapter
      * @param array $data
      * @return string
      */
-    function fromJsonBlock($class, $data)
+    function fromJsonBlock(string $class, array $data)
     {
         if (!empty($data)) {
             $a = '';
@@ -123,9 +123,9 @@ class Go extends Adapter
      * @param string $propertiesName
      * @return mixed
      */
-    function makeProperties($token, $propertiesName)
+    function makeProperties(string $token, string $propertiesName)
     {
-        return;
+
     }
 
     /**
@@ -134,7 +134,7 @@ class Go extends Adapter
      * @param string $token
      * @return mixed
      */
-    function propertieToJson($propertiesName, $name, $token = '')
+    function propertiesToJson(string $propertiesName, string $name, string $token = '')
     {
         $propertiesName = ucfirst($propertiesName);
         return "{$propertiesName} {$token} `json:\"{$name}\"`";
@@ -145,7 +145,7 @@ class Go extends Adapter
      * @param string $classBody
      * @return mixed
      */
-    function genClass($className, $classBody)
+    function genClass(string $className, string $classBody)
     {
         return "type {$className} struct {" . $classBody . "\n}\n";
     }

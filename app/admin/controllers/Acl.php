@@ -6,11 +6,13 @@
 
 namespace app\admin\controllers;
 
-use Cross\Exception\CoreException;
+use Cross\Exception\LogicStatusException;
 use Cross\Exception\FrontException;
+use Cross\Exception\CoreException;
 
 use app\admin\supervise\SecurityModule;
 use app\admin\supervise\AclModule;
+
 use ReflectionException;
 
 /**
@@ -70,13 +72,13 @@ class Acl extends Admin
 
             $this->returnReferer();
         } else {
-            $menu_list = $this->ACL->getMenuAllDate($id);
-            if (false === $menu_list) {
+            $menuList = $this->ACL->getMenuAllDate($id);
+            if (false === $menuList) {
                 $this->to('acl');
                 return;
             }
 
-            $this->data['menu_list'] = $menu_list;
+            $this->data['menu_list'] = $menuList;
         }
 
         $this->display($this->data);
@@ -104,11 +106,11 @@ class Acl extends Admin
             return;
         }
 
-        $un_save_menu = [];
+        $unSaveMenu = [];
         $this->ACL->initMenuList();
 
-        $this->data['menu'] = $this->ACL->getNavList($un_save_menu);
-        $this->data['un_save_menu'] = $un_save_menu;
+        $this->data['menu'] = $this->ACL->getNavList($unSaveMenu);
+        $this->data['un_save_menu'] = $unSaveMenu;
 
         $this->display($this->data);
     }
@@ -138,16 +140,16 @@ class Acl extends Admin
      *
      * @throws CoreException
      * @throws ReflectionException
-     * @throws FrontException
+     * @throws LogicStatusException
      */
     function addRole()
     {
-        $menu_list = $this->ACL->initMenuList();
+        $menuList = $this->ACL->initMenuList();
         if ($this->isPost()) {
             $postData = $this->request->getPostData();
             if (!empty($postData['name']) && !empty($postData['menu_id'])) {
-                $menu_set = $postData ['menu_id'];
-                $ret = $this->ACL->saveRoleMenu($postData['name'], $menu_set);
+                $menuSet = $postData ['menu_id'];
+                $ret = $this->ACL->saveRoleMenu($postData['name'], $menuSet);
 
                 if ($ret->getStatus() == 1) {
                     $this->to('acl:roleList');
@@ -162,7 +164,7 @@ class Acl extends Admin
             }
         }
 
-        $this->data['menu_list'] = $menu_list;
+        $this->data['menu_list'] = $menuList;
         $this->display($this->data);
     }
 
@@ -201,8 +203,8 @@ class Acl extends Admin
         }
 
         $rid = (int)$this->params['rid'];
-        $role_info = $this->ACL->getRoleInfo(['id' => $rid]);
-        if (empty($role_info)) {
+        $roleInfo = $this->ACL->getRoleInfo(['id' => $rid]);
+        if (empty($roleInfo)) {
             $this->to('acl');
             return;
         }
@@ -214,9 +216,9 @@ class Acl extends Admin
             return;
         }
 
-        $menu_list = $this->ACL->initMenuList();
-        $this->data['role_info'] = $role_info;
-        $this->data['menu_list'] = $menu_list;
+        $menuList = $this->ACL->initMenuList();
+        $this->data['role_info'] = $roleInfo;
+        $this->data['menu_list'] = $menuList;
 
         $this->display($this->data);
     }
@@ -229,11 +231,11 @@ class Acl extends Admin
      */
     function delRole()
     {
-        $is_ajax = $this->isAjax();
-        $rid = $is_ajax ? (int)$this->request->getGetData()['rid'] : (int)$this->params['rid'];
+        $isAjax = $this->isAjax();
+        $rid = $isAjax ? (int)$this->request->getGetData()['rid'] : (int)$this->params['rid'];
 
         $ret = $this->ACL->delRole($rid);
-        if ($is_ajax) {
+        if ($isAjax) {
             echo (int)$ret;
         } else {
             $this->to('acl:roleList');

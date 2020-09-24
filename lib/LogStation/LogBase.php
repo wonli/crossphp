@@ -42,7 +42,7 @@ abstract class LogBase implements ILog
      *
      * @var string
      */
-    protected $station_server = '212.129.138.182';
+    protected $stationServer = '212.129.138.182';
 
     /**
      * 合并日志分隔符
@@ -56,7 +56,7 @@ abstract class LogBase implements ILog
      *
      * @var array
      */
-    private $stack = array();
+    private $stack = [];
 
     function __construct()
     {
@@ -70,7 +70,7 @@ abstract class LogBase implements ILog
      * @param mixed $log
      * @return mixed
      */
-    abstract function write($e, $log = '');
+    abstract function write(string $e, $log = '');
 
     /**
      * 格式化日志输出
@@ -78,7 +78,7 @@ abstract class LogBase implements ILog
      * @param string $format
      * @param mixed ...$args
      */
-    function writef($format, ...$args)
+    function writef(string $format, ...$args)
     {
         $msg = sprintf($format, ...$args);
         $this->write($msg);
@@ -91,7 +91,7 @@ abstract class LogBase implements ILog
      * @param mixed $data
      * @return $this
      */
-    function addToLog($tag, $data = array())
+    function addToLog(string $tag, $data = [])
     {
         if (!is_array($data)) {
             $data = array($data);
@@ -102,14 +102,13 @@ abstract class LogBase implements ILog
     }
 
     /**
-     * @see addToLog
-     *
      * @param string $tag
      * @param string $format
      * @param mixed ...$args
      * @return $this
+     * @see addToLog
      */
-    function addToLogf($tag, $format, ...$args)
+    function addToLogf(string $tag, string $format, ...$args)
     {
         $data = sprintf($format, ...$args);
         return $this->addToLog($tag, [$data]);
@@ -121,7 +120,7 @@ abstract class LogBase implements ILog
      * @param string $data
      * @return $this
      */
-    function setDefaultLogData($data = 'GPCSE')
+    function setDefaultLogData(string $data = 'GPCSE')
     {
         $this->defaultLogData = $data;
         return $this;
@@ -135,7 +134,7 @@ abstract class LogBase implements ILog
      */
     function getLogContent($string = true)
     {
-        $content = array();
+        $content = [];
         if ($this->defaultLogData) {
             $tokens = str_split($this->defaultLogData);
             $allowToken = array('G' => true, 'P' => true, 'C' => true, 'S' => true, 'E' => true);
@@ -152,7 +151,7 @@ abstract class LogBase implements ILog
                             $content[] = self::prettyArray('cookies', $_COOKIE);
                             break;
                         case 'S':
-                            $session = array();
+                            $session = [];
                             if (isset($_SESSION)) {
                                 $session = &$_SESSION;
                             }
@@ -186,7 +185,7 @@ abstract class LogBase implements ILog
      * @param string $type
      * @return array
      */
-    protected function formatRemoteLog($tag, $type = 'udp')
+    protected function formatRemoteLog(string $tag, string $type = 'udp')
     {
         $content = $this->getLogContent(false);
         if (!empty($content)) {
@@ -198,24 +197,24 @@ abstract class LogBase implements ILog
             $content = '';
         }
 
-        return array(
+        return [
             'type' => $type,
             'name' => $tag,
             'content' => $content,
             'time' => date('Y-m-d H:i:s'),
-        );
+        ];
     }
 
     /**
      * 用于远程日志验证的签名
      *
-     * @param string $app_id
-     * @param string $app_key
+     * @param string $appId
+     * @param string $appKey
      * @return string
      */
-    protected function makeSign($app_id, $app_key)
+    protected function makeSign(string $appId, string $appKey)
     {
-        return md5($app_id . $app_key);
+        return md5($appId . $appKey);
     }
 
     /**
@@ -226,7 +225,7 @@ abstract class LogBase implements ILog
      * @param int $i
      * @return string
      */
-    static function prettyArray($tag, array $data, $i = 2)
+    static function prettyArray(string $tag, array $data, $i = 2)
     {
         $space = '';
         if (0 === strcasecmp(static::$lineSeparator, PHP_EOL)) {

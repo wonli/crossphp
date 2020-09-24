@@ -18,9 +18,9 @@ class HexEncoder extends Encoder
      * 加密
      *
      * @param string $data
-     * @return array
+     * @return string
      */
-    public function enCode($data)
+    public function enCode(string $data)
     {
         return bin2hex($data);
     }
@@ -31,7 +31,7 @@ class HexEncoder extends Encoder
      * @param string $data
      * @return string
      */
-    public function deCode($data)
+    public function deCode(string $data)
     {
         return hex2bin($data);
     }

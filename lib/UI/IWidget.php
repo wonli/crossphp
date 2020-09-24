@@ -34,7 +34,7 @@ interface IWidget
      * @param string $js
      * @return mixed
      */
-    function addJs($js);
+    function addJs(string $js);
 
     /**
      * 添加CSS
@@ -42,7 +42,7 @@ interface IWidget
      * @param string $css
      * @return mixed
      */
-    function addCss($css);
+    function addCss(string $css);
 
     /**
      * 输出HTML代码
@@ -56,7 +56,7 @@ interface IWidget
      * @param array $b
      * @return mixed
      */
-    function widget($name, $value, $data, $params, $attributes, &$a = array(), &$b = array());
+    function widget(string $name, string $value, array $data, array $params, array $attributes, array &$a = [], array &$b = []);
 
     /**
      * 初始化控件, 所需要的JS调用放在次数执行

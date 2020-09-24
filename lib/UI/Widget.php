@@ -19,12 +19,12 @@ abstract class Widget implements IWidget
     /**
      * @var array
      */
-    protected $js = array();
+    protected $js = [];
 
     /**
      * @var array
      */
-    protected $css = array();
+    protected $css = [];
 
     /**
      * @var View
@@ -57,7 +57,7 @@ abstract class Widget implements IWidget
      * @param string $js
      * @return mixed|void
      */
-    function addJs($js)
+    function addJs(string $js)
     {
         $this->js[] = $js;
     }
@@ -68,7 +68,7 @@ abstract class Widget implements IWidget
      * @param string $css
      * @return mixed|void
      */
-    function addCss($css)
+    function addCss(string $css)
     {
         $this->css[] = $css;
     }
@@ -105,7 +105,7 @@ abstract class Widget implements IWidget
      * @param array $b
      * @return mixed
      */
-    abstract function widget($name, $value, $data, $params, $attributes, &$a = array(), &$b = array());
+    abstract function widget(string $name, string $value, array $data, array $params, array $attributes, array &$a = [], array &$b = []);
 
     /**
      * 初始化控件

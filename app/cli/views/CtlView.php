@@ -20,7 +20,7 @@ class CtlView extends CliView
      * @param string $propertyFile
      * @return bool|int
      */
-    function makeModelFile($propertyFile)
+    function makeModelFile(string $propertyFile)
     {
         $content = $this->tpl('ctl/ctl.config', true, false);
         return file_put_contents($propertyFile, $content);
@@ -33,7 +33,7 @@ class CtlView extends CliView
      * @param array $config
      * @return bool|int
      */
-    function makeController($dest, $config)
+    function makeController(string $dest, array $config)
     {
         $data = array(
             'app' => $config['app'],
@@ -57,7 +57,7 @@ class CtlView extends CliView
      * @param array $config
      * @return bool|int
      */
-    function makeViewController($dest, $config)
+    function makeViewController(string $dest, array $config)
     {
         $data = array(
             'app' => $config['app'],
@@ -85,7 +85,7 @@ class CtlView extends CliView
      * @param array $config
      * @return bool|int
      */
-    function makeTpl($dest, $config)
+    function makeTpl(string $dest, array $config)
     {
         $data = array(
             'path' => $dest,
@@ -103,7 +103,7 @@ class CtlView extends CliView
      * @param string $filename
      * @return string
      */
-    protected function makeFileAnnotate($author, $filename)
+    protected function makeFileAnnotate(string $author, string $filename)
     {
         $content = array(
             '<?php',
@@ -123,7 +123,7 @@ class CtlView extends CliView
      * @param string $namespace
      * @return string
      */
-    protected function makeClassAnnotate($name, $namespace)
+    protected function makeClassAnnotate(string $name, string $namespace)
     {
         $content = array(
             '/**',
@@ -160,7 +160,7 @@ class CtlView extends CliView
      * @param string $tplName
      * @return string
      */
-    protected function makeActionBody($tplName)
+    protected function makeActionBody(string $tplName)
     {
         if (!empty($tplName)) {
             return $this->makeLines(array(

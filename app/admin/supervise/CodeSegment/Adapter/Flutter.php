@@ -33,7 +33,7 @@ class Flutter extends Adapter
         $this->doGen($this->struct, $code);
 
         $f = '';
-        if(!empty($this->singleClass)) {
+        if (!empty($this->singleClass)) {
             foreach ($this->singleClass as $s) {
                 $f .= "\n" . $s;
             }
@@ -44,11 +44,11 @@ class Flutter extends Adapter
     }
 
     /**
-     * @param $data
+     * @param array $data
      * @param string $code
      * @param string $name
      */
-    protected function doGen($data, &$code = '', $name = 'Result')
+    protected function doGen(array $data, string &$code = '', string $name = 'Result')
     {
         $i = $j = 65;
         $json = [];
@@ -81,7 +81,7 @@ class Flutter extends Adapter
                 }
 
                 $code .= '    ' . $p . "\n";
-                $json[] = $this->propertieToJson($pName, $n);
+                $json[] = $this->propertiesToJson($pName, $n);
 
                 $item = '';
                 $this->doGen($tree['segment'], $item, $className);
@@ -100,7 +100,7 @@ class Flutter extends Adapter
      * @param array $data
      * @return string
      */
-    function fromJsonBlock($class, $data)
+    function fromJsonBlock(string $class, array $data)
     {
         if (!empty($data)) {
             $a = '';
@@ -127,7 +127,7 @@ class Flutter extends Adapter
      * @param string $propertiesName
      * @return mixed
      */
-    function makeProperties($token, $propertiesName)
+    function makeProperties(string $token, string $propertiesName)
     {
         return "final {$token} {$propertiesName};";
     }
@@ -138,7 +138,7 @@ class Flutter extends Adapter
      * @param string $token
      * @return mixed
      */
-    function propertieToJson($propertiesName, $name, $token = '')
+    function propertiesToJson(string $propertiesName, string $name, $token = '')
     {
         return "{$propertiesName} = json['{$name}'],";
     }
@@ -148,7 +148,7 @@ class Flutter extends Adapter
      * @param string $classBody
      * @return mixed
      */
-    function genClass($className, $classBody)
+    function genClass(string $className, string $classBody)
     {
         return "class {$className} {\n" . $classBody . "\n}\n";
     }

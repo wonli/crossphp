@@ -35,38 +35,43 @@ class ImageThumb
      *
      * @var string
      */
-    protected $save_dir;
+    protected $saveDir;
 
     /**
      * 原文件路径
      *
      * @var string
      */
-    protected $src_images;
+    protected $srcImages;
 
     /**
      * 缩略图文件名
      *
      * @var string
      */
-    protected $thumb_image_name;
+    protected $thumbImageName;
 
-    function __construct($src_images)
+    /**
+     * ImageThumb constructor.
+     * 
+     * @param $srcImages
+     */
+    function __construct($srcImages)
     {
-        $this->src_images = $src_images;
+        $this->srcImages = $srcImages;
     }
 
     /**
      * 设置文件路径和文件名
      *
      * @param $dir
-     * @param $thumb_image_name
+     * @param $thumbImageName
      * @return $this
      */
-    function setFile($dir, $thumb_image_name)
+    function setFile($dir, $thumbImageName)
     {
-        $this->save_dir = $dir;
-        $this->thumb_image_name = $thumb_image_name;
+        $this->saveDir = $dir;
+        $this->thumbImageName = $thumbImageName;
 
         return $this;
     }
@@ -94,22 +99,20 @@ class ImageThumb
      */
     protected function getImageInfo($images)
     {
-        $image_info = getimagesize($images);
-        if (false !== $image_info) {
-            $image_ext = strtolower(image_type_to_extension($image_info[2]));
-            $image_type = substr($image_ext, 1);
-            $image_size = filesize($images);
+        $imageInfo = getimagesize($images);
+        if (false !== $imageInfo) {
+            $imageExt = strtolower(image_type_to_extension($imageInfo[2]));
+            $imageType = substr($imageExt, 1);
+            $imageSize = filesize($images);
 
-            $info = array(
-                'width' => $image_info[0],
-                'height' => $image_info[1],
-                'ext' => $image_ext,
-                'file_type' => $image_type,
-                'size' => $image_size,
-                'mime' => $image_info['mime'],
-            );
-
-            return $info;
+            return [
+                'width' => $imageInfo[0],
+                'height' => $imageInfo[1],
+                'ext' => $imageExt,
+                'file_type' => $imageType,
+                'size' => $imageSize,
+                'mime' => $imageInfo['mime']
+            ];
         } else {
             return false;
         }
@@ -119,87 +122,87 @@ class ImageThumb
      * 生成缩略图
      *
      * @param bool $interlace
-     * @param bool $return_full_path
+     * @param bool $returnFullPath
      * @param int $quality
      * @return bool|string
      * @throws CoreException
      */
-    function thumb($interlace = true, $return_full_path = false, $quality = 100)
+    function thumb($interlace = true, $returnFullPath = false, $quality = 100)
     {
-        if (!$this->save_dir || !$this->src_images) {
+        if (!$this->saveDir || !$this->srcImages) {
             throw new CoreException('请设置文件路径和文件名');
         }
 
         // 获取原图信息
-        $info = $this->getImageInfo($this->src_images);
+        $info = $this->getImageInfo($this->srcImages);
         if (!$info) {
             return false;
         }
 
-        $src_width = &$info['width'];
-        $src_height = &$info['height'];
+        $srcWidth = &$info['width'];
+        $srcHeight = &$info['height'];
         $type = strtolower($info['file_type']);
-        $file_ext = strtolower($info['ext']);
-        $thumb_file_name = $this->thumb_image_name . $file_ext;
+        $fileExt = strtolower($info['ext']);
+        $thumbFileName = $this->thumbImageName . $fileExt;
         unset($info);
 
         $x = 0;
         $height = $this->height;
-        $width = floor($src_width * ($this->height / $src_height));
+        $width = floor($srcWidth * ($this->height / $srcHeight));
         if ($width > $this->width) {
             $x = floor(($this->width - $width) / 2);
         }
 
         //载入原图
-        $src_images = $this->createImage($this->src_images, $type);
+        $srcImages = $this->createImage($this->srcImages, $type);
 
         //创建缩略图
         if ($type != 'gif' && function_exists('imagecreatetruecolor')) {
-            $thumb_images = imagecreatetruecolor($this->width, $this->height);
+            $thumbImages = imagecreatetruecolor($this->width, $this->height);
         } else {
-            $thumb_images = imagecreate($this->width, $this->height);
+            $thumbImages = imagecreate($this->width, $this->height);
         }
 
         if ('gif' == $type) {
-            $background_color = imagecolorallocate($thumb_images, 0, 0, 0);
-            imagecolortransparent($thumb_images, $background_color);
+            $backgroundColor = imagecolorallocate($thumbImages, 0, 0, 0);
+            imagecolortransparent($thumbImages, $backgroundColor);
         } elseif ('png' == $type) {
-            imagealphablending($thumb_images, false);
-            imagesavealpha($thumb_images, true);
+            imagealphablending($thumbImages, false);
+            imagesavealpha($thumbImages, true);
         } else {
-            imageinterlace($thumb_images, (int)$interlace);
+            imageinterlace($thumbImages, (int)$interlace);
         }
 
         //复制图片
         if (function_exists('imagecopyresampled')) {
-            imagecopyresampled($thumb_images, $src_images, $x, 0, 0, 0, $width, $height, $src_width, $src_height);
+            imagecopyresampled($thumbImages, $srcImages, $x, 0, 0, 0, $width, $height, $srcWidth, $srcHeight);
         } else {
-            imagecopyresized($thumb_images, $src_images, $x, 0, 0, 0, $width, $height, $src_width, $src_height);
+            imagecopyresized($thumbImages, $srcImages, $x, 0, 0, 0, $width, $height, $srcWidth, $srcHeight);
         }
 
         //返回缩略图的路径，字符串
-        $save_path = $this->save_dir . $thumb_file_name;
-        $this->saveImage($thumb_images, $save_path, $type, $quality);
-        imagedestroy($thumb_images);
-        imagedestroy($src_images);
+        $savePath = $this->saveDir . $thumbFileName;
+        $this->saveImage($thumbImages, $savePath, $type, $quality);
+        imagedestroy($thumbImages);
+        imagedestroy($srcImages);
 
-        if ($return_full_path) {
-            return $save_path;
+        if ($returnFullPath) {
+            return $savePath;
         }
 
-        return $thumb_file_name;
+        return $thumbFileName;
     }
 
     /**
      * 创建图片
      *
      * @param $image
-     * @param $image_type
+     * @param $imageType
      * @return resource
      */
-    protected function createImage($image, $image_type)
+    protected function createImage($image, $imageType)
     {
-        switch ($image_type) {
+        switch ($imageType) {
             case 'jpg':
             case 'jpeg':
             case 'pjpeg':
@@ -230,30 +233,30 @@ class ImageThumb
      * 存储图片
      *
      * @param $resource
-     * @param $save_path
-     * @param $image_type
+     * @param $savePath
+     * @param $imageType
      * @param int $quality
      * @return bool
      */
-    protected function saveImage($resource, $save_path, $image_type, $quality = 100)
+    protected function saveImage($resource, $savePath, $imageType, $quality = 100)
     {
-        switch ($image_type) {
+        switch ($imageType) {
             case 'jpg':
             case 'jpeg':
             case 'pjpeg':
-                $ret = imagejpeg($resource, $save_path, $quality);
+                $ret = imagejpeg($resource, $savePath, $quality);
                 break;
 
             case 'gif':
-                $ret = imagegif($resource, $save_path);
+                $ret = imagegif($resource, $savePath);
                 break;
 
             case 'png':
-                $ret = imagepng($resource, $save_path);
+                $ret = imagepng($resource, $savePath);
                 break;
 
             default:
-                $ret = imagegd2($resource, $save_path);
+                $ret = imagegd2($resource, $savePath);
                 break;
         }
 

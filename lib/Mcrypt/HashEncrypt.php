@@ -59,9 +59,9 @@ class HashEncrypt
      *
      * @param string $algorithm
      * @return $this
-     * @throws \Cross\Exception\CoreException
+     * @throws CoreException
      */
-    function setAlgorithm($algorithm)
+    function setAlgorithm(string $algorithm)
     {
         if(! in_array($algorithm, hash_algos())) {
             throw new CoreException("不支持的加密算法");

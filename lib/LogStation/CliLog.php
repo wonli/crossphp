@@ -39,7 +39,7 @@ class CliLog extends LogBase
      * @param mixed $log
      * @return mixed
      */
-    function write($e, $log = '')
+    function write(string $e, $log = '')
     {
         $this->addToLog($e, $log);
         $log = $this->getLogContent();

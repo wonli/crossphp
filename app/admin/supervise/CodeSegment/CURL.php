@@ -175,11 +175,11 @@ class CURL
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, $header); //避免data数据过长
         $result = curl_exec($ch);
-        $error_no = curl_errno($ch);
-        if (!$error_no) {
+        $errorNo = curl_errno($ch);
+        if (!$errorNo) {
             $result = trim($result);
         } else {
-            $result = $error_no;
+            $result = $errorNo;
         }
 
         curl_close($ch);

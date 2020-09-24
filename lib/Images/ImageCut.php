@@ -1,4 +1,5 @@
 <?php
+
 namespace lib\Images;
 
 use Exception;
@@ -38,51 +39,56 @@ class ImageCut
      *
      * @var string
      */
-    protected $src_images;
+    protected $srcImages;
 
     /**
      * 图片保存路径
      *
      * @var string
      */
-    protected $save_path;
+    protected $savePath;
 
     /**
      * 图片保存名
      *
      * @var string
      */
-    protected $save_name;
+    protected $saveName;
 
     /**
      * 原始图片信息
      *
      * @var array|bool
      */
-    protected $images_info;
+    protected $imagesInfo;
 
     /**
      * @var int
      */
-    private $resize_width;
+    private $resizeWidth;
 
     /**
      * @var int
      */
-    private $resize_height;
+    private $resizeHeight;
 
-    function __construct($src_images)
+    /**
+     * ImageCut constructor.
+     *
+     * @param $srcImages
+     */
+    function __construct($srcImages)
     {
-        $this->src_images = $src_images;
-        $this->images_info = $this->getImageInfo($src_images);
-        $this->type = $this->images_info['file_type'];
+        $this->srcImages = $srcImages;
+        $this->imagesInfo = $this->getImageInfo($srcImages);
+        $this->type = $this->imagesInfo['file_type'];
 
         //初始化图象
         $this->createImageResource();
 
         //目标图象地址
-        $this->width = $this->images_info['width'];
-        $this->height = $this->images_info['height'];
+        $this->width = $this->imagesInfo['width'];
+        $this->height = $this->imagesInfo['height'];
     }
 
     /**
@@ -94,8 +100,8 @@ class ImageCut
      */
     function setSaveInfo($path, $name)
     {
-        $this->save_path = $path;
-        $this->save_name = $name;
+        $this->savePath = $path;
+        $this->saveName = $name;
 
         return $this;
     }
@@ -109,8 +115,8 @@ class ImageCut
      */
     function setCutSize($width, $height)
     {
-        $this->resize_width = $width;
-        $this->resize_height = $height;
+        $this->resizeWidth = $width;
+        $this->resizeHeight = $height;
 
         return $this;
     }
@@ -119,11 +125,11 @@ class ImageCut
      * 剪切图象
      *
      * @param $coordinate
-     * @param bool $return_path
+     * @param bool $returnPath
      * @return string
      * @throws Exception
      */
-    function cut($coordinate, $return_path = false)
+    function cut($coordinate, $returnPath = false)
     {
         if (!isset($coordinate['x']) || !isset($coordinate['y']) ||
             !isset($coordinate['w']) || !isset($coordinate['h'])
@@ -131,53 +137,53 @@ class ImageCut
             throw new Exception('请设置剪切坐标x, y, w, h');
         }
 
-        $save_path = $this->getSavePath();
+        $savePath = $this->getSavePath();
 
         //改变后的图象的比例
-        if (!empty($this->resize_height)) {
-            $resize_ratio = ($this->width) / ($this->height);
+        if (!empty($this->resizeHeight)) {
+            $resizeRatio = ($this->width) / ($this->height);
         } else {
-            $resize_ratio = 0;
+            $resizeRatio = 0;
         }
 
         //实际图象的比例
         $ratio = ($this->width) / ($this->height);
 
-        if ($ratio >= $resize_ratio) //高度优先
+        if ($ratio >= $resizeRatio) //高度优先
         {
-            $thumb_images_width = $this->height * $resize_ratio;
-            $thumb_images_height = $this->height;
+            $thumbImagesWidth = $this->height * $resizeRatio;
+            $thumbImagesHeight = $this->height;
         } else {
-            $thumb_images_width = $this->width;
-            $thumb_images_height = $this->width / $resize_ratio;
+            $thumbImagesWidth = $this->width;
+            $thumbImagesHeight = $this->width / $resizeRatio;
         }
 
         //创建缩略图
-        if ($this->images_info['file_type'] != 'gif' && function_exists('imagecreatetruecolor')) {
-            $thumb_images = imagecreatetruecolor($this->width, $this->height);
+        if ($this->imagesInfo['file_type'] != 'gif' && function_exists('imagecreatetruecolor')) {
+            $thumbImages = imagecreatetruecolor($this->width, $this->height);
         } else {
-            $thumb_images = imagecreate($this->width, $this->height);
+            $thumbImages = imagecreate($this->width, $this->height);
         }
 
         imagecopyresampled(
-            $thumb_images,
+            $thumbImages,
             $this->im,
             0,
             0,
             $coordinate['x'],
             $coordinate['y'],
-            $thumb_images_width,
-            $thumb_images_height,
+            $thumbImagesWidth,
+            $thumbImagesHeight,
             $coordinate['w'],
             $coordinate['h']
         );
 
-        $this->saveImage($thumb_images, $save_path, $this->images_info['file_type'], 100);
-        if (true === $return_path) {
-            return $save_path;
+        $this->saveImage($thumbImages, $savePath, $this->imagesInfo['file_type'], 100);
+        if (true === $returnPath) {
+            return $savePath;
         }
 
-        return $this->save_name;
+        return $this->saveName;
     }
 
     /**
@@ -188,22 +194,20 @@ class ImageCut
      */
     protected function getImageInfo($images)
     {
-        $image_info = getimagesize($images);
-        if (false !== $image_info) {
-            $image_ext = strtolower(image_type_to_extension($image_info[2]));
-            $image_type = substr($image_ext, 1);
-            $image_size = filesize($images);
+        $imageInfo = getimagesize($images);
+        if (false !== $imageInfo) {
+            $imageExt = strtolower(image_type_to_extension($imageInfo[2]));
+            $imageType = substr($imageExt, 1);
+            $imageSize = filesize($images);
 
-            $info = array(
-                'width' => $image_info[0],
-                'height' => $image_info[1],
-                'ext' => $image_ext,
-                'file_type' => $image_type,
-                'size' => $image_size,
-                'mime' => $image_info['mime'],
-            );
-
-            return $info;
+            return [
+                'width' => $imageInfo[0],
+                'height' => $imageInfo[1],
+                'ext' => $imageExt,
+                'file_type' => $imageType,
+                'size' => $imageSize,
+                'mime' => $imageInfo['mime'],
+            ];
         } else {
             return false;
         }
@@ -218,23 +222,23 @@ class ImageCut
             case 'jpg':
             case 'jpeg':
             case 'pjpeg':
-                $this->im = imagecreatefromjpeg($this->src_images);
+                $this->im = imagecreatefromjpeg($this->srcImages);
                 break;
 
             case 'gif':
-                $this->im = imagecreatefromgif($this->src_images);
+                $this->im = imagecreatefromgif($this->srcImages);
                 break;
 
             case 'png':
-                $this->im = imagecreatefrompng($this->src_images);
+                $this->im = imagecreatefrompng($this->srcImages);
                 break;
 
             case 'bmp':
-                $this->im = imagecreatefromwbmp($this->src_images);
+                $this->im = imagecreatefromwbmp($this->srcImages);
                 break;
 
             default:
-                $this->im = imagecreatefromgd2($this->src_images);
+                $this->im = imagecreatefromgd2($this->srcImages);
                 break;
         }
     }
@@ -243,30 +247,30 @@ class ImageCut
      * 存储图片
      *
      * @param $resource
-     * @param $save_path
-     * @param $image_type
+     * @param $savePath
+     * @param $imageType
      * @param int $quality
      * @return bool
      */
-    protected function saveImage($resource, $save_path, $image_type, $quality = 100)
+    protected function saveImage($resource, $savePath, $imageType, $quality = 100)
     {
-        switch ($image_type) {
+        switch ($imageType) {
             case 'jpg':
             case 'jpeg':
             case 'pjpeg':
-                $ret = imagejpeg($resource, $save_path, $quality);
+                $ret = imagejpeg($resource, $savePath, $quality);
                 break;
 
             case 'gif':
-                $ret = imagegif($resource, $save_path);
+                $ret = imagegif($resource, $savePath);
                 break;
 
             case 'png':
-                $ret = imagepng($resource, $save_path);
+                $ret = imagepng($resource, $savePath);
                 break;
 
             default:
-                $ret = imagegd2($resource, $save_path);
+                $ret = imagegd2($resource, $savePath);
                 break;
         }
 
@@ -276,8 +280,8 @@ class ImageCut
     /**
      * 图象目标地址
      *
-     * @throws Exception
      * @return string
+     * @throws Exception
      */
     protected function getSavePath()
     {
@@ -291,7 +295,7 @@ class ImageCut
             throw new Exception('请设置路径');
         }
 
-        return $path . $name . $this->images_info['ext'];
+        return $path . $name . $this->imagesInfo['ext'];
     }
 
     /**
@@ -301,7 +305,7 @@ class ImageCut
      */
     private function getSaveName()
     {
-        return $this->save_name;
+        return $this->saveName;
     }
 
     /**
@@ -311,6 +315,6 @@ class ImageCut
      */
     private function getSaveDir()
     {
-        return $this->save_path;
+        return $this->savePath;
     }
 }

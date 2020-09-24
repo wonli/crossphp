@@ -2,6 +2,7 @@
 /**
  * @author wonli <wonli@live.com>
  */
+
 namespace app\admin\views;
 
 /**
@@ -12,13 +13,14 @@ namespace app\admin\views;
  */
 class MainView extends AdminView
 {
-    function __construct() {
+    function __construct()
+    {
         parent::__construct();
 
         //设置布局
-        $this->set(array(
-            'layer' =>  'login'
-        ));
+        $this->set([
+            'layer' => 'login'
+        ]);
     }
 
     /**

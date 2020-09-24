@@ -74,25 +74,25 @@ class Doc extends Admin
     }
 
     /**
-     * @param $doc_id
+     * @param $docId
      * @param $args
      * @throws CoreException|DBConnectException
      */
-    function __call($doc_id, $args)
+    function __call($docId, $args)
     {
-        $data = $this->ADM->get((int)$doc_id);
+        $data = $this->ADM->get((int)$docId);
         if (empty($data)) {
             $this->to('doc:setting');
             return;
         }
 
         $servers = &$data['servers'];
-        $userData = $this->ADM->getAllUserData($this->u, $doc_id);
+        $userData = $this->ADM->getAllUserData($this->u, $docId);
         $userServerID = &$userData['host']['sid'];
         $currentServerID = 0;
 
         $this->data['doc'] = $data;
-        $this->data['doc_id'] = $doc_id;
+        $this->data['doc_id'] = $docId;
         $this->data['user_data'] = $userData;
         $this->data['current_sid'] = $currentServerID;
 
@@ -119,7 +119,7 @@ class Doc extends Admin
             $this->data['api_host'] = $apiServer['api_addr'];
 
             //更新文档数据
-            $updateStatus = $this->getInitApiData($doc_id, $apiServer['api_addr'], $data['doc_token']);
+            $updateStatus = $this->getInitApiData($docId, $apiServer['api_addr'], $data['doc_token']);
             if ($updateStatus->getStatus() != 1) {
                 $data = array_merge($this->data, $updateStatus->getData());
                 $this->display($data, 'index');
@@ -127,7 +127,7 @@ class Doc extends Admin
             }
 
             $docCategory = [];
-            $docData = (new ApiDocData())->getAll(['doc_id' => $doc_id], 'id, group_key, group_name, api_path, api_name, api_method, enable_mock');
+            $docData = (new ApiDocData())->getAll(['doc_id' => $docId], 'id, group_key, group_name, api_path, api_name, api_method, enable_mock');
             if (!empty($docData)) {
                 foreach ($docData as $d) {
                     $docCategory[$d['group_key']]['group_key'] = $d['group_key'];
@@ -247,7 +247,7 @@ class Doc extends Admin
     /**
      * 发起curl请求
      *
-     * @param string $apiId
+     * @param mixed $apiId
      * @param array $params
      * @param array $serverInfo
      * @return array|mixed
@@ -318,9 +318,9 @@ class Doc extends Admin
     function generator()
     {
         $data = [];
-        $show_input = true;
+        $showInput = true;
         if ($this->isPost()) {
-            $show_input = false;
+            $showInput = false;
             $postData = $this->delegate->getRequest()->getPostData();
             $json = &$postData['json'];
             if (!empty($json)) {
@@ -332,7 +332,7 @@ class Doc extends Admin
         }
 
         $this->data['data'] = $data;
-        $this->data['show_input'] = $show_input;
+        $this->data['show_input'] = $showInput;
         $this->display($this->data);
     }
 
@@ -344,14 +344,14 @@ class Doc extends Admin
      */
     function changeApiServer()
     {
-        $doc_id = (int)$this->params['doc_id'];
-        if (!$doc_id) {
+        $docId = (int)$this->params['doc_id'];
+        if (!$docId) {
             $this->to('doc:setting');
             return;
         }
 
         $sid = (int)$this->params['sid'];
-        $docInfo = $this->ADM->get($doc_id);
+        $docInfo = $this->ADM->get($docId);
         $servers = &$docInfo['servers'];
         if (!isset($servers[$sid])) {
             $this->to('doc:setting');
@@ -359,9 +359,9 @@ class Doc extends Admin
         }
 
         $valueData = array('sid' => $sid);
-        $data = $this->ADM->getUserData($this->u, $doc_id, ApiDocModule::KEY_HOST);
+        $data = $this->ADM->getUserData($this->u, $docId, ApiDocModule::KEY_HOST);
         if ($data == false) {
-            $this->ADM->addUserData($this->u, $doc_id, ApiDocModule::KEY_HOST, $valueData);
+            $this->ADM->addUserData($this->u, $docId, ApiDocModule::KEY_HOST, $valueData);
         } else {
             $this->ADM->updateUserData($data['id'], [
                 'value' => json_encode($valueData)
@@ -380,8 +380,8 @@ class Doc extends Admin
      */
     function saveCommonParams()
     {
-        $doc_id = (int)$this->params['doc_id'];
-        if (!$doc_id) {
+        $docId = (int)$this->params['doc_id'];
+        if (!$docId) {
             $this->to('doc:setting');
             return;
         }
@@ -393,9 +393,9 @@ class Doc extends Admin
                     case ApiDocModule::KEY_HEADERPARAMS:
                     case ApiDocModule::KEY_GLOBALPARAMS:
                         if (!empty($v)) {
-                            $data = $this->ADM->getUserData($this->u, $doc_id, $k);
+                            $data = $this->ADM->getUserData($this->u, $docId, $k);
                             if ($data == false) {
-                                $this->ADM->addUserData($this->u, $doc_id, $k, $v);
+                                $this->ADM->addUserData($this->u, $docId, $k, $v);
                             } else {
                                 $this->ADM->updateUserData($data['id'], array(
                                     'value' => json_encode($v)
@@ -408,7 +408,7 @@ class Doc extends Admin
         }
 
         $hash = &$postData['hash'];
-        $url = $this->view->url("doc:{$doc_id}");
+        $url = $this->view->url("doc:{$docId}");
         if ($hash) {
             $url .= '#!' . $hash;
         }
@@ -500,26 +500,26 @@ class Doc extends Admin
                 }
             }
 
-            $global_params = [];
+            $globalParams = [];
             $global = $postData['global'];
             if (!empty($global)) {
                 foreach ($global as $g) {
                     $key = trim($g['key']);
                     $name = trim($g['name']);
                     if (!empty($key)) {
-                        $global_params[$key] = !empty($name) ? $name : $key;
+                        $globalParams[$key] = !empty($name) ? $name : $key;
                     }
                 }
             }
 
-            $header_params = [];
+            $headerParams = [];
             $header = $postData['header'];
             if (!empty($header)) {
                 foreach ($header as $g) {
                     $key = trim($g['key']);
                     $name = trim($g['name']);
                     if (!empty($key)) {
-                        $header_params[$key] = !empty($name) ? $name : $key;
+                        $headerParams[$key] = !empty($name) ? $name : $key;
                     }
                 }
             }
@@ -527,8 +527,8 @@ class Doc extends Admin
             $saveData = [
                 'name' => $siteName,
                 'servers' => json_encode($servers, JSON_UNESCAPED_UNICODE),
-                'global_params' => json_encode($global_params, JSON_UNESCAPED_UNICODE),
-                'header_params' => json_encode($header_params, JSON_UNESCAPED_UNICODE),
+                'global_params' => json_encode($globalParams, JSON_UNESCAPED_UNICODE),
+                'header_params' => json_encode($headerParams, JSON_UNESCAPED_UNICODE),
                 'doc_token' => $docToken,
                 'last_update_admin' => $this->u,
             ];

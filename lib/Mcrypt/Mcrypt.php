@@ -55,8 +55,8 @@ class Mcrypt
     function __construct($method = 'AES-256-CBC')
     {
         if ($method != $this->method) {
-            $cipher_methods = openssl_get_cipher_methods(true);
-            if (in_array($method, $cipher_methods)) {
+            $cipherMethods = openssl_get_cipher_methods(true);
+            if (in_array($method, $cipherMethods)) {
                 $this->method = $method;
             }
         }
@@ -70,7 +70,7 @@ class Mcrypt
      * @param string $data
      * @return string
      */
-    public function encrypt($data)
+    public function encrypt(string $data)
     {
         $key = $this->getKey();
         $iv = openssl_random_pseudo_bytes($this->ivLength);
@@ -119,7 +119,7 @@ class Mcrypt
      *
      * @param bool $useEncoder
      */
-    function setUseEncoder($useEncoder)
+    function setUseEncoder(bool $useEncoder)
     {
         $this->useEncoder = $useEncoder;
     }

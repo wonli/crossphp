@@ -46,7 +46,7 @@ abstract class Adapter
      * @param string $propertiesName
      * @return mixed
      */
-    abstract function makeProperties($token, $propertiesName);
+    abstract function makeProperties(string $token, string $propertiesName);
 
     /**
      * 类成员属性对应的JSON代码
@@ -56,7 +56,7 @@ abstract class Adapter
      * @param string $token
      * @return mixed
      */
-    abstract function propertieToJson($propertiesName, $name, $token = '');
+    abstract function propertiesToJson(string $propertiesName, string $name, string $token = '');
 
     /**
      * 类模版
@@ -65,7 +65,7 @@ abstract class Adapter
      * @param string $classBody
      * @return mixed
      */
-    abstract function genClass($className, $classBody);
+    abstract function genClass(string $className, string $classBody);
 
     /**
      * 字段类型
@@ -80,7 +80,7 @@ abstract class Adapter
      * @param array $struct
      * @param array $result
      */
-    protected function gen1(array $struct, &$result)
+    protected function gen1(array $struct, array &$result)
     {
         $tokens = $this->getTokens();
         if (empty($tokens)) {
@@ -112,7 +112,7 @@ abstract class Adapter
                 //属性使用小驼峰命名法
                 $camelName = $this->toCamelCase($name);
                 $properties = $this->makeProperties($token, $camelName);
-                $json = $this->propertieToJson($camelName, $name, $token);
+                $json = $this->propertiesToJson($camelName, $name, $token);
 
                 $result[$name] = array(
                     'type' => 'properties',
@@ -132,7 +132,7 @@ abstract class Adapter
      * @param string $type
      * @return string
      */
-    protected function toCamelCase($name, $type = 'camel')
+    protected function toCamelCase(string $name, string $type = 'camel')
     {
         $result = '';
         $strLen = strlen($name);

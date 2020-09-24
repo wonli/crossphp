@@ -30,7 +30,7 @@ class ApiDocModule extends AdminModule
      * @return mixed
      * @throws CoreException
      */
-    function get($id)
+    function get(int $id)
     {
         $data = $this->link->get($this->t_api_doc, '*', [
             'id' => $id,
@@ -75,11 +75,11 @@ class ApiDocModule extends AdminModule
      * 更新
      *
      * @param int $id
-     * @param array $data
+     * @param mixed $data
      * @return bool
      * @throws CoreException
      */
-    function update($id, $data)
+    function update(int $id, $data)
     {
         return $this->link->update($this->t_api_doc, $data, [
             'id' => (int)$id,
@@ -127,7 +127,7 @@ class ApiDocModule extends AdminModule
      * @param int $id
      * @throws CoreException
      */
-    function del($id)
+    function del(int $id)
     {
         $data = $this->link->get($this->t_api_doc, '*', [
             'id' => $id,
@@ -153,16 +153,16 @@ class ApiDocModule extends AdminModule
      * 获取用户所有设置
      *
      * @param string $u
-     * @param int $doc_id
+     * @param int $docId
      * @return mixed
      * @throws CoreException
      */
-    function getAllUserData($u, $doc_id)
+    function getAllUserData(string $u, int $docId)
     {
         $result = [];
         $data = $this->link->getAll($this->t_api_doc_user, '*', [
             'u' => $u,
-            'doc_id' => $doc_id,
+            'doc_id' => $docId,
         ]);
 
         if (!empty($data)) {
@@ -179,16 +179,16 @@ class ApiDocModule extends AdminModule
      * 获取用户数据
      *
      * @param string $u
-     * @param int $doc_id
+     * @param int $docId
      * @param string $name
      * @return bool|array
      * @throws CoreException
      */
-    function getUserData($u, $doc_id, $name)
+    function getUserData(string $u, int $docId, string $name)
     {
         $data = $this->link->get($this->t_api_doc_user, '*', [
             'u' => $u,
-            'doc_id' => $doc_id,
+            'doc_id' => $docId,
             'name' => $name,
         ]);
 
@@ -203,17 +203,17 @@ class ApiDocModule extends AdminModule
      * 添加用户数据
      *
      * @param string $u
-     * @param int $doc_id
+     * @param int $docId
      * @param string $name
      * @param array $value
      * @return bool|mixed
      * @throws CoreException
      */
-    function addUserData($u, $doc_id, $name, array $value)
+    function addUserData(string $u, int $docId, string $name, array $value)
     {
         $data = [
             'u' => $u,
-            'doc_id' => $doc_id,
+            'doc_id' => $docId,
             'name' => $name,
             'value' => json_encode($value),
         ];
@@ -224,23 +224,23 @@ class ApiDocModule extends AdminModule
     /**
      * 缓存接口结构
      *
-     * @param int $doc_id
-     * @param string $api_path
-     * @param array $struct_data
+     * @param int $docId
+     * @param string $apiPath
+     * @param array $structData
      * @return bool|mixed
      * @throws CoreException
      */
-    function saveCache($doc_id, $api_path, array $struct_data)
+    function saveCache(int $docId, string $apiPath, array $structData)
     {
-        $api_path = '/' . ltrim($api_path, '/');
+        $apiPath = '/' . ltrim($apiPath, '/');
         $cacheInfo = $this->link->get($this->t_api_doc_data, 'cache_id', [
-            'doc_id' => $doc_id,
-            'api_path' => $api_path,
+            'doc_id' => $docId,
+            'api_path' => $apiPath,
         ]);
 
-        $data['doc_id'] = $doc_id;
-        $data['api_path'] = $api_path;
-        $data['api_response'] = json_encode($struct_data);
+        $data['doc_id'] = $docId;
+        $data['api_path'] = $apiPath;
+        $data['api_response'] = json_encode($structData);
         $data['cache_at'] = TIME;
         if (!empty($cacheInfo)) {
             return $this->link->update($this->t_api_doc_data, $data, [
@@ -254,14 +254,14 @@ class ApiDocModule extends AdminModule
     /**
      * 返回文档接口所有缓存数据
      *
-     * @param int $doc_id
+     * @param int $docId
      * @return array
      * @throws CoreException
      */
-    function getCacheData($doc_id)
+    function getCacheData(int $docId)
     {
         return $this->link->select('api_path, api_response')
-            ->from($this->t_api_doc_data)->where(['doc_id' => $doc_id])
+            ->from($this->t_api_doc_data)->where(['doc_id' => $docId])
             ->stmt()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_KEY_PAIR);
     }
 
@@ -273,10 +273,10 @@ class ApiDocModule extends AdminModule
      * @return bool
      * @throws CoreException
      */
-    function updateUserData($id, array $data)
+    function updateUserData(int $id, array $data)
     {
         return $this->link->update($this->t_api_doc_user, $data, [
-            'id' => (int)$id
+            'id' => $id
         ]);
     }
 
@@ -286,7 +286,7 @@ class ApiDocModule extends AdminModule
      * @param string $name
      * @return string
      */
-    function getCacheFilePathFromCacheName($name)
+    function getCacheFilePathFromCacheName(string $name)
     {
         $file = $this->getCachePath() . DIRECTORY_SEPARATOR . $name . '.yaml';
         if (file_exists($file)) {

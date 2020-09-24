@@ -24,17 +24,17 @@ abstract class UI
     /**
      * @var array
      */
-    private $js = array();
+    private $js = [];
 
     /**
      * @var array
      */
-    private $css = array();
+    private $css = [];
 
     /**
      * @var Widget[]
      */
-    protected $widget = array();
+    protected $widget = [];
 
     /**
      * 控件使用标识
@@ -42,14 +42,14 @@ abstract class UI
      *
      * @var array
      */
-    protected $usedWidget = array();
+    protected $usedWidget = [];
 
     /**
      * 控件属性
      *
      * @var array
      */
-    protected $widgetAttributes = array();
+    protected $widgetAttributes = [];
 
     /**
      * 空间默认class
@@ -68,7 +68,7 @@ abstract class UI
      *
      * @var array
      */
-    protected $widgetRuntimeConfig = array();
+    protected $widgetRuntimeConfig = [];
 
     /**
      * @return mixed
@@ -101,7 +101,7 @@ abstract class UI
      * @param array $attributes
      * @return UI
      */
-    function registerWidget($name, Widget $widget, $attributes = array())
+    function registerWidget(string $name, Widget $widget, $attributes = [])
     {
         $this->widget[$name] = $widget;
         $this->js = array_merge($this->js, $widget->getJs());
@@ -123,7 +123,7 @@ abstract class UI
      * @param array $params 运行时参数
      * @return $this
      */
-    function useWidget($name, $params = array())
+    function useWidget(string $name, $params = [])
     {
         $this->widgetRuntimeConfig[$this->widgetKey] = array(
             'name' => $name,
@@ -154,7 +154,7 @@ abstract class UI
      * @param string $widget
      * @param array $attributes 属性列表
      */
-    function setAttributes($widget, array $attributes = array())
+    function setAttributes(string $widget, array $attributes = [])
     {
         if (isset($this->widgetAttributes[$widget])) {
             $this->widgetAttributes[$widget] = array_merge($this->widgetAttributes[$widget], $attributes);
@@ -176,7 +176,7 @@ abstract class UI
      * @return mixed
      * @throws CoreException
      */
-    protected function makeWidgetContent($key, $value, $token, $rowData, $inputName = '', &$a = array(), &$b = array())
+    protected function makeWidgetContent(string $key, string $value, $token, array $rowData, string $inputName = '', &$a = [], &$b = [])
     {
         $widgetConfig = &$this->widgetRuntimeConfig[$key];
         if (!empty($widgetConfig['name'])) {
@@ -197,12 +197,12 @@ abstract class UI
                 'class' => $this->widgetDefaultClass
             ));
         } else {
-            $params = array();
+            $params = [];
             if (!empty($widgetConfig['params'])) {
                 $params = &$widgetConfig['params'];
             }
 
-            $attributes = array();
+            $attributes = [];
             if (isset($this->widgetAttributes[$widgetName])) {
                 $attributes = $this->widgetAttributes[$widgetName];
             }
@@ -233,7 +233,7 @@ abstract class UI
                 case 'time':
                 case 'date':
                     $format = 'Y-m-d H:i:s';
-                    $custom_params = array();
+                    $custom_params = [];
                     if (!empty($params)) {
                         if (is_array($params)) {
                             list($format, $custom_params) = $params;
@@ -263,7 +263,7 @@ abstract class UI
                     $options = '';
                     if (!empty($params)) {
                         foreach ($params as $v => $text) {
-                            $option_attributes = array();
+                            $option_attributes = [];
                             $option_attributes['value'] = $v;
                             $option_attributes['@content'] = $text;
                             if ($value == $v) {
