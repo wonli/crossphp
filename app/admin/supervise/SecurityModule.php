@@ -60,7 +60,7 @@ class SecurityModule extends AdminModule
                 'bind_user' => $bindUser,
             );
 
-            $cardId = $this->link->add($this->t_security_card, $data);
+            $cardId = $this->link->add($this->tSecurityCard, $data);
             if (false !== $cardId) {
                 return $this->responseData(1);
             }
@@ -82,7 +82,7 @@ class SecurityModule extends AdminModule
         $isBind = $this->checkBind($bindUser);
 
         if ($isBind) {
-            $status = $this->link->update($this->t_security_card, ['card_data' => $cardData], ['bind_user' => $bindUser]);
+            $status = $this->link->update($this->tSecurityCard, ['card_data' => $cardData], ['bind_user' => $bindUser]);
             if ($status !== false) {
                 return $this->responseData(1);
             } else {
@@ -113,7 +113,7 @@ class SecurityModule extends AdminModule
                 }
             }
 
-            $delStatus = $this->link->del($this->t_security_card, array('bind_user' => $bindUser));
+            $delStatus = $this->link->del($this->tSecurityCard, array('bind_user' => $bindUser));
             if ($delStatus) {
                 return $this->responseData(1);
             } else {
@@ -133,7 +133,7 @@ class SecurityModule extends AdminModule
      */
     public function checkBind(string $bindUser)
     {
-        $id = $this->link->get($this->t_security_card, 'id', ['bind_user' => $bindUser]);
+        $id = $this->link->get($this->tSecurityCard, 'id', ['bind_user' => $bindUser]);
         if (!empty($id)) {
             return true;
         } else {
@@ -278,7 +278,7 @@ class SecurityModule extends AdminModule
         $isBind = $this->checkBind($bindUser);
 
         if ($isBind) {
-            $data = $this->link->get($this->t_security_card, '*', array('bind_user' => $bindUser));
+            $data = $this->link->get($this->tSecurityCard, '*', array('bind_user' => $bindUser));
             return [$data['ext_time'], json_decode($data['card_data'], true)];
         }
 
@@ -293,7 +293,7 @@ class SecurityModule extends AdminModule
      */
     function createTable()
     {
-        $table = $this->getPrefix($this->t_security_card);
+        $table = $this->getPrefix($this->tSecurityCard);
         $createSql = "CREATE TABLE `{$table}` (
             `id` INT(11) NOT NULL AUTO_INCREMENT,
             `card_data` TEXT NOT NULL COLLATE 'utf8_unicode_ci',

@@ -40,7 +40,7 @@ class AdminUserModule extends AdminModule
     {
         $SEC = new SecurityModule;
         try {
-            $userInfo = $this->link->get($this->t_admin, '*', ['name' => $username]);
+            $userInfo = $this->link->get($this->tAdmin, '*', ['name' => $username]);
         } catch (Exception $e) {
             return $this->responseData(100100);
         }
@@ -100,7 +100,7 @@ class AdminUserModule extends AdminModule
      */
     function getAdminUserList(array &$page = ['p' => 1, 'limit' => 10])
     {
-        return $this->link->find("{$this->t_admin} a LEFT JOIN {$this->t_security_card} s ON a.name=s.bind_user",
+        return $this->link->find("{$this->tAdmin} a LEFT JOIN {$this->tSecurityCard} s ON a.name=s.bind_user",
             'a.*, s.id bind_id', ['a.rid' => ['>', 0]], $page);
     }
 
@@ -118,14 +118,14 @@ class AdminUserModule extends AdminModule
             return $this->responseData(100410);
         }
 
-        $ai = $this->link->get($this->t_admin, '*', ['name' => $data['name']]);
+        $ai = $this->link->get($this->tAdmin, '*', ['name' => $data['name']]);
         if ($ai) {
             return $this->responseData(100411);
         }
 
         $data['last_login_ip'] = '';
         $data['password'] = self::genPassword($data['password'], $data['salt']);
-        $id = $this->link->add($this->t_admin, $data);
+        $id = $this->link->add($this->tAdmin, $data);
         if ($id) {
             return $this->responseData(1, ['id' => $id]);
         }
@@ -142,7 +142,7 @@ class AdminUserModule extends AdminModule
      */
     function getAdminInfo($condition)
     {
-        return $this->link->get($this->t_admin, '*', $condition);
+        return $this->link->get($this->tAdmin, '*', $condition);
     }
 
     /**
@@ -154,7 +154,7 @@ class AdminUserModule extends AdminModule
      */
     function del(array $condition): ResponseData
     {
-        $ret = $this->link->del($this->t_admin, $condition);
+        $ret = $this->link->del($this->tAdmin, $condition);
         if ($ret) {
             return $this->responseData(1);
         }
@@ -174,14 +174,14 @@ class AdminUserModule extends AdminModule
     function update(int $id, array $data): ResponseData
     {
         unset($data['id']);
-        $adminInfo = $this->link->get($this->t_admin, '*', ['id' => $id]);
+        $adminInfo = $this->link->get($this->tAdmin, '*', ['id' => $id]);
         if (!$adminInfo) {
             return $this->responseData(100400);
         }
 
         //更新用户名
         if (isset($data['name'])) {
-            $nameUser = $this->link->get($this->t_admin, '*', ['name' => $data['name']]);
+            $nameUser = $this->link->get($this->tAdmin, '*', ['name' => $data['name']]);
             if (!empty($nameUser) && $nameUser['id'] != $id) {
                 return $this->responseData(100420);
             }
@@ -192,7 +192,7 @@ class AdminUserModule extends AdminModule
             $data ['password'] = self::genPassword($data['password'], $data['salt']);
         }
 
-        $ret = $this->link->update($this->t_admin, $data, ['id' => $id]);
+        $ret = $this->link->update($this->tAdmin, $data, ['id' => $id]);
         if ($ret !== false) {
             return $this->responseData(1);
         }
@@ -229,16 +229,16 @@ class AdminUserModule extends AdminModule
             'ip' => $this->request->getClientIPAddress()
         ];
 
-        $actInfo = $this->link->get($this->t_act_log, 'count(id) has, min(id) del_act_id', [
+        $actInfo = $this->link->get($this->tActLog, 'count(id) has, min(id) del_act_id', [
             'name' => $name,
             'type' => $type
         ]);
 
         if ($actInfo['has'] >= self::MAX_ACT_LOG) {
-            $this->link->del($this->t_act_log, ['id' => $actInfo['del_act_id']]);
+            $this->link->del($this->tActLog, ['id' => $actInfo['del_act_id']]);
         }
 
-        $this->link->add($this->t_act_log, $data);
+        $this->link->add($this->tActLog, $data);
     }
 
     /**
@@ -252,7 +252,7 @@ class AdminUserModule extends AdminModule
      */
     function checkPassword(string $name, string $pwd)
     {
-        $adminInfo = $this->link->get($this->t_admin, '*', ['name' => $name]);
+        $adminInfo = $this->link->get($this->tAdmin, '*', ['name' => $name]);
         return $adminInfo ['password'] === self::genPassword($pwd, $adminInfo['salt']);
     }
 
@@ -273,7 +273,7 @@ class AdminUserModule extends AdminModule
             'salt' => $salt
         ];
 
-        $status = $this->link->update($this->t_admin, $data, ['name' => $name]);
+        $status = $this->link->update($this->tAdmin, $data, ['name' => $name]);
         if ($status !== false) {
             return $this->responseData(1);
         }

@@ -32,7 +32,7 @@ class ApiDocModule extends AdminModule
      */
     function get(int $id)
     {
-        $data = $this->link->get($this->t_api_doc, '*', [
+        $data = $this->link->get($this->tApiDoc, '*', [
             'id' => $id,
         ]);
 
@@ -68,7 +68,7 @@ class ApiDocModule extends AdminModule
      */
     function add($data = [])
     {
-        return $this->link->add($this->t_api_doc, $data);
+        return $this->link->add($this->tApiDoc, $data);
     }
 
     /**
@@ -81,7 +81,7 @@ class ApiDocModule extends AdminModule
      */
     function update(int $id, $data)
     {
-        return $this->link->update($this->t_api_doc, $data, [
+        return $this->link->update($this->tApiDoc, $data, [
             'id' => (int)$id,
         ]);
     }
@@ -93,7 +93,7 @@ class ApiDocModule extends AdminModule
      */
     function getAll()
     {
-        $data = $this->link->getAll($this->t_api_doc, '*');
+        $data = $this->link->getAll($this->tApiDoc, '*');
         if (!empty($data)) {
             array_walk($data, function (&$d) {
                 $servers = &$d['servers'];
@@ -129,16 +129,16 @@ class ApiDocModule extends AdminModule
      */
     function del(int $id)
     {
-        $data = $this->link->get($this->t_api_doc, '*', [
+        $data = $this->link->get($this->tApiDoc, '*', [
             'id' => $id,
         ]);
 
         if (!empty($data)) {
-            $this->link->del($this->t_api_doc, [
+            $this->link->del($this->tApiDoc, [
                 'id' => $id
             ]);
 
-            $this->link->del($this->t_api_doc_user, [
+            $this->link->del($this->tApiDocUser, [
                 'doc_id' => $id
             ]);
 
@@ -160,7 +160,7 @@ class ApiDocModule extends AdminModule
     function getAllUserData(string $u, int $docId)
     {
         $result = [];
-        $data = $this->link->getAll($this->t_api_doc_user, '*', [
+        $data = $this->link->getAll($this->tApiDocUser, '*', [
             'u' => $u,
             'doc_id' => $docId,
         ]);
@@ -186,7 +186,7 @@ class ApiDocModule extends AdminModule
      */
     function getUserData(string $u, int $docId, string $name)
     {
-        $data = $this->link->get($this->t_api_doc_user, '*', [
+        $data = $this->link->get($this->tApiDocUser, '*', [
             'u' => $u,
             'doc_id' => $docId,
             'name' => $name,
@@ -218,7 +218,7 @@ class ApiDocModule extends AdminModule
             'value' => json_encode($value),
         ];
 
-        return $this->link->add($this->t_api_doc_user, $data);
+        return $this->link->add($this->tApiDocUser, $data);
     }
 
     /**
@@ -233,7 +233,7 @@ class ApiDocModule extends AdminModule
     function saveCache(int $docId, string $apiPath, array $structData)
     {
         $apiPath = '/' . ltrim($apiPath, '/');
-        $cacheInfo = $this->link->get($this->t_api_doc_data, 'cache_id', [
+        $cacheInfo = $this->link->get($this->tApiDocData, 'cache_id', [
             'doc_id' => $docId,
             'api_path' => $apiPath,
         ]);
@@ -243,11 +243,11 @@ class ApiDocModule extends AdminModule
         $data['api_response'] = json_encode($structData);
         $data['cache_at'] = TIME;
         if (!empty($cacheInfo)) {
-            return $this->link->update($this->t_api_doc_data, $data, [
+            return $this->link->update($this->tApiDocData, $data, [
                 'cache_id' => $cacheInfo['cache_id']
             ]);
         } else {
-            return $this->link->add($this->t_api_doc_data, $data);
+            return $this->link->add($this->tApiDocData, $data);
         }
     }
 
@@ -261,7 +261,7 @@ class ApiDocModule extends AdminModule
     function getCacheData(int $docId)
     {
         return $this->link->select('api_path, api_response')
-            ->from($this->t_api_doc_data)->where(['doc_id' => $docId])
+            ->from($this->tApiDocData)->where(['doc_id' => $docId])
             ->stmt()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_KEY_PAIR);
     }
 
@@ -275,7 +275,7 @@ class ApiDocModule extends AdminModule
      */
     function updateUserData(int $id, array $data)
     {
-        return $this->link->update($this->t_api_doc_user, $data, [
+        return $this->link->update($this->tApiDocUser, $data, [
             'id' => $id
         ]);
     }

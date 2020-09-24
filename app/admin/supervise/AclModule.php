@@ -33,11 +33,11 @@ class AclModule extends AdminModule
      */
     function addNav(string $name, string $link, $pid = 0)
     {
-        $menuId = $this->link->add($this->t_acl_menu, array(
+        $menuId = $this->link->add($this->tAclMenu, [
             'pid' => $pid,
             'name' => $name,
             'link' => $link
-        ));
+        ]);
 
         return false !== $menuId;
     }
@@ -163,7 +163,7 @@ class AclModule extends AdminModule
     function getMenuAllDate(int $id)
     {
         $data = $this->link->select('*')
-            ->from("{$this->t_acl_menu} where id={$id} union all select * from {$this->t_acl_menu} where pid={$id}")
+            ->from("{$this->tAclMenu} where id={$id} union all select * from {$this->tAclMenu} where pid={$id}")
             ->stmt()->fetchAll(PDO::FETCH_ASSOC);
 
         $main = $child = [];
@@ -185,20 +185,6 @@ class AclModule extends AdminModule
     }
 
     /**
-     * 获取所有子菜单数据
-     *
-     * @param int $pid
-     * @return mixed
-     * @throws CoreException
-     */
-    function getChildMenuData(int $pid)
-    {
-        return $this->link->getAll($this->t_acl_menu, '*', [
-            'pid' => $pid
-        ]);
-    }
-
-    /**
      * 保存导航菜单
      *
      * @param array $menus
@@ -215,54 +201,19 @@ class AclModule extends AdminModule
             $data = [
                 'name' => $p['name'],
                 'link' => $p['link'],
-                'pid' => !empty($p['pid']) ? (int)$p['pid'] : 0,
-                'type' => !empty($p['type']) ? (int)$p['type'] : 1,
-                '`order`' => !empty($p['order']) ? (int)$p['order'] : 0,
-                'display' => !empty($p['display']) ? (int)$p['display'] : 0
+                'pid' => $p['pid'] ?? 0,
+                'type' => $p['type'] ?: 1,
+                '`order`' => $p['order'] ?: 0,
+                'display' => $p['display'] ?? 0
             ];
 
             if (isset($p['id'])) {
-                $this->link->update($this->t_acl_menu, $data, ['id' => $p['id']]);
+                $this->link->update($this->tAclMenu, $data, ['id' => $p['id']]);
             } else {
-                $this->link->add($this->t_acl_menu, $data);
+                $this->link->add($this->tAclMenu, $data);
             }
         }
         return true;
-    }
-
-    /**
-     * 保存导航菜单数据
-     *
-     * @param array $data
-     * @return bool|mixed
-     * @throws CoreException
-     */
-    function saveNavData(array $data)
-    {
-        if (empty($data['name']) || empty($data['link'])) {
-            return false;
-        }
-
-        $data = array(
-            'name' => $data['name'],
-            'link' => $data['link'],
-            'pid' => !empty($data['pid']) ? (int)$data['pid'] : 0,
-            'type' => !empty($data['type']) ? (int)$data['type'] : 1,
-            '`order`' => !empty($data['order']) ? (int)$data['order'] : 0,
-            'display' => !empty($data['display']) ? (int)$data['display'] : 0
-        );
-
-        $has = $this->link->get($this->t_acl_menu, 'id', array(
-            'name' => $data['name']
-        ));
-
-        if ($has) {
-            return $this->link->update($this->t_acl_menu, $data, array(
-                'id' => $has['id']
-            ));
-        } else {
-            return $this->link->add($this->t_acl_menu, $data);
-        }
     }
 
     /**
@@ -275,13 +226,13 @@ class AclModule extends AdminModule
     function getMenu()
     {
         $menuList = [];
-        $count = $this->link->get($this->t_acl_menu, 'count(1) cnt', ['pid' => 0]);
+        $count = $this->link->get($this->tAclMenu, 'count(1) cnt', ['pid' => 0]);
 
         if (!$count['cnt'] || $count['cnt'] == 0) {
             $this->initMenu4controllers();
         }
 
-        $menu = $this->link->getAll($this->t_acl_menu, '*', ['pid' => 0], '`order` ASC');
+        $menu = $this->link->getAll($this->tAclMenu, '*', ['pid' => 0], '`order` ASC');
         array_map(function ($m) use (&$menuList) {
             $menuList[$m['link']] = $m;
         }, $menu);
@@ -374,7 +325,7 @@ class AclModule extends AdminModule
                                 '`order`' => $order,
                                 'display' => $display,
                             ];
-                            $this->link->update($this->t_acl_menu, $update, ['id' => $id]);
+                            $this->link->update($this->tAclMenu, $update, ['id' => $id]);
                         }
                     } else {
                         $addData = [
@@ -403,7 +354,7 @@ class AclModule extends AdminModule
      */
     function addClassMethodMenu(string $class, string $method, array &$menuData = [])
     {
-        $classMenuPid = $this->link->get($this->t_acl_menu, 'id', [
+        $classMenuPid = $this->link->get($this->tAclMenu, 'id', [
             'pid' => 0,
             'link' => lcfirst($class),
         ]);
@@ -439,7 +390,7 @@ class AclModule extends AdminModule
         $addData['display'] = isset($data['display']) ? $data['display'] : 0;
         $addData['type'] = isset($data['type']) ? $data['type'] : 1;
         $data = $addData;
-        return $this->link->add($this->t_acl_menu, $addData);
+        return $this->link->add($this->tAclMenu, $addData);
     }
 
     /**
@@ -450,7 +401,7 @@ class AclModule extends AdminModule
      */
     function getRoleList()
     {
-        return $this->link->getAll($this->t_role, '*');
+        return $this->link->getAll($this->tRole, '*');
     }
 
     /**
@@ -462,7 +413,7 @@ class AclModule extends AdminModule
      */
     function getRoleInfo($condition)
     {
-        return $this->link->get($this->t_role, '*', $condition);
+        return $this->link->get($this->tRole, '*', $condition);
     }
 
     /**
@@ -474,7 +425,7 @@ class AclModule extends AdminModule
      */
     function delRole(int $rid)
     {
-        return $this->link->del($this->t_role, ['id' => $rid]);
+        return $this->link->del($this->tRole, ['id' => $rid]);
     }
 
     /**
@@ -497,12 +448,12 @@ class AclModule extends AdminModule
 
         $saveData ['name'] = $menuName;
         $saveData ['behavior'] = implode($data, ',');
-        $roleInfo = $this->link->get($this->t_role, '*', ['name' => $menuName]);
+        $roleInfo = $this->link->get($this->tRole, '*', ['name' => $menuName]);
         if ($roleInfo) {
             return $this->responseData(100630);
         }
 
-        $rid = $this->link->add($this->t_role, $saveData);
+        $rid = $this->link->add($this->tRole, $saveData);
         if ($rid) {
             return $this->responseData(1, ['rid' => $rid]);
         }
@@ -532,30 +483,18 @@ class AclModule extends AdminModule
             $saveData['behavior'] = trim(implode($data, ','));
         }
 
-        $roleInfo = $this->link->get($this->t_role, '*', ['id' => $rid]);
+        $roleInfo = $this->link->get($this->tRole, '*', ['id' => $rid]);
         if (!$roleInfo) {
             return $this->responseData(100650);
         }
 
         $rid = $roleInfo['id'];
-        $status = $this->link->update($this->t_role, $saveData, ['id' => $rid]);
+        $status = $this->link->update($this->tRole, $saveData, ['id' => $rid]);
         if ($status !== false) {
             return $this->responseData(1, ['rid' => $rid]);
         }
 
         return $this->responseData(100660);
-    }
-
-    /**
-     * 根据菜单ID获取信息
-     *
-     * @param int $id
-     * @return mixed
-     * @throws CoreException
-     */
-    function getMenuInfo(int $id)
-    {
-        return $this->link->get($this->t_acl_menu, '*', ['id' => (int)$id]);
     }
 
     /**
@@ -605,18 +544,6 @@ class AclModule extends AdminModule
     }
 
     /**
-     * 根据父级id查询子菜单
-     *
-     * @param int $pid
-     * @return mixed
-     * @throws CoreException
-     */
-    function getChildMenu(int $pid)
-    {
-        return $this->getMenuByCondition(['pid' => $pid]);
-    }
-
-    /**
      * 根据条件查询菜单
      *
      * @param array|string $condition
@@ -626,7 +553,7 @@ class AclModule extends AdminModule
      */
     function getMenuByCondition($condition, $order = '`order` ASC')
     {
-        $result = $this->link->getAll($this->t_acl_menu, '*', $condition, $order);
+        $result = $this->link->getAll($this->tAclMenu, '*', $condition, $order);
         if (empty($result)) {
             $result = [];
         }
@@ -643,7 +570,7 @@ class AclModule extends AdminModule
      */
     private function delNavByCondition($condition)
     {
-        return $this->link->del($this->t_acl_menu, $condition);
+        return $this->link->del($this->tAclMenu, $condition);
     }
 
     /**

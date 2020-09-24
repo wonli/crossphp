@@ -21,55 +21,55 @@ class AdminModule extends Module
      *
      * @var string
      */
-    protected $t_admin = 'cpa_admin';
+    protected $tAdmin = 'cpa_admin';
 
     /**
      * 角色表名
      *
      * @var string
      */
-    protected $t_role = 'cpa_acl_role';
+    protected $tRole = 'cpa_acl_role';
 
     /**
      * 操作日志
      *
      * @var string
      */
-    protected $t_act_log = 'cpa_act_log';
+    protected $tActLog = 'cpa_act_log';
 
     /**
      * 权限表
      *
      * @var string
      */
-    protected $t_acl_menu = 'cpa_acl_menu';
+    protected $tAclMenu = 'cpa_acl_menu';
 
     /**
      * API文档
      *
      * @var string
      */
-    protected $t_api_doc = 'cpa_doc';
+    protected $tApiDoc = 'cpa_doc';
 
     /**
      * API文档用户数据
      *
      * @var string
      */
-    protected $t_api_doc_user = 'cpa_doc_user';
+    protected $tApiDocUser = 'cpa_doc_user';
 
     /**
      * 接口数据
      *
      * @var string
      */
-    protected $t_api_doc_data = 'cpa_doc_data';
+    protected $tApiDocData = 'cpa_doc_data';
 
     /**
      * 存储密保卡的表名
      *
      * @var string
      */
-    protected $t_security_card = 'cpa_security_card';
+    protected $tSecurityCard = 'cpa_security_card';
 }
 

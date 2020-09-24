@@ -117,18 +117,14 @@ class Acl extends Admin
     /**
      * 删除
      *
-     * @cp_params id, e
+     * @cp_params id
      * @throws CoreException|LogicStatusException
      */
     function del()
     {
-        if (!empty($this->input('id')->uInt())) {
-            $this->ACL->delNav($this->input('id')->uInt());
-        }
-
-        if (!empty($this->input('e')->uInt())) {
-            $this->to('acl:editMenu', array('id' => $this->input('e')->uInt()));
-            return;
+        $id = $this->input('id')->uInt();
+        if (!empty($id)) {
+            $this->ACL->delNav($id);
         }
 
         $this->to('acl:navManager');
