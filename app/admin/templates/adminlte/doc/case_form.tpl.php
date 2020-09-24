@@ -11,7 +11,7 @@ $method = $data['api']['api_method'] ?? '';
 $apiId = $data['api']['id'] ?? '';
 
 $headerParams = $data['doc']['header_params'] ?? [];
-$useGlobalParams = $data['user']['global_params'] ?? [];
+$useGlobalParams = $data['doc']['global_params'] ?? [];
 $formFields = $data['api']['api_params'] ?? [];
 ?>
 <div class="action-list-container">
