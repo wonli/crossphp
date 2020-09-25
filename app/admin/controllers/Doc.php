@@ -23,6 +23,7 @@ use app\admin\supervise\CodeSegment\CURL;
 use app\admin\supervise\CodeSegment\Generator;
 use app\admin\views\DocView;
 use ReflectionException;
+use Throwable;
 
 
 /**
@@ -119,14 +120,6 @@ class Doc extends Admin
             $this->data['current_sid'] = $currentServerID;
             $this->data['api_host'] = $apiServer['api_addr'];
 
-            //更新文档数据
-            $updateStatus = $this->getInitApiData($docId, $apiServer['api_addr'], $data['doc_token']);
-            if ($updateStatus->getStatus() != 1) {
-                $data = array_merge($this->data, $updateStatus->getData());
-                $this->display($data, 'index');
-                return;
-            }
-
             $docCategory = [];
             $docData = (new ApiDocData())->getAll(['doc_id' => $docId], 'id, group_key, group_name, api_path, api_name, api_method, enable_mock');
             if (!empty($docData)) {
@@ -140,6 +133,37 @@ class Doc extends Admin
             $this->data['data'] = $docData;
             $this->data['category'] = $docCategory;
             $this->display($this->data, 'index');
+        }
+    }
+
+    /**
+     * 更新文档数据
+     *
+     * @throws CoreException
+     * @throws LogicStatusException
+     */
+    function updateApiData()
+    {
+        $this->response->setContentType('json');
+        $docId = $this->input('doc_id')->id();
+        $data = $this->ADM->get($docId);
+        if (empty($data)) {
+            $this->end(100712);
+        }
+
+        $servers = &$data['servers'];
+        $sid = $this->input('current_sid')->int();
+        $currentInfo = $servers[$sid] ?? [];
+        if (empty($currentInfo)) {
+            $this->end(100713);
+        }
+
+        try {
+            //更新文档数据
+            $updateStatus = $this->getInitApiData($docId, $currentInfo['api_addr'], $data['doc_token']);
+            $this->display($updateStatus, 'JSON');
+        } catch (Throwable $e) {
+            $this->end(0, $e->getMessage());
         }
     }
 

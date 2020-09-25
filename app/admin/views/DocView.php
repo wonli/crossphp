@@ -30,7 +30,7 @@ class DocView extends AdminView
     /**
      * 文档阅读页
      */
-    function index( )
+    function index()
     {
         $this->set([
             'layer' => 'doc',
@@ -80,7 +80,7 @@ class DocView extends AdminView
      */
     function docCategory()
     {
-        foreach($this->data['category'] ?? [] as $category => $d) {
+        foreach ($this->data['category'] ?? [] as $category => $d) {
             $this->renderTpl('doc/leftCategory', $d);
         }
     }
@@ -96,17 +96,17 @@ class DocView extends AdminView
         $statusName = ResponseData::builder()->getStatusName();
         $statusCode = $data[$statusName] ?? 0;
         if ($statusCode == 1) {
-            foreach($this->data['data']??[] as $d) {
+            foreach ($this->data['data'] ?? [] as $d) {
                 ?>
                 <div class="row">
-                        <div class="col-md-12 case-title" style="margin:10px 0">
-                            <span class="badge"><?= $d['api_method'] ?? 'post' ?></span>
-                            <a href="javascript:void(0)" onclick="getTestCase('<?= $d['group_key'] ?>', '<?= $d['id'] ?>')">
-                                <?= $d['api_name']??'' ?>
-                            </a>
-                            <span class="hidden-xs">(<?= $d['api_path'] ?>)</span>
-                        </div>
+                    <div class="col-md-12 case-title" style="margin:10px 0">
+                        <span class="badge"><?= $d['api_method'] ?? 'post' ?></span>
+                        <a href="javascript:void(0)" onclick="getTestCase('<?= $d['group_key'] ?>', '<?= $d['id'] ?>')">
+                            <?= $d['api_name'] ?? '' ?>
+                        </a>
+                        <span class="hidden-xs">(<?= $d['api_path'] ?>)</span>
                     </div>
+                </div>
                 <?php
             }
         } else {
@@ -218,17 +218,17 @@ class DocView extends AdminView
      */
     function docData()
     {
-        if(empty($this->data) || (isset($this->data['status']) && $this->data['status'] != 1)) {
+        if (empty($this->data) || (isset($this->data['status']) && $this->data['status'] != 1)) {
 
             $message = $this->data['message'];
-            if(is_array($message)) {
+            if (is_array($message)) {
                 $message = LogBase::prettyArray('', $message);
             }
 
-            $title = $this->wrap('div', ['class' => 'h4'])->html('发生错误！' . ' - '. $this->data['status']);
+            $title = $this->wrap('div', ['class' => 'h4'])->html('发生错误！' . ' - ' . $this->data['status']);
             $msg = $this->wrap('pre', ['class' => ''])->html($message);
 
-             echo $this->wrap('div', ['class' => 'col-md-8', 'style' => 'margin:0 auto'])
+            echo $this->wrap('div', ['class' => 'col-md-8', 'style' => 'margin:0 auto'])
                 ->wrap('div', ['class' => 'alert alert-danger alert-dismissible fade in', 'style' => 'margin-top: 100px'])
                 ->html($title . $msg);
             return;
@@ -327,13 +327,14 @@ class DocView extends AdminView
             }
             ?>
             <ul class="nav navbar-nav navbar-right">
-            <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                   aria-expanded="false">
-                    服务器(<?= $currentServerName ?>) <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu"><?= $serverList ?></ul>
-            </li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">
+                        服务器(<?= $currentServerName ?>) <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu"><?= $serverList ?></ul>
+                </li>
+            </ul>
             <?php
         }
     }
@@ -343,8 +344,8 @@ class DocView extends AdminView
      */
     function globalParams()
     {
-        $userData = $this->data['user']['global_params']??[];
-        $globalParams = $this->data['doc']['global_params']??[];
+        $userData = $this->data['user']['global_params'] ?? [];
+        $globalParams = $this->data['doc']['global_params'] ?? [];
         if (!empty($globalParams)) {
             foreach ($globalParams as $field => $name) {
                 $userValue = '';
@@ -427,13 +428,13 @@ class DocView extends AdminView
         $serverAddr = $this->data['doc']['current_server']['api_addr'] ?? '';
         $headerParams = $this->data['doc']['header_params'] ?? [];
         if (empty($headerParams)) {
-            return  rtrim($serverAddr, '/') . '/' . ltrim($apiPath, '/');
+            return rtrim($serverAddr, '/') . '/' . ltrim($apiPath, '/');
         }
 
         return $this->url('doc:curlRequest', [
-            'ugp' => $this->data['api']['global_params']??[],
-            'method' => $this->data['api']['api_method']??'get',
-            'doc_id' => $this->data['doc']['id']??0,
+            'ugp' => $this->data['api']['global_params'] ?? [],
+            'method' => $this->data['api']['api_method'] ?? 'get',
+            'doc_id' => $this->data['doc']['id'] ?? 0,
             'host' => urlencode($serverAddr),
             'path' => urlencode($apiPath)
         ]);
@@ -444,14 +445,14 @@ class DocView extends AdminView
      *
      * @return string
      */
-    function getApiActionMethod( )
+    function getApiActionMethod()
     {
         $headerParams = $this->data['user']['global_params'] ?? [];
         if (empty($headerParams)) {
             return $this->data['api']['api_method'];
         }
 
-        return $this->data['api']['api_method']??'POST';
+        return $this->data['api']['api_method'] ?? 'POST';
     }
 
     /**
@@ -472,7 +473,7 @@ class DocView extends AdminView
                         ->wrap('code', ['class' => 'json hljs'])
                         ->html(json_encode(json_decode($data, true), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
                 } else {
-                    echo $this->wrap('div', ['class' => 'cache-tips'])->html( '第一次请求接口之后生成');
+                    echo $this->wrap('div', ['class' => 'cache-tips'])->html('第一次请求接口之后生成');
                 }
                 ?>
             </div>
