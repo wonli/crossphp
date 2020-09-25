@@ -170,17 +170,8 @@ class Acl extends Admin
      */
     function roleList()
     {
-        $this->data ['role_list'] = $this->ACL->getRoleList();
-        if ($this->isPost()) {
-            $postData = $this->request->getPostData();
-            $ret = $this->ACL->editRoleMenu($postData['rid'] ?? '', $postData['name'] ?? '', $postData['menu_id'] ?? '');
-            if ($ret->getStatus() == 1) {
-                $this->to("acl:roleList");
-                return;
-            }
-        }
-
-        $this->display($this->data);
+        $data['role_list'] = $this->ACL->getRoleList();
+        $this->display($data);
     }
 
     /**
