@@ -150,21 +150,14 @@ class Doc extends Admin
      */
     function initApiData()
     {
-        $status = 1;
-        $apiAddr = $this->delegate->getRequest()->getRequestData()['api_addr'];
+        $apiAddr = $this->input('api_addr')->url();
         if (empty($apiAddr)) {
-            $status = 100711;
+            $this->end(100711);
         }
 
-        $docToken = $this->delegate->getRequest()->getRequestData()['doc_token'];
+        $docToken = $this->input('doc_token')->val();
         if (empty($docToken)) {
-            $status = 100701;
-        }
-
-        if ($status !== 1) {
-            $this->data = $this->getStatus($status);
-            $this->display($this->data, 'JSON');
-            return;
+            $this->end(100701);
         }
 
         $docId = $this->input('id')->id();
@@ -174,39 +167,11 @@ class Doc extends Admin
             return;
         }
 
-        $this->data['data'] = $updateStatus->getDataContent();
-        $this->display($this->data, 'JSON');
-    }
+        $data['data'] = $updateStatus->getDataContent();
+        $data['msgName'] = ResponseData::builder()->getMessageName();
+        $data['statusName'] = ResponseData::builder()->getStatusName();
 
-    /**
-     * 代码片段
-     *
-     * @cp_display codeSegment
-     * @throws CoreException
-     * @throws DBConnectException
-     * @throws LogicStatusException
-     */
-    function codeSegment()
-    {
-        $postData = $this->delegate->getRequest()->getPostData();
-        $apiId = &$postData['apiId'];
-        $params = &$postData['params'];
-
-        $data = $this->getApiCurlData($apiId, $params);
-        if (!empty($data) && is_array($data)) {
-            $g = (new Generator())->run($data);
-            if (!empty($g)) {
-                $Add = new ApiDocData();
-                $Add->id = $apiId;
-                $Add->api_response_struct = json_encode($g['struct']);
-                $Add->update();
-                $this->data['data'] = $g;
-            }
-        } else {
-            $this->data['data'] = [];
-        }
-
-        $this->display($this->data);
+        $this->display($data, 'JSON');
     }
 
     /**
@@ -597,21 +562,8 @@ class Doc extends Admin
 
         $url = $apiAddr . '?' . $requestParams;
         $response = Helper::curlRequest($url);
-        if (($responseData = json_decode($response, true)) === false) {
+        if (false === ($responseData = json_decode($response, true))) {
             return $this->responseData(100705, ['url' => $url]);
-        }
-
-        $rdb = ResponseData::builder();
-        if (!empty($responseData)) {
-            $rdb->updateInfoProperty($responseData);
-            $rdb->setData($responseData);
-        }
-
-        $responseData = $rdb->getDataContent();
-        $responseData['api_url'] = $url;
-        $status = $rdb->getStatus();
-        if ($status != 1) {
-            return $this->responseData(100705, $responseData);
         }
 
         if (empty($responseData['data'])) {

@@ -182,15 +182,14 @@
                 api_addr: api_addr,
                 doc_token: doc_token
             }, function (d) {
-                console.log(d);
-                if (!d.code) {
+                var status = d[d.statusName] || null;
+                console.log(d)
+                if (status === null) {
                     layer.msg('返回数据出错, 请联系技术部');
-                } else if (d.code !== 1) {
-                    var msg = '';
-                    if (typeof d.msg !== 'string') {
-                        msg = JSON.stringify(d.message, null, 2);
-                    } else {
-                        msg = d.msg;
+                } else if (status !== 1) {
+                    var msg = d[d.msgName] || '';
+                    if (typeof msg !== 'string') {
+                        msg = JSON.stringify(msg, null, 2);
                     }
 
                     layer.msg(msg, {
@@ -202,7 +201,6 @@
                     layer.msg('获取数据成功');
                     vm[0].innerHTML = '更新数据';
                     var vTd = vm.closest('td');
-                    vTd.find('.cache_name').val(d.data.cache_name);
                     vTd.find('.cache_at').val(d.data.cache_at);
                     vTd.find('.user').val(d.data.user);
                 }
