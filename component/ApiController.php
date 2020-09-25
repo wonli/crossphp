@@ -70,7 +70,8 @@ abstract class ApiController extends Controller
     /**
      * ApiController constructor.
      *
-     * @throws LogicStatusException|CoreException|ReflectionException
+     * @throws CoreException
+     * @throws LogicStatusException
      */
     function __construct()
     {
@@ -98,7 +99,7 @@ abstract class ApiController extends Controller
         $requestType = &$this->requestType;
         $annotateApi = &$this->actionAnnotate['api'];
         if (!empty($annotateApi)) {
-            $requestMethod = $this->delegate->getRequest()->SERVER('REQUEST_METHOD');
+            $requestMethod = $this->delegate->getRequest()->getRequestMethod();
             list($requestType) = explode(',', $annotateApi);
             if (strcasecmp($requestMethod, trim($requestType)) !== 0) {
                 $this->display(200000);
@@ -174,7 +175,7 @@ abstract class ApiController extends Controller
      */
     function getHeaderData(string $key)
     {
-        $data = $this->delegate->getRequest()->SERVER('HTTP_' . strtoupper($key));
+        $data = $this->delegate->getRequest()->server('HTTP_' . strtoupper($key));
         if (!$data && function_exists('getallheaders')) {
             $headers = getallheaders();
             $data = &$headers[$key];
@@ -227,7 +228,7 @@ abstract class ApiController extends Controller
                 $dataContainer = $this->delegate->getRequest()->getPostData();
                 if (empty($dataContainer)) {
                     $input = filter_var(file_get_contents("php://input"), FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
-                    $contentType = $this->delegate->getRequest()->SERVER('CONTENT_TYPE');
+                    $contentType = $this->delegate->getRequest()->server('CONTENT_TYPE');
                     if (0 == strcasecmp($contentType, 'application/json')) {
                         $dataContainer = json_decode($input, true);
                     } else {
