@@ -206,7 +206,7 @@ abstract class ApiController extends Controller
             throw $LogicStatusException;
         }
 
-        $this->delegate->getResponse()->end(json_encode($data->getData(), JSON_UNESCAPED_UNICODE));
+        $this->delegate->getResponse()->setContent(json_encode($data->getData(), JSON_UNESCAPED_UNICODE));
     }
 
     /**
