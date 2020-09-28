@@ -240,6 +240,7 @@ abstract class Admin extends Controller
      */
     protected function dieJson(array $data)
     {
-        $this->response->setContentType('json')->end(json_encode($data, JSON_UNESCAPED_UNICODE));
+        $this->response->setContentType('json')
+            ->setContent(json_encode($data, JSON_UNESCAPED_UNICODE))->end();
     }
 }

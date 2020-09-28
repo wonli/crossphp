@@ -319,11 +319,11 @@ class DocView extends AdminView
                     $currentServerName = $serverName;
                 }
 
-                $serverList .= $this->wrap('li')->a($serverName, 'javascript:void(0)', [
+                $serverList .= $this->wrap('li', [
+                    'class' => 'change-server-flag',
                     'doc_id' => $docId,
                     'sid' => $sid,
-                    'class' => 'change-server-flag'
-                ]);
+                ])->a($serverName, 'javascript:void(0)');
             }
             ?>
             <ul class="nav navbar-nav navbar-right">
