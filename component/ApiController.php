@@ -326,7 +326,7 @@ abstract class ApiController extends Controller
     private function verifyDocApiToken(string $token, $t): bool
     {
         //10秒过期
-        if (time() - $t > 10) {
+        if (time() - $t > 300) {
             return false;
         }
 
