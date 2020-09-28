@@ -587,11 +587,19 @@ class Doc extends Admin
         $url = $apiAddr . '?' . $requestParams;
         $response = Helper::curlRequest($url);
         if (false === ($responseData = json_decode($response, true))) {
-            return $this->responseData(100705, ['url' => $url]);
+            return $this->responseData(100705, [
+                'url' => $url,
+                'response' => $response,
+                'reason' => 'json_decode失败'
+            ]);
         }
 
         if (empty($responseData['data'])) {
-            return $this->responseData(100706, $responseData);
+            return $this->responseData(100706, [
+                'url' => $url,
+                'response' => $responseData,
+                'reason' => 'data数据为空',
+            ]);
         }
 
         $ADD = new ApiDocData();
