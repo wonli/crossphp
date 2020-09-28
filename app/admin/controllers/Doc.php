@@ -182,7 +182,7 @@ class Doc extends Admin
             $this->end(100701);
         }
 
-        $docId = $this->input('id')->id();
+        $docId = $this->input('id', 0)->int();
         $updateStatus = $this->getInitApiData($docId, $apiAddr, $docToken);
         if ($updateStatus->getStatus() != 1) {
             $this->display($updateStatus->getData(), 'JSON');
@@ -454,7 +454,7 @@ class Doc extends Admin
                 'last_update_admin' => $this->u,
             ];
 
-            $id = $this->input('id')->id();
+            $id = $this->input('id', 0)->int();
             if (!empty($id)) {
                 $this->ADM->update($id, $saveData);
             } else {
