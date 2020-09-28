@@ -64,7 +64,6 @@ class Doc extends Admin
     {
         parent::__construct();
         $this->ADM = new ApiDocModule();
-        $this->yamlFileCachePath = $this->ADM->getCachePath();
     }
 
     /**
@@ -137,14 +136,13 @@ class Doc extends Admin
     }
 
     /**
-     * 更新文档数据
+     * 更新文档数据（打开页面时更新）
      *
      * @throws CoreException
      * @throws LogicStatusException
      */
     function updateApiData()
     {
-        $this->response->setContentType('json');
         $docId = $this->input('doc_id')->id();
         $data = $this->ADM->get($docId);
         if (empty($data)) {
@@ -161,7 +159,7 @@ class Doc extends Admin
         try {
             //更新文档数据
             $updateStatus = $this->getInitApiData($docId, $currentInfo['api_addr'], $data['doc_token']);
-            $this->display($updateStatus, 'JSON');
+            $this->json($updateStatus);
         } catch (Throwable $e) {
             $this->end(0, $e->getMessage());
         }
@@ -179,7 +177,7 @@ class Doc extends Admin
             $this->end(100711);
         }
 
-        $docToken = $this->input('doc_token')->val();
+        $docToken = $this->input('doc_token')->raw();
         if (empty($docToken)) {
             $this->end(100701);
         }
@@ -199,6 +197,8 @@ class Doc extends Admin
     }
 
     /**
+     * 获取curl数据
+     *
      * @throws CoreException
      * @throws DBConnectException
      * @throws LogicStatusException
@@ -230,72 +230,6 @@ class Doc extends Admin
     }
 
     /**
-     * 发起curl请求
-     *
-     * @param mixed $apiId
-     * @param array $params
-     * @param array $serverInfo
-     * @return array|mixed
-     * @throws CoreException
-     * @throws DBConnectException
-     * @throws LogicStatusException
-     */
-    function getApiCurlData($apiId, &$params = [], &$serverInfo = [])
-    {
-        $headerParams = [];
-        $Api = new ApiDocData();
-        $Api->id = $apiId;
-        $apiData = $Api->get();
-        if (empty($apiData)) {
-            throw new LogicStatusException(0, '获取api数据失败');
-        }
-
-        $docId = $apiData['doc_id'];
-        $doc = $this->ADM->get($docId);
-        $Api = new ApiDocModule();
-        $userData = $Api->getAllUserData($this->u, $docId);
-        if (!empty($doc['header_params'])) {
-            if (!empty($userData['header_params'])) {
-                foreach ($userData['header_params'] as $k => $v) {
-                    $headerParams[] = sprintf("%s: %s", $k, $v);
-                }
-            }
-
-            if (!empty($userData['global_params'])) {
-                $params = array_merge($params, $userData['global_params']);
-            }
-        }
-
-        $sid = $userData['host']['sid'] ?? 0;
-        $method = $apiData['api_method'] ?? 'POST';
-        $server = $doc['servers'][$sid] ?? [];
-        if (empty($server)) {
-            throw new LogicStatusException(0, '获取Server信息失败');
-        }
-
-        $apiUrl = rtrim($server['api_addr'], '/') . '/' . $apiData['api_path'];
-        $curlData = (new CURL())->setUrl($apiUrl)
-            ->setParams($params)
-            ->setHeaderParams($headerParams)
-            ->setMethod($method)
-            ->request();
-
-        $data = json_decode($curlData, true);
-        if (!is_array($data)) {
-            return $curlData;
-        }
-
-        $serverInfo = [
-            'sid' => $sid,
-            'method' => $method,
-            'apiUrl' => $apiUrl,
-            'docId' => $docId
-        ];
-
-        return $data;
-    }
-
-    /**
      * 代码生成
      *
      * @throws CoreException
@@ -322,7 +256,7 @@ class Doc extends Admin
     }
 
     /**
-     * 更改API服务器地址
+     * 切换API服务器地址
      *
      * @cp_params doc_id, sid=0
      * @throws CoreException|LogicStatusException
@@ -343,7 +277,7 @@ class Doc extends Admin
             return;
         }
 
-        $valueData = array('sid' => $sid);
+        $valueData = ['sid' => $sid];
         $data = $this->ADM->getUserData($this->u, $docId, ApiDocModule::KEY_HOST);
         if ($data == false) {
             $this->ADM->addUserData($this->u, $docId, ApiDocModule::KEY_HOST, $valueData);
@@ -565,6 +499,72 @@ class Doc extends Admin
     {
         $this->data['t'] = $this->input('t')->val();
         $this->view->makeParamsNode($this->data);
+    }
+
+    /**
+     * 发起curl请求
+     *
+     * @param mixed $apiId
+     * @param array $params
+     * @param array $serverInfo
+     * @return array|mixed
+     * @throws CoreException
+     * @throws DBConnectException
+     * @throws LogicStatusException
+     */
+    protected function getApiCurlData($apiId, &$params = [], &$serverInfo = [])
+    {
+        $headerParams = [];
+        $Api = new ApiDocData();
+        $Api->id = $apiId;
+        $apiData = $Api->get();
+        if (empty($apiData)) {
+            throw new LogicStatusException(0, '获取api数据失败');
+        }
+
+        $docId = $apiData['doc_id'];
+        $doc = $this->ADM->get($docId);
+        $Api = new ApiDocModule();
+        $userData = $Api->getAllUserData($this->u, $docId);
+        if (!empty($doc['header_params'])) {
+            if (!empty($userData['header_params'])) {
+                foreach ($userData['header_params'] as $k => $v) {
+                    $headerParams[] = sprintf("%s: %s", $k, $v);
+                }
+            }
+
+            if (!empty($userData['global_params'])) {
+                $params = array_merge($params, $userData['global_params']);
+            }
+        }
+
+        $sid = $userData['host']['sid'] ?? 0;
+        $method = $apiData['api_method'] ?? 'POST';
+        $server = $doc['servers'][$sid] ?? [];
+        if (empty($server)) {
+            throw new LogicStatusException(0, '获取Server信息失败');
+        }
+
+        $apiUrl = rtrim($server['api_addr'], '/') . '/' . $apiData['api_path'];
+        $curlData = (new CURL())->setUrl($apiUrl)
+            ->setParams($params)
+            ->setHeaderParams($headerParams)
+            ->setMethod($method)
+            ->request();
+
+        $data = json_decode($curlData, true);
+        if (!is_array($data)) {
+            return $curlData;
+        }
+
+        $serverInfo = [
+            'sid' => $sid,
+            'method' => $method,
+            'apiUrl' => $apiUrl,
+            'docId' => $docId
+        ];
+
+        return $data;
     }
 
     /**
