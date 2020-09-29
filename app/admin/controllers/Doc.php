@@ -159,7 +159,7 @@ class Doc extends Admin
         try {
             //更新文档数据
             $updateStatus = $this->getInitApiData($docId, $currentInfo['api_addr'], $data['doc_token']);
-            $this->json($updateStatus);
+            $this->dieJson($updateStatus->getData());
         } catch (Throwable $e) {
             $this->end(0, $e->getMessage());
         }
