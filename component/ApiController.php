@@ -72,6 +72,7 @@ abstract class ApiController extends Controller
      *
      * @throws CoreException
      * @throws LogicStatusException
+     * @throws ReflectionException
      */
     function __construct()
     {
@@ -111,12 +112,15 @@ abstract class ApiController extends Controller
         $this->requestDataContainer = $this->getDataContainer($requestType);
         $annotateRequest = &$this->actionAnnotate['request'];
         if (!empty($annotateRequest)) {
-            $request = explode(',', $annotateRequest);
-            if (!empty($request)) {
-                foreach ($request as $actionParams) {
-                    $requestParams = explode("\n", $actionParams);
-                    foreach ($requestParams as $p) {
-                        list($params, $message, $require) = explode('|', trim($p));
+            if (!is_array($annotateRequest)) {
+                $annotateRequest = [$annotateRequest];
+            }
+
+            array_map(function ($annotate) use ($requestType) {
+                $requestAnnotateData = explode(',', trim(trim($annotate), ','));
+                if (!empty($requestAnnotateData)) {
+                    foreach ($requestAnnotateData as $actionParams) {
+                        list($params, $message, $require) = explode('|', trim($actionParams));
                         if (strpos($params, ':') !== false) {
                             list($params, $inputParamsType) = explode(':', $params);
                             $this->inputDataContainer[$params] = $inputParamsType;
@@ -141,7 +145,7 @@ abstract class ApiController extends Controller
                         }
                     }
                 }
-            }
+            }, $annotateRequest);
         }
     }
 
@@ -253,6 +257,7 @@ abstract class ApiController extends Controller
      * API 调试文档基础数据
      *
      * @return array
+     * @throws ReflectionException
      */
     protected function docApiData(): array
     {
