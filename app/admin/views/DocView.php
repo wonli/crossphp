@@ -306,31 +306,30 @@ class DocView extends AdminView
      */
     protected function genApiServerList()
     {
-        $docId = $this->data['doc_id'];
+        $doc_id = $this->data['doc_id'];
         $servers = &$this->data['doc']['servers'];
-        $currentSid = $this->data['current_sid'];
-        $currentServerName = '';
+        $current_sid = $this->data['current_sid'];
+        $current_server_name = '';
 
         if (!empty($servers)) {
             $serverList = '';
             foreach ($servers as $sid => $d) {
-                $serverName = &$d['server_name'];
-                if ($currentSid == $sid) {
-                    $currentServerName = $serverName;
+                $server_name = &$d['server_name'];
+                if ($current_sid == $sid) {
+                    $current_server_name = $server_name;
                 }
 
-                $serverList .= $this->wrap('li', [
-                    'class' => 'change-server-flag',
-                    'doc_id' => $docId,
+                $serverList .= $this->wrap('li')->a($server_name, 'javascript:void(0)', array(
+                    'doc_id' => $doc_id,
                     'sid' => $sid,
-                ])->a($serverName, 'javascript:void(0)');
+                    'class' => 'change-server-flag'
+                ));
             }
             ?>
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">
-                        服务器(<?= $currentServerName ?>) <span class="caret"></span>
+                       aria-expanded="false">服务器(<?= $current_server_name ?>) <span class="caret"></span>
                     </a>
                     <ul class="dropdown-menu"><?= $serverList ?></ul>
                 </li>
@@ -345,9 +344,9 @@ class DocView extends AdminView
     function globalParams()
     {
         $userData = $this->data['user']['global_params'] ?? [];
-        $globalParams = $this->data['doc']['global_params'] ?? [];
-        if (!empty($globalParams)) {
-            foreach ($globalParams as $field => $name) {
+        $global_params = $this->data['doc']['global_params'] ?? [];
+        if (!empty($global_params)) {
+            foreach ($global_params as $field => $name) {
                 $userValue = '';
                 if (isset($userData[$field])) {
                     $userValue = $userData[$field];
