@@ -120,7 +120,12 @@ class Doc extends Admin
             $this->data['api_host'] = $apiServer['api_addr'];
 
             $docCategory = [];
-            $docData = (new ApiDocData())->getAll(['doc_id' => $docId], 'id, group_key, group_name, api_path, api_name, api_method, enable_mock');
+            $docData = (new ApiDocData())->getAll(
+                ['doc_id' => $docId],
+                'id, group_key, group_name, api_path, api_name, api_method, enable_mock',
+                'group_name ASC'
+            );
+
             if (!empty($docData)) {
                 foreach ($docData as $d) {
                     $docCategory[$d['group_key']]['group_key'] = $d['group_key'];

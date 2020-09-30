@@ -134,8 +134,8 @@ CREATE TABLE IF NOT EXISTS `cpa_doc_data`  (
   `doc_id` INT(10) UNSIGNED NOT NULL,
   `enable_mock` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0' COMMENT '0,关闭mock 1,开启mock',
   `global_params` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1' COMMENT '全局参数是否生效',
-  `group_key` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '分类（类名）' COLLATE 'utf8_general_ci',
-  `group_name` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '分类名称' COLLATE 'utf8_general_ci',
+  `group_key` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '分类（类名）' COLLATE 'utf8_general_ci',
+  `group_name` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '分类名称' COLLATE 'utf8_general_ci',
   `api_path` VARCHAR(128) NOT NULL COLLATE 'utf8_general_ci',
   `api_name` VARCHAR(64) NOT NULL COMMENT '接口名称' COLLATE 'utf8_general_ci',
   `api_params` TEXT NULL DEFAULT NULL COLLATE 'utf8_general_ci',
@@ -147,4 +147,5 @@ CREATE TABLE IF NOT EXISTS `cpa_doc_data`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `doc_api_path_uindex` (`doc_id`, `api_path`) USING BTREE,
   INDEX `group_key` (`group_key`) USING BTREE
+  INDEX `group_name` (`group_name`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
