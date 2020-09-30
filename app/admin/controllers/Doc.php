@@ -41,13 +41,6 @@ class Doc extends Admin
     protected $ADM;
 
     /**
-     * yaml缓存路径
-     *
-     * @var string
-     */
-    protected $yamlFileCachePath;
-
-    /**
      * 禁用操作日志
      *
      * @var bool
@@ -214,14 +207,12 @@ class Doc extends Admin
         $params = $this->params;
         $curlData = $this->getApiCurlData($apiId, $params, $serverInfo);
         $g = (new Generator())->run($curlData);
-        if (!empty($g['struct'])) {
-            if (!empty($g)) {
-                $Add = new ApiDocData();
-                $Add->id = $apiId;
-                $Add->api_response_struct = json_encode($g['struct']);
-                $Add->update();
-                $this->data['data'] = $g;
-            }
+        if (!empty($g) && !empty($g['struct'])) {
+            $Add = new ApiDocData();
+            $Add->id = $apiId;
+            $Add->api_response_struct = json_encode($g['struct']);
+            $Add->update();
+            $this->data['data'] = $g;
         }
 
         $this->data['data'] = $g;
