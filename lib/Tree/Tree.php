@@ -1,7 +1,6 @@
 <?php
 /**
  * Class Tree
- * crossphp 优化返回数据
  */
 
 namespace lib\Tree;
@@ -58,6 +57,13 @@ class Tree
     public $parentField = '';
 
     /**
+     * 子节点名称
+     *
+     * @var string
+     */
+    protected $childrenNodeName = 'children';
+
+    /**
      * 构造函数
      *
      * @param string $value
@@ -65,6 +71,18 @@ class Tree
     function __construct($value = 'root')
     {
         $this->setNode(0, -1, $value);
+    }
+
+    /**
+     * 设置子节点名称
+     *
+     * @param string $name
+     * @return Tree
+     */
+    function setChildrenNodeName(string $name): self
+    {
+        $this->childrenNodeName = $name;
+        return $this;
     }
 
     /**
@@ -77,29 +95,128 @@ class Tree
      */
     function setTree(array $nodes, string $idField, string $parentField, string $valueField)
     {
-        $this->valueField = $valueField;
         $this->idField = $idField;
+        $this->valueField = $valueField;
         $this->parentField = $parentField;
         foreach ($nodes as $node) {
             $this->setNode($node[$this->idField], $node[$this->parentField], $node);
         }
+
         $this->setLayer();
     }
 
     /**
-     * 取得options
+     * 先根遍历，数组格式 id,子id,value对应的值
+     * <pre>
+     * [
+     *     'id' => '',
+     *     'value' => '',
+     *     'children' => [
+     *          ['id' => '', 'value' => '', children => []],
+     *      ]
+     * ]
+     * </pre>
+     *
+     * @param int $root
+     * @param null $layer
+     * @param bool $clear
+     * @return array
+     */
+    function getArrayList($root = 0, $layer = null, $clear = false)
+    {
+        $data = [];
+        foreach ($this->child[$root] as $id) {
+            if ($layer && $this->layer[$this->parent[$id]] > $layer - 1) {
+                continue;
+            }
+
+            $childrenNodeData = $this->child[$id] ? $this->getArrayList($id, $layer) : [];
+            if (true === $clear) {
+                $data[] = [
+                    $this->idField => $id,
+                    $this->valueField => $this->getValue($id),
+                    $this->childrenNodeName => $childrenNodeData
+                ];
+            } else {
+                $data[] = array_merge($this->data[$id], [
+                    $this->childrenNodeName => $childrenNodeData
+                ]);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * 获取父节点
+     *
+     * @param $id
+     * @return mixed
+     */
+    function getParent($id)
+    {
+        return $this->parent[$id];
+    }
+
+    /**
+     * 取得祖先，不包括自身
+     *
+     * @param $id
+     * @return mixed
+     */
+    function getParents($id)
+    {
+        while ($this->parent[$id] != -1) {
+            $id = $parent[$this->layer[$id]] = $this->parent[$id];
+        }
+
+        ksort($parent);
+        reset($parent);
+
+        return $parent;
+    }
+
+    /**
+     * 获取子节点
+     *
+     * @param $id
+     * @return mixed
+     */
+    function getChild($id)
+    {
+        return $this->child[$id];
+    }
+
+    /**
+     * 取得子孙，包括自身，先根遍历
+     *
+     * @param int $id
+     * @param null $except
+     * @return array
+     */
+    function getChildren($id = 0, $except = null)
+    {
+        $child = array($id);
+        $this->getList($child, $id, $except);
+        unset($child[0]);
+
+        return $child;
+    }
+
+    /**
+     * 生成HTML表单options选项
      *
      * @param int $layer
      * @param int $root
      * @param null $except
      * @param string $space
-     * @return array (id=>value)
+     * @return array
      */
-    function getOptions($layer = 0, $root = 0, $except = null, $space = '&nbsp;&nbsp;')
+    function makeSelectOptions($layer = 0, $root = 0, $except = null, $space = '&nbsp;&nbsp;')
     {
         $options = [];
-        $childs = $this->getChilds($root, $except);
-        foreach ($childs as $id) {
+        $children = $this->getChildren($root, $except);
+        foreach ($children as $id) {
             if ($id > 0 && ($layer <= 0 || $this->getLayer($id) <= $layer)) {
                 $options[$id] = $this->getLayer($id, $space) . htmlspecialchars($this->getValue($id));
             }
@@ -142,7 +259,9 @@ class Tree
     {
         foreach ($this->child[$root] as $id) {
             $this->layer[$id] = $this->layer[$this->parent[$id]] + 1;
-            if ($this->child[$id]) $this->setLayer($id);
+            if ($this->child[$id]) {
+                $this->setLayer($id);
+            }
         }
     }
 
@@ -161,8 +280,9 @@ class Tree
             }
 
             $tree[] = $id;
-
-            if ($this->child[$id]) $this->getList($tree, $id, $except);
+            if ($this->child[$id]) {
+                $this->getList($tree, $id, $except);
+            }
         }
     }
 
@@ -187,98 +307,5 @@ class Tree
     private function getLayer($id, $space = false)
     {
         return $space ? str_repeat($space, $this->layer[$id]) : $this->layer[$id];
-    }
-
-    /**
-     * 获取父节点
-     *
-     * @param $id
-     * @return mixed
-     */
-    private function getParent($id)
-    {
-        return $this->parent[$id];
-    }
-
-    /**
-     * 取得祖先，不包括自身
-     *
-     * @param $id
-     * @return mixed
-     */
-    private function getParents($id)
-    {
-        while ($this->parent[$id] != -1) {
-            $id = $parent[$this->layer[$id]] = $this->parent[$id];
-        }
-
-        ksort($parent);
-        reset($parent);
-
-        return $parent;
-    }
-
-    /**
-     * 获取子节点
-     *
-     * @param $id
-     * @return mixed
-     */
-    private function getChild($id)
-    {
-        return $this->child[$id];
-    }
-
-    /**
-     * 取得子孙，包括自身，先根遍历
-     *
-     * @param int $id
-     * @param null $except
-     * @return array
-     */
-    private function getChilds($id = 0, $except = null)
-    {
-        $child = array($id);
-        $this->getList($child, $id, $except);
-        unset($child[0]);
-
-        return $child;
-    }
-
-    /**
-     * 先根遍历，数组格式 id,子id,value对应的值
-     * <pre>
-     * array(
-     *     array('id' => '', 'value' => '', children => array(
-     *         array('id' => '', 'value' => '', children => []),
-     *     ))
-     * )
-     * </pre>
-     *
-     * @param int $root
-     * @param null $layer
-     * @param bool $clear
-     * @return array
-     */
-    function getArrayList($root = 0, $layer = null, $clear = false)
-    {
-        $data = [];
-        foreach ($this->child[$root] as $id) {
-            if ($layer && $this->layer[$this->parent[$id]] > $layer - 1) {
-                continue;
-            }
-
-            if (true === $clear) {
-                $data[] = [
-                    $this->idField => $id,
-                    $this->valueField => $this->getValue($id),
-                    'children' => $this->child[$id] ? $this->getArrayList($id, $layer) : []
-                ];
-            } else {
-                $data[] = array_merge($this->data[$id], ['children' => $this->child[$id] ? $this->getArrayList($id, $layer) : []]);
-            }
-        }
-
-        return $data;
     }
 }
