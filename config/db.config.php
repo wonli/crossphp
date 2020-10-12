@@ -1,40 +1,35 @@
 <?php
-/**
- * mysql
- */
-$mysql_link = [
-    'host' => '127.0.0.1',
-    'port' => '3306',
-    'user' => 'root',
-    'pass' => '123456',
-    'prefix' => '',
-    'charset' => 'utf8',
-];
+$mysql = function (string $name) {
+    return [
+        'host' => '127.0.0.1',
+        'port' => '3306',
+        'user' => 'root',
+        'pass' => '123456',
+        'prefix' => '',
+        'charset' => 'utf8',
+        'name' => $name
+    ];
+};
+
+$redis = function (int $db) {
+    return [
+        'host' => '127.0.0.1',
+        'port' => 6379,
+        'pass' => '',
+        'db' => $db,
+        'timeout' => 2.5
+    ];
+};
 
 /**
- * redis
+ * 数据库配置
  */
-$redis_link = [
-    'host' => '127.0.0.1',
-    'port' => 6379,
-    'pass' => '',
-    'timeout' => 2.5
-];
-
-#默认数据库配置
-$db = $mysql_link;
-$db['name'] = 'test';
-
-#redis
-$redis = $redis_link;
-$redis['db'] = 1;
-
 return [
     'mysql' => [
-        'db' => $db,
+        'db' => $mysql('test')
     ],
 
     'redis' => [
-        'cache' => $redis
+        'cache' => $redis(1)
     ],
 ];
