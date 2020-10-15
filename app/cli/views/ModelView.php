@@ -274,7 +274,7 @@ class ModelView extends CliView
                 } elseif (is_numeric($value)) {
                     return (int)$value;
                 } else {
-                    $value = trim($value, "'");
+                    $value = addslashes(trim($value, "'"));
                     return '\'' . $value . '\'';
                 }
             }
