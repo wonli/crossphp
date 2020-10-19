@@ -288,6 +288,29 @@ class Doc extends Admin
     }
 
     /**
+     * 获取api服务器信息
+     *
+     * @throws CoreException
+     * @throws LogicStatusException
+     */
+    function getApiServerInfo()
+    {
+        $docId = $this->input('doc_id')->uInt();
+        if (!$docId) {
+            $this->end(100712);
+        }
+
+        $sid = $this->input('current_sid')->uInt();
+        $docInfo = $this->ADM->get($docId);
+        $serverInfo = $docInfo['servers'][$sid] ?? [];
+        if (empty($serverInfo)) {
+            $this->end(100713);
+        }
+
+        $this->display($serverInfo, 'getApiServerInfo');
+    }
+
+    /**
      * 保存公共参数
      *
      * @cp_params doc_id

@@ -285,6 +285,28 @@ class DocView extends AdminView
     }
 
     /**
+     * 获取部署服务器信息
+     *
+     * @param array $data
+     */
+    function getApiServerInfo(array $data = [])
+    {
+        $this->set([
+            'layer' => 'doc_response',
+        ]);
+        ?>
+        <div class="server-status">
+            <div class="media">
+                <div class="media-body">
+                    <h4 class="media-heading"><?= $data['server_name'] ?></h4>
+                    <span class="s"><?= $data['api_addr'] ?? '' ?></span>
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
      * 公共参数开关
      */
     protected function genCommonParams()

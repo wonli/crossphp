@@ -46,7 +46,7 @@
             </ul>
             <?php $this->genApiServerList() ?>
             <?php $this->genCommonParams() ?>
-            <ul class="nav navbar-nav navbar-right">
+            <ul id="serverInfo" class="nav navbar-nav navbar-right">
                 <li>
                     <a href="javascript:void(0)">
                         <i id="currentServerStatus" title="服务连接中" class="fa fa-circle-o text-gray"></i>
@@ -259,6 +259,23 @@
                 'sid': $(this).attr('sid')
             }, function (d) {
                 window.location.reload()
+            })
+        })
+
+        $('#serverInfo').on('click', function () {
+            var contentUrl = '<?= $this->url("doc:getApiServerInfo", [
+                'doc_id' => $this->data['doc_id'],
+                'current_sid' => $this->data['current_sid']
+            ]) ?>';
+
+            layer.open({
+                type: 2,
+                title: false,
+                icon: 0,
+                closeBtn: 0,
+                shadeClose: true,
+                area: ['680px', '200px'],
+                content: [contentUrl, 'no']
             })
         })
 
