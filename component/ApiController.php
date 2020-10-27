@@ -101,8 +101,8 @@ abstract class ApiController extends Controller
         $annotateApi = &$this->actionAnnotate['api'];
         if (!empty($annotateApi)) {
             $requestMethod = $this->delegate->getRequest()->getRequestMethod();
-            list($requestType) = explode(',', $annotateApi);
-            if (strcasecmp($requestMethod, trim($requestType)) !== 0) {
+            list($requestType) = array_map('trim', explode(',', $annotateApi));
+            if (strcasecmp($requestType, 'any') !== 0 && strcasecmp($requestMethod, $requestType) !== 0) {
                 $this->display(200000);
                 return;
             }
