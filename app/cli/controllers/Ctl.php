@@ -155,7 +155,7 @@ class Ctl extends Cli
         //创建视图控制器
         $tplName = '';
         $createViewCtl = $this->command('viewCtl');
-        if (null !== $createViewCtl) {
+        if (false !== $createViewCtl) {
             $makeViewController = $this->getBooleanValueFromString($createViewCtl);
         } else {
             $makeViewController = &$config['makeViewController'];
