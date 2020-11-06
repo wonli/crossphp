@@ -50,5 +50,14 @@ return [
         'makeViewController' => true,
         'viewExtends' => 'WebView',
         'makeTpl' => true
-    ]
+    ],
+    'cli' => [
+        'app' => 'cli',
+
+        'extends' => 'Cli',
+
+        'makeViewController' => false,
+        'viewExtends' => '',
+        'makeTpl' => false
+    ],
 ];
