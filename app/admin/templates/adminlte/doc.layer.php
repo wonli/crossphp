@@ -64,7 +64,7 @@
         }, tips = '', dom = $('#currentServerStatus');
 
         $.get('<?= $this->url('doc:updateApiData') ?>', q, function (d) {
-            if (d.status !== 1) {
+            if (d.code !== 1) {
                 tips = '当前服务不可用'
                 dom.removeClass('fa-circle-o text-gray').addClass('fa-circle text-red');
             } else {
