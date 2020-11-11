@@ -24,7 +24,7 @@
         </p>
 
         <form action="" method="post">
-            <?= empty($content) ? '暂无内容' : $content; ?>
+            <?= $content ?? '' ?>
             <div class="row">
                 <div class="col-xs-8">
 

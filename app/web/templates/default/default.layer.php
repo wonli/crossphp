@@ -5,21 +5,15 @@
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title><?= isset($title) ? $title : '' ?></title>
-    <meta name="Keywords" content="<?= isset($keywords) ? $keywords : ''; ?>"/>
-    <meta name="Description" content="<?= isset($description) ? $description : ''; ?>"/>
+    <title><?= $title ?? '' ?></title>
+    <meta name="Keywords" content="<?= $keywords ?? ''; ?>"/>
+    <meta name="Description" content="<?= $description ?? ''; ?>"/>
 
-    <!-- Bootstrap -->
     <link href="<?= $this->res('libs/bootstrap/3.3.5/css/bootstrap.min.css') ?>" rel="stylesheet">
-
-    <!--[if lt IE 9]>
-    <script src="<?= $this->res('libs/html5shiv/3.7.2/html5shiv.min.js') ?>"></script>
-    <script src="<?= $this->res('libs/respond.js/1.4.2/respond.min.js') ?>"></script>
-    <![endif]-->
+    <script src="<?= $this->res('libs/jquery/1.11.1/jquery.min.js') ?>"></script>
 </head>
 <body>
-<?= empty($content) ? "" : $content ?>
-<script src="<?= $this->res('libs/jquery/1.11.1/jquery.min.js') ?>"></script>
+<?= $content ?? '' ?>
 <script src="<?= $this->res('libs/bootstrap/3.3.5/js/bootstrap.min.js') ?>"></script>
 </body>
 </html>

@@ -5,9 +5,9 @@
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title><?= isset($title) ? $title : '' ?></title>
-    <meta name="Keywords" content="<?= isset($keywords) ? $keywords : ''; ?>"/>
-    <meta name="Description" content="<?= isset($description) ? $description : ''; ?>"/>
+    <title><?= $title ?? '' ?></title>
+    <meta name="Keywords" content="<?= $keywords ?? '' ?>"/>
+    <meta name="Description" content="<?= $description ?? '' ?>"/>
     <link href="<?= $this->res('libs/bootstrap/3.3.7/css/bootstrap.min.css') ?>" rel="stylesheet">
     <link href="<?= $this->res("adminlte/2.4.3/dist/css/AdminLTE.min.css") ?>" rel="stylesheet">
     <link href="<?= $this->res('libs/font-awesome/4.7.0/css/font-awesome.min.css') ?>" rel="stylesheet">

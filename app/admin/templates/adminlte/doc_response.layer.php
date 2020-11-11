@@ -5,9 +5,9 @@
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title><?= isset($title) ? $title : '' ?></title>
-    <meta name="Keywords" content="<?= isset($keywords) ? $keywords : ''; ?>"/>
-    <meta name="Description" content="<?= isset($description) ? $description : ''; ?>"/>
+    <title><?= $title ?? '' ?></title>
+    <meta name="Keywords" content="<?= $keywords ?? ''; ?>"/>
+    <meta name="Description" content="<?= $description ?? ''; ?>"/>
     <link href="<?= $this->res('libs/bootstrap/3.3.7/css/bootstrap.min.css') ?>" rel="stylesheet">
     <link href="<?= $this->res('css/doc-default-theme.css') ?>" rel="stylesheet">
 
@@ -23,10 +23,10 @@
     <script src="<?= $this->res('libs/bootstrap-validator/0.11.8/validator.min.js') ?>"></script>
 </head>
 <body>
-    <?= empty($content)?'':$content ?>
+<?= $content ?? '' ?>
 </body>
 <script>
-    $(function(){
+    $(function () {
         $('pre code').each(function (i, block) {
             hljs.highlightBlock(block);
         });

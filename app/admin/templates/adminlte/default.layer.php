@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <title><?= isset($title) ? $title : 'CPAdmin' ?></title>
+    <title><?= $title ?? 'CPAdmin' ?></title>
 
     <link rel="stylesheet" href="<?= $this->res('libs/bootstrap/3.3.7/css/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= $this->res("adminlte/2.4.3/dist/css/AdminLTE.min.css") ?>">
