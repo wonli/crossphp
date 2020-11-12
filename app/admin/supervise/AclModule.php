@@ -515,6 +515,41 @@ class AclModule extends AdminModule
     }
 
     /**
+     * 创建控制器后自动添加菜单
+     *
+     * @param array $data
+     * @return bool|mixed
+     * @throws CoreException
+     */
+    function saveNavData(array $data)
+    {
+        if (empty($data['name']) || empty($data['link'])) {
+            return false;
+        }
+
+        $data = array(
+            'name' => $data['name'],
+            'link' => $data['link'],
+            'pid' => !empty($data['pid']) ? (int)$data['pid'] : 0,
+            'type' => !empty($data['type']) ? (int)$data['type'] : 1,
+            '`order`' => !empty($data['order']) ? (int)$data['order'] : 0,
+            'display' => !empty($data['display']) ? (int)$data['display'] : 0
+        );
+
+        $has = $this->link->get($this->tAclMenu, 'id', [
+            'name' => $data['name']
+        ]);
+
+        if ($has) {
+            return $this->link->update($this->tAclMenu, $data, [
+                'id' => $has['id']
+            ]);
+        } else {
+            return $this->link->add($this->tAclMenu, $data);
+        }
+    }
+
+    /**
      * 一级菜单列表
      *
      * @param array $unSaveMenu
