@@ -16,7 +16,6 @@ class <?= $data['name'] ?> extends <?= $data['extends'] . PHP_EOL ?>
      */
     function index()
     {
-
+        $this->display($this->data);
     }
-
 }
