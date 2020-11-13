@@ -495,35 +495,37 @@ class Table extends UI
             ];
 
             try {
-                $tn = strtoupper('t' . Helper::random(5));
+                $jid = strtoupper('t' . Helper::random(5));
             } catch (Exception $e) {
-                $tn = 'uiTable';
+                $jid = 'uiTable';
             }
+
+            $this->setJID($jid);
             ?>
             <script>
-                var <?= sprintf('%s = %s', $tn, json_encode($config)) ?>;
+                var <?= sprintf('%s = %s', $jid, json_encode($config)) ?>;
                 $(function () {
-                    $(<?= $tn . '.switch' ?>).prop('checked', <?= $tn . '.s' ?>).bind('click', function () {
-                        <?= $tn ?>.s = !<?= $tn ?>.s;
-                        $(<?= $tn . '.switch' ?>).prop('checked', <?= $tn . '.s' ?>);
+                    $(<?= $jid . '.switch' ?>).prop('checked', <?= $jid . '.s' ?>).bind('click', function () {
+                        <?= $jid ?>.s = !<?= $jid ?>.s;
+                        $(<?= $jid . '.switch' ?>).prop('checked', <?= $jid . '.s' ?>);
                         //更新选中状态
-                        $(<?= $tn . '.checkboxClass' ?>).each(function () {
-                            $(this).prop('checked', <?= $tn . '.s' ?>);
+                        $(<?= $jid . '.checkboxClass' ?>).each(function () {
+                            $(this).prop('checked', <?= $jid . '.s' ?>);
                             var token = $(this).attr('data-token');
-                            if (<?= $tn . '.s' ?>) {
-                                <?= $tn . '.checkStatus' ?>[token] = 1;
+                            if (<?= $jid . '.s' ?>) {
+                                <?= $jid . '.checkStatus' ?>[token] = 1;
                             } else {
-                                <?= $tn . '.checkStatus' ?>[token] = 0;
+                                <?= $jid . '.checkStatus' ?>[token] = 0;
                             }
                         })
                     });
 
-                    $(<?= $tn . '.checkboxClass' ?>).bind('click', function () {
+                    $(<?= $jid . '.checkboxClass' ?>).bind('click', function () {
                         var token = $(this).attr('data-token');
                         if ($(this).is(':checked')) {
-                            <?= $tn . '.checkStatus' ?>[token] = 1;
+                            <?= $jid . '.checkStatus' ?>[token] = 1;
                         } else {
-                            <?= $tn . '.checkStatus' ?>[token] = 0;
+                            <?= $jid . '.checkStatus' ?>[token] = 0;
                         }
                     })
                 });

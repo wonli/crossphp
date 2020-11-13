@@ -37,6 +37,13 @@ abstract class UI
     protected $widget = [];
 
     /**
+     * 当前UI组件JavaScript ID
+     *
+     * @var string
+     */
+    protected $jid = 'ui';
+
+    /**
      * 控件使用标识
      * 在所有控件调用结束后统一执行init()方法
      *
@@ -74,6 +81,26 @@ abstract class UI
      * @return mixed
      */
     abstract function render();
+
+    /**
+     * 设置JID
+     *
+     * @param string $jid
+     */
+    function setJID(string $jid)
+    {
+        $this->jid = $jid;
+    }
+
+    /**
+     * 获取JID
+     *
+     * @return string
+     */
+    function getJID(): string
+    {
+        return $this->jid;
+    }
 
     /**
      * 使用匿名函数来处理输出
