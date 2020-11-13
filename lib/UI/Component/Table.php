@@ -8,7 +8,10 @@ namespace lib\UI\Component;
 
 use Cross\Exception\CoreException;
 use Cross\Lib\Document\HTML;
+use Cross\Core\Helper;
 use lib\UI\UI;
+
+use Exception;
 use Closure;
 
 /**
@@ -91,14 +94,14 @@ class Table extends UI
      *
      * @var array
      */
-    protected $checkboxConfig = array('type' => 'checkbox');
+    protected $checkboxConfig = ['type' => 'checkbox'];
 
     /**
      * 多选框包裹器属性配置
      *
      * @var array
      */
-    protected $checkBoxWrapConfig = array('class' => 'form-control-static');
+    protected $checkBoxWrapConfig = ['class' => 'form-control-static'];
 
     /**
      * 表格中的数据
@@ -167,12 +170,12 @@ class Table extends UI
      */
     function addHead(string $field, string $name, string $width, $minWidth = '')
     {
-        $this->head[] = array(
+        $this->head[] = [
             'field' => $field,
             'name' => $name,
             'width' => $width,
             'min-width' => $minWidth
-        );
+        ];
 
         //默认第一个字段为POST表单数据分组键名
         if (empty($this->groupKey) && empty($this->fields)) {
@@ -196,11 +199,11 @@ class Table extends UI
     function setActionMenu(string $name, string $width, $minWidth = '')
     {
         $this->hasActionMenu = true;
-        $this->head[] = array(
+        $this->head[] = [
             'name' => $name,
             'width' => $width,
             'min-width' => $minWidth
-        );
+        ];
 
         return $this;
     }
@@ -247,10 +250,10 @@ class Table extends UI
         $th = $this->makeTableHead();
         $body = $this->makeTableBody();
 
-        $table = HTML::table(array(
+        $table = HTML::table([
             '@content' => $th . $body,
             'class' => $this->tableClass
-        ));
+        ]);
 
         $table = $this->renderWidget($table);
         $js = $this->makeTableJS();
@@ -328,17 +331,17 @@ class Table extends UI
                 }
 
                 $style = "width:{$d['width']};min-width:{$minWidth}";
-                $ths .= HTML::th(array(
+                $ths .= HTML::th([
                     '@content' => $d['name'],
                     'style' => $style
-                ));
+                ]);
             }
         }
 
-        return HTML::thead(array(
+        return HTML::thead([
             '@content' => HTML::tr($ths),
             'class' => $this->tableHeadClass
-        ));
+        ]);
     }
 
     /**
@@ -375,7 +378,7 @@ class Table extends UI
                     $actionMenu = '';
                     foreach ($this->actionClosure as $i => $action) {
                         if ($action instanceof Closure) {
-                            $actionContent = call_user_func_array($action, array($d));
+                            $actionContent = call_user_func_array($action, [$d]);
                             if ($actionContent) {
                                 $actionMenu .= HTML::span(array(
                                     '@content' => $actionContent,
@@ -402,7 +405,7 @@ class Table extends UI
             }
         } else {
             $cols = count($this->head);
-            $trs = "<tr><td colspan='{$cols}'>暂无数据</td></tr>";
+            $trs = HTML::tr(HTML::td(['@content' => '暂无数据', 'colspan' => $cols]));
         }
 
         return HTML::tbody($trs);
@@ -432,7 +435,7 @@ class Table extends UI
         }
 
         if (null !== $this->checkboxValueAction) {
-            $isChecked = call_user_func_array($this->checkboxValueAction, array($data));
+            $isChecked = call_user_func_array($this->checkboxValueAction, [$data]);
             if ($isChecked) {
                 $attr['checked'] = true;
                 $this->checkedCount++;
@@ -468,13 +471,13 @@ class Table extends UI
      */
     private function makeCheckboxSwitch()
     {
-        return HTML::th(array(
+        return HTML::th([
             'style' => 'width:20px;min-width:20px;max-width:20px',
-            '@content' => HTML::input(array(
+            '@content' => HTML::input([
                 'type' => 'checkbox',
                 'class' => "{$this->useCheckbox}-switch-flag"
-            ))
-        ));
+            ])
+        ]);
     }
 
     /**
@@ -484,42 +487,46 @@ class Table extends UI
     {
         if ($this->useCheckbox) {
             ob_start();
-            $config = array(
+            $config = [
                 's' => ($this->dataCount == $this->checkedCount),
-
                 'checkStatus' => $this->checkStatus,
-
                 'switch' => ".{$this->useCheckbox}-switch-flag",
                 'checkboxClass' => ".{$this->useCheckbox}-flag"
-            );
+            ];
+
+            try {
+                $tn = strtoupper('t' . Helper::random(5));
+            } catch (Exception $e) {
+                $tn = 'uiTable';
+            }
             ?>
             <script>
-                var CPUITable = <?= json_encode($config) ?>;
+                var <?= sprintf('%s = %s', $tn, json_encode($config)) ?>;
                 $(function () {
-                    $(CPUITable.switch).prop('checked', CPUITable.s).bind('click', function () {
-                        CPUITable.s = !CPUITable.s;
-                        $(CPUITable.switch).prop('checked', CPUITable.s);
+                    $(<?= $tn . '.switch' ?>).prop('checked', <?= $tn . '.s' ?>).bind('click', function () {
+                        <?= $tn ?>.s = !<?= $tn ?>.s;
+                        $(<?= $tn . '.switch' ?>).prop('checked', <?= $tn . '.s' ?>);
                         //更新选中状态
-                        $(CPUITable.checkboxClass).each(function () {
-                            $(this).prop('checked', CPUITable.s);
+                        $(<?= $tn . '.checkboxClass' ?>).each(function () {
+                            $(this).prop('checked', <?= $tn . '.s' ?>);
                             var token = $(this).attr('data-token');
-                            if (CPUITable.s) {
-                                CPUITable.checkStatus[token] = 1;
+                            if (<?= $tn . '.s' ?>) {
+                                <?= $tn . '.checkStatus' ?>[token] = 1;
                             } else {
-                                CPUITable.checkStatus[token] = 0;
+                                <?= $tn . '.checkStatus' ?>[token] = 0;
                             }
                         })
                     });
 
-                    $(CPUITable.checkboxClass).bind('click', function () {
+                    $(<?= $tn . '.checkboxClass' ?>).bind('click', function () {
                         var token = $(this).attr('data-token');
                         if ($(this).is(':checked')) {
-                            CPUITable.checkStatus[token] = 1;
+                            <?= $tn . '.checkStatus' ?>[token] = 1;
                         } else {
-                            CPUITable.checkStatus[token] = 0;
+                            <?= $tn . '.checkStatus' ?>[token] = 0;
                         }
                     })
-                })
+                });
             </script>
             <?php
             return ob_get_clean();

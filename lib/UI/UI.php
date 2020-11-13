@@ -85,12 +85,15 @@ abstract class UI
      * </pre>
      *
      * @param Closure $action
+     * @return UI
      */
-    function useClosure(Closure $action)
+    function useClosure(Closure $action): self
     {
-        $this->widgetRuntimeConfig[$this->widgetKey] = array(
+        $this->widgetRuntimeConfig[$this->widgetKey] = [
             'name' => $action,
-        );
+        ];
+
+        return $this;
     }
 
     /**
@@ -123,12 +126,12 @@ abstract class UI
      * @param array $params 运行时参数
      * @return $this
      */
-    function useWidget(string $name, $params = [])
+    function useWidget(string $name, $params = []): self
     {
-        $this->widgetRuntimeConfig[$this->widgetKey] = array(
+        $this->widgetRuntimeConfig[$this->widgetKey] = [
             'name' => $name,
             'params' => $params,
-        );
+        ];
 
         return $this;
     }
@@ -186,16 +189,16 @@ abstract class UI
         }
 
         if ($widgetName instanceof Closure) {
-            $content = call_user_func_array($widgetName, array($value, $rowData, $inputName));
+            $content = call_user_func_array($widgetName, [$value, $rowData, $inputName]);
             if (empty($content)) {
                 throw new CoreException('回调函数不能返回空');
             }
 
             //回调函数返回结果自动包一层div
-            $content = HTML::div(array(
+            $content = HTML::div([
                 '@content' => $content,
                 'class' => $this->widgetDefaultClass
-            ));
+            ]);
         } else {
             $params = [];
             if (!empty($widgetConfig['params'])) {
@@ -282,7 +285,7 @@ abstract class UI
 
                 case 'checkbox':
                     $label = null;
-                    $trues = array(1 => 1, true => 1, 'y' => 1, 'yes' => 1, 'true' => 1);
+                    $trues = [1 => 1, true => 1, 'y' => 1, 'yes' => 1, 'true' => 1];
                     if (!empty($params)) {
                         if (is_array($params)) {
                             list($label, $custom_trues) = $params;
