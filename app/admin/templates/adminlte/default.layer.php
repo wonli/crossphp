@@ -63,9 +63,9 @@
             <ul class="sidebar-menu">
                 <li class="header">使用帮助</li>
                 <li>
-                    <a href="//document.crossphp.com/skeleton/" target="_blank">
+                    <a href="//document.crossphp.com/" target="_blank">
                         <i class="fa fa-circle-o text-aqua"></i>
-                        <span>帮助文档</span>
+                        <span>框架文档</span>
                     </a>
                 </li>
             </ul>
