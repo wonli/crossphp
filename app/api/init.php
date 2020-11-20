@@ -57,8 +57,7 @@ return [
      * 数据交互字段配置
      */
     'responseData' => [
-        'status' => ResponseData::builder()->setStatusName('status'),
-        'message' => ResponseData::builder()->setMessageName('message')
+
     ],
 
     /**
