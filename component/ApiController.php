@@ -292,7 +292,7 @@ abstract class ApiController extends Controller
             $methodList = $rc->getMethods(ReflectionMethod::IS_PUBLIC);
             if (!empty($methodList)) {
                 foreach ($methodList as $method) {
-                    if ($method->class != $classNamespace) {
+                    if (0 !== strcasecmp($method->class, $classNamespace)) {
                         continue;
                     }
 
