@@ -69,12 +69,12 @@ $formFields = $data['api']['api_params'] ?? [];
                                                     $options = '';
                                                 }
 
-                                                $input_tag_data = array(
+                                                $input_tag_data = [
                                                     'name' => $field_name,
                                                     'type' => $input_type,
                                                     'class' => 'form-control',
                                                     'style' => 'min-width:75%;max-width:95%',
-                                                );
+                                                ];
 
                                                 $input_addition_html = '';
                                                 if ($field['required'] == 1) {
@@ -115,7 +115,13 @@ $formFields = $data['api']['api_params'] ?? [];
                                                         $input_tag_data['type'] = 'file';
                                                         $input_tag_data['placeholder'] = $field_name;
                                                         $input_tag_data['multiple'] = true;
-                                                        $input_tag_data['style'] = 'min-width:80%';
+                                                        $input_tag_data['style'] = 'min-width:80%;max-width:95%;height:39px';
+                                                        $input = $this->htmlTag($input_ele_type, $input_tag_data);
+                                                        break;
+
+                                                    case 'file':
+                                                        $input_ele_type = 'input';
+                                                        $input_tag_data['style'] = 'min-width:80%;max-width:95%;height:39px';
                                                         $input = $this->htmlTag($input_ele_type, $input_tag_data);
                                                         break;
 
