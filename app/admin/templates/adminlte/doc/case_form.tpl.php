@@ -73,7 +73,7 @@ $formFields = $data['api']['api_params'] ?? [];
                                                     'name' => $field_name,
                                                     'type' => $input_type,
                                                     'class' => 'form-control',
-                                                    'style' => 'min-width:75%'
+                                                    'style' => 'min-width:75%;max-width:95%',
                                                 );
 
                                                 $input_addition_html = '';
