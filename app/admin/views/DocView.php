@@ -387,13 +387,13 @@ class DocView extends AdminView
                                    value="<?= $userValue ?>"
                                    placeholder="<?= $name ?>">
                             <span class="hidden-xs">
-                                <b style="form-control-static">*</b>
+                                <b class="form-control-static">*</b>
                             </span>
                         </div>
                     </td>
                     <td>
                         <div class="form-control-static">
-                            <span class="visible-xs"><b style="form-control-static">*</b></span>
+                            <span class="visible-xs"><b class="form-control-static">*</b></span>
                             <span class="hidden-xs"><?= $name ?></span>
                         </div>
                     </td>

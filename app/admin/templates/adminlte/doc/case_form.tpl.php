@@ -79,7 +79,7 @@ $formFields = $data['api']['api_params'] ?? [];
                                                 $input_addition_html = '';
                                                 if ($field['required'] == 1) {
                                                     $input_tag_data['required'] = 1;
-                                                    $input_addition_html = '<b style="form-control-static">*</b>';
+                                                    $input_addition_html = '<b class="form-control-static">*</b>';
                                                 }
 
                                                 switch ($input_type) {
