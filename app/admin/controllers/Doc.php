@@ -74,7 +74,7 @@ class Doc extends Admin
      */
     function __call($docId, $args)
     {
-        $data = $this->ADM->get((int)$docId);
+        $data = $this->ADM->get((int)$docId, $this->rid);
         if (empty($data)) {
             $this->to('doc:setting');
             return;
@@ -142,7 +142,7 @@ class Doc extends Admin
     function updateApiData()
     {
         $docId = $this->input('doc_id')->id();
-        $data = $this->ADM->get($docId);
+        $data = $this->ADM->get($docId, $this->rid);
         if (empty($data)) {
             $this->end(100712);
         }
@@ -266,7 +266,7 @@ class Doc extends Admin
         }
 
         $sid = $this->input('sid')->uInt();
-        $docInfo = $this->ADM->get($docId);
+        $docInfo = $this->ADM->get($docId, $this->rid);
         $servers = &$docInfo['servers'];
         if (!isset($servers[$sid])) {
             $this->to('doc:setting');
@@ -301,7 +301,7 @@ class Doc extends Admin
         }
 
         $sid = $this->input('current_sid')->uInt();
-        $docInfo = $this->ADM->get($docId);
+        $docInfo = $this->ADM->get($docId, $this->rid);
         $serverInfo = $docInfo['servers'][$sid] ?? [];
         if (empty($serverInfo)) {
             $this->end(100713);
@@ -328,8 +328,8 @@ class Doc extends Admin
         if ($this->isPost()) {
             foreach ($postData as $k => $v) {
                 switch ($k) {
-                    case ApiDocModule::KEY_HEADERPARAMS:
-                    case ApiDocModule::KEY_GLOBALPARAMS:
+                    case ApiDocModule::KEY_HEADER_PARAMS:
+                    case ApiDocModule::KEY_GLOBAL_PARAMS:
                         if (!empty($v)) {
                             $data = $this->ADM->getUserData($this->u, $docId, $k);
                             if ($data == false) {
@@ -404,7 +404,7 @@ class Doc extends Admin
      */
     function setting()
     {
-        $this->data['list'] = $this->ADM->getAll();
+        $this->data['list'] = $this->ADM->getAll($this->rid);
         $this->display($this->data);
     }
 
@@ -417,6 +417,15 @@ class Doc extends Admin
     function action()
     {
         if ($this->isPost()) {
+            $id = $this->input('id', 0)->int();
+            if ($id) {
+                $data = $this->ADM->get($id, $this->rid);
+                if (empty($data)) {
+                    $this->to('doc:setting');
+                    return;
+                }
+            }
+
             $postData = $this->delegate->getRequest()->getPostData();
             $siteName = &$postData['name'];
             $docToken = &$postData['doc_token'];
@@ -473,7 +482,6 @@ class Doc extends Admin
                 'last_update_admin' => $this->u,
             ];
 
-            $id = $this->input('id', 0)->int();
             if (!empty($id)) {
                 $this->ADM->update($id, $saveData);
             } else {
@@ -484,18 +492,20 @@ class Doc extends Admin
             $this->to('doc:setting');
             return;
         } else {
-            switch ($this->input('action')->val()) {
-                case 'edit':
-                    $this->data['data'] = $this->ADM->get($this->input('id')->id());
-                    break;
+            $id = $this->input('id')->int();
+            $action = $this->input('action')->val();
+            $data = $this->ADM->get($id, $this->rid);
+            if (empty($data)) {
+                $this->to('doc:setting');
+                return;
+            }
 
-                case 'del':
-                    $this->ADM->del($this->input('id')->id());
-                    $this->to('doc:setting');
-                    break;
-
-                default:
-                    $this->data['data'] = [];
+            if ($action == 'del') {
+                $this->ADM->del($id);
+                $this->to('doc:setting');
+                return;
+            } else {
+                $this->data['data'] = $data;
             }
         }
 
@@ -542,7 +552,7 @@ class Doc extends Admin
         }
 
         $docId = $apiData['doc_id'];
-        $doc = $this->ADM->get($docId);
+        $doc = $this->ADM->get($docId, $this->rid);
         $Api = new ApiDocModule();
         $userData = $Api->getAllUserData($this->u, $docId);
         if (!empty($doc['header_params'])) {

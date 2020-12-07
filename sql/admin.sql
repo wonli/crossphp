@@ -111,6 +111,7 @@ CREATE TABLE IF NOT EXISTS `cpa_doc` (
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `doc_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',
   `servers` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `role_limit` varchar(128) NOT NULL DEFAULT '' COMMENT '限制查看角色ID逗号分隔',
   `global_params` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `header_params` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `last_update_admin` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '',

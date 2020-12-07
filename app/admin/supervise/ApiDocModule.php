@@ -20,27 +20,32 @@ use PDO;
 class ApiDocModule extends AdminModule
 {
     const KEY_HOST = 'host';
-    const KEY_GLOBALPARAMS = 'global_params';
-    const KEY_HEADERPARAMS = 'header_params';
+    const KEY_GLOBAL_PARAMS = 'global_params';
+    const KEY_HEADER_PARAMS = 'header_params';
 
     /**
      * 获取单条数据
      *
      * @param int $id
+     * @param int|null $rid 当rid有值时判断角色权限
      * @return mixed
      * @throws CoreException
      */
-    function get(int $id)
+    function get(int $id, ?int $rid = null)
     {
         $data = $this->link->get($this->tApiDoc, '*', [
             'id' => $id,
         ]);
 
         if (!empty($data)) {
-            $servers = &$data['servers'];
-            $servers = json_decode($servers, true);
-            foreach ($servers as &$s) {
-                $s['cache_file'] = $this->getCacheFilePathFromCacheName($s['cache_name']);
+            if (null !== $rid && !self::checkDocRoleLimit($rid, $data)) {
+                return false;
+            }
+
+            if (!empty($data['servers'])) {
+                $data['servers'] = json_decode($data['servers'], true);
+            } else {
+                $data['servers'] = [];
             }
 
             if (!empty($data['global_params'])) {
@@ -89,36 +94,24 @@ class ApiDocModule extends AdminModule
     /**
      * 获取所有数据
      *
+     * @param int|null $rid
+     * @return mixed
      * @throws CoreException
      */
-    function getAll()
+    function getAll(?int $rid = null)
     {
-        $data = $this->link->getAll($this->tApiDoc, '*');
-        if (!empty($data)) {
-            array_walk($data, function (&$d) {
-                $servers = &$d['servers'];
-                $servers = json_decode($servers, true);
-                if (!empty($servers)) {
-                    array_walk($servers, function (&$dd) {
-                        $dd['cache_file'] = $this->getCacheFilePathFromCacheName($dd['cache_name']);
-
-                        if (!empty($dd['global_params'])) {
-                            $dd['global_params'] = json_decode($dd['global_params'], true);
-                        } else {
-                            $dd['global_params'] = [];
-                        }
-
-                        if (!empty($dd['header_params'])) {
-                            $dd['header_params'] = json_decode($dd['header_params'], true);
-                        } else {
-                            $dd['header_params'] = [];
-                        }
-                    });
+        $result = [];
+        $apiListData = $this->link->getAll($this->tApiDoc, '*');
+        if (!empty($apiListData)) {
+            foreach ($apiListData as $index => $d) {
+                $has = self::checkDocRoleLimit($rid, $d);
+                if ($has) {
+                    $result[] = $d;
                 }
-            });
+            }
         }
 
-        return $data;
+        return $result;
     }
 
     /**
@@ -311,5 +304,25 @@ class ApiDocModule extends AdminModule
             }
         }
         return $yamlFileCachePath;
+    }
+
+    /**
+     * 检查角色是否有文档相关权限
+     *
+     * @param int $rid
+     * @param array $docData
+     * @return bool
+     */
+    static function checkDocRoleLimit(int $rid, array $docData): bool
+    {
+        $roleLimit = $docData['role_limit'] ?? '';
+        if ('' !== $roleLimit) {
+            $roleConfig = explode(',', trim($roleLimit));
+            if (!empty($roleConfig) && !in_array($rid, $roleConfig)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
