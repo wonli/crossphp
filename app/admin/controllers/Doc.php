@@ -416,8 +416,8 @@ class Doc extends Admin
      */
     function action()
     {
+        $id = $this->input('id', 0)->int();
         if ($this->isPost()) {
-            $id = $this->input('id', 0)->int();
             if ($id) {
                 $data = $this->ADM->get($id, $this->rid);
                 if (empty($data)) {
@@ -492,14 +492,15 @@ class Doc extends Admin
             $this->to('doc:setting');
             return;
         } else {
-            $id = $this->input('id')->int();
+            $data = [];
             $action = $this->input('action')->val();
-            $data = $this->ADM->get($id, $this->rid);
-            if (empty($data)) {
-                $this->to('doc:setting');
-                return;
+            if ($id > 0) {
+                $data = $this->ADM->get($id, $this->rid);
+                if (empty($data)) {
+                    $this->to('doc:setting');
+                    return;
+                }
             }
-
             if ($action == 'del') {
                 $this->ADM->del($id);
                 $this->to('doc:setting');
