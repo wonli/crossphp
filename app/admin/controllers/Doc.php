@@ -206,7 +206,12 @@ class Doc extends Admin
         $apiId = $this->input('doc_-_api-_-id')->id();
         $params = $this->params;
         $curlData = $this->getApiCurlData($apiId, $params, $serverInfo);
-        $g = (new Generator())->run($curlData);
+
+        $g = [];
+        if (is_array($curlData)) {
+            $g = (new Generator())->run($curlData);
+        }
+
         if (!empty($g) && !empty($g['struct'])) {
             $Add = new ApiDocData();
             $Add->id = $apiId;
