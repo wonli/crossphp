@@ -547,7 +547,7 @@ class Doc extends Admin
      * @throws DBConnectException
      * @throws LogicStatusException
      */
-    protected function getApiCurlData($apiId, &$params = [], &$serverInfo = [])
+    protected function getApiCurlData($apiId, &$params = [], &$serverInfo = []): array
     {
         $headerParams = [];
         $Api = new ApiDocData();
@@ -578,6 +578,10 @@ class Doc extends Admin
         $server = $doc['servers'][$sid] ?? [];
         if (empty($server)) {
             throw new LogicStatusException(0, '获取Server信息失败');
+        }
+
+        if (0 === strcasecmp($method, 'any')) {
+            $method = 'POST';
         }
 
         $apiUrl = rtrim($server['api_addr'], '/') . '/' . $apiData['api_path'];
