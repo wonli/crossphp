@@ -1,6 +1,6 @@
 <?php
 /**
- * Cross - lightness PHP framework
+ * Cross - a micro PHP 5 framework
  *
  * @link        http://www.crossphp.com
  * @license     MIT License
@@ -8,11 +8,13 @@
 
 namespace lib\Mcrypt\Encoder;
 
+use lib\Mcrypt\Encoder;
+
 /**
  * @author wonli <wonli@live.com>
  * Class Base64Encoder
  */
-class Base64Encoder extends Encoder
+class Base64Encoder implements Encoder
 {
     /**
      * 加密
@@ -20,7 +22,7 @@ class Base64Encoder extends Encoder
      * @param string $data
      * @return string
      */
-    public function enCode(string $data)
+    public function enCode(string $data): string
     {
         return str_replace(array('=', '/', '+'), array('', '-', '_'), base64_encode($data));
     }
@@ -31,7 +33,7 @@ class Base64Encoder extends Encoder
      * @param string $data
      * @return string
      */
-    public function deCode(string $data)
+    public function deCode(string $data): string
     {
         return base64_decode(str_replace(array('-', '_'), array('/', '+'), $data));
     }

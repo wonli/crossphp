@@ -1,10 +1,11 @@
 <?php
 /**
- * Cross - lightness PHP framework
+ * Cross - a micro PHP 5 framework
  *
  * @link        http://www.crossphp.com
  * @license     MIT License
  */
+
 namespace lib\Mcrypt;
 
 use Cross\Exception\CoreException;
@@ -35,20 +36,20 @@ class HashEncrypt
     /**
      * 设置过期时间
      *
-     * @param $ttl
+     * @param string $ttl
      * @return $this
      */
-    function setTTL($ttl)
+    function setTTL(string $ttl): self
     {
         $this->ttl = $ttl;
         return $this;
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @return $this
      */
-    function setKey($key)
+    function setKey(string $key): self
     {
         $this->key = $key;
         return $this;
@@ -61,9 +62,9 @@ class HashEncrypt
      * @return $this
      * @throws CoreException
      */
-    function setAlgorithm(string $algorithm)
+    function setAlgorithm(string $algorithm): self
     {
-        if(! in_array($algorithm, hash_algos())) {
+        if (!in_array($algorithm, hash_algos())) {
             throw new CoreException("不支持的加密算法");
         }
 
@@ -74,10 +75,10 @@ class HashEncrypt
     /**
      * 生成加密数据
      *
-     * @param $data
+     * @param string $data
      * @return string
      */
-    public function encrypt($data)
+    public function encrypt(string $data): string
     {
         return hash_hmac($this->algorithm, $data, $this->key);
     }
@@ -85,11 +86,11 @@ class HashEncrypt
     /**
      * 生成一个字符串用于校验encrypt的值
      *
-     * @param $key
+     * @param string $key
      * @param int $action
      * @return string
      */
-    public function make($key, $action = -1)
+    public function make(string $key, $action = -1): string
     {
         $i = ceil(time() / $this->ttl);
         return substr($this->encrypt($i . $action . $key), -12, 10);
@@ -98,12 +99,12 @@ class HashEncrypt
     /**
      * 用make生成的校验字符串校验encrypt是否有效
      *
-     * @param $key
-     * @param $crumb
+     * @param string $key
+     * @param string $crumb
      * @param int $action
      * @return bool
      */
-    public function verify($key, $crumb, $action = -1)
+    public function verify(string $key, string $crumb, $action = -1): bool
     {
         $i = ceil(time() / $this->ttl);
         if (substr($this->encrypt($i . $action . $key), -12, 10) === $crumb ||

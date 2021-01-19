@@ -1,17 +1,18 @@
 <?php
 /**
- * Cross - lightness PHP framework
+ * Cross - a micro PHP 5 framework
  *
  * @link        http://www.crossphp.com
  * @license     MIT License
  */
-namespace lib\Mcrypt\Encoder;
+
+namespace lib\Mcrypt;
 
 /**
  * @author wonli <wonli@live.com>
  * Class Encoder
  */
-abstract class Encoder
+interface Encoder
 {
     /**
      * 编码
@@ -19,7 +20,7 @@ abstract class Encoder
      * @param string $data
      * @return mixed
      */
-    abstract function enCode(string $data);
+    function enCode(string $data);
 
     /**
      * 解码
@@ -27,5 +28,5 @@ abstract class Encoder
      * @param string $data
      * @return mixed
      */
-    abstract function deCode(string $data);
+    function deCode(string $data);
 }
