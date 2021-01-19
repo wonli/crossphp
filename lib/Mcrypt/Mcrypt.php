@@ -34,7 +34,7 @@ class Mcrypt
     /**
      * @var string
      */
-    private $method = 'AES-256-CBC';
+    private $method = 'aes-256-cbc';
 
     /**
      * @var Encoder
@@ -63,10 +63,11 @@ class Mcrypt
      *
      * @param string $method
      */
-    function __construct(string $method = 'AES-256-CBC')
+    function __construct(string $method = 'aes-256-cbc')
     {
-        $cipher_methods = openssl_get_cipher_methods(true);
-        if (in_array($method, $cipher_methods)) {
+        $method = strtolower($method);
+        $cipherMethods = openssl_get_cipher_methods();
+        if (in_array($method, $cipherMethods)) {
             $this->method = $method;
         }
     }

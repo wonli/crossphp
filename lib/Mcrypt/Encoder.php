@@ -10,7 +10,7 @@ namespace lib\Mcrypt;
 
 /**
  * @author wonli <wonli@live.com>
- * Class Encoder
+ * interface Encoder
  */
 interface Encoder
 {
