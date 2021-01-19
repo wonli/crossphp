@@ -66,7 +66,7 @@ class Mcrypt
     function __construct(string $method = 'aes-256-cbc')
     {
         $method = strtolower($method);
-        $cipherMethods = openssl_get_cipher_methods();
+        $cipherMethods = openssl_get_cipher_methods(true);
         if (in_array($method, $cipherMethods)) {
             $this->method = $method;
         }
